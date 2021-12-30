@@ -18,8 +18,8 @@ parser = Parser()
 parser.set_language(JAVA_LANGUAGE)
 
 def convert_github_url_into_raw_url(github_url:str) -> str:
-    """Convert github url into raw github url
-    Parameters
+    """Convert github url into raw github url.
+    Args
         github_url: github url
     Returns
         raw github url
@@ -30,8 +30,19 @@ def convert_github_url_into_raw_url(github_url:str) -> str:
     return raw_github_url
 
 
-def retrieve_method_content(github_url, target_method_name):
+def retrieve_method_content(github_url:str, target_method_name:str) -> str:
     """Retrieve method content given github url and target method name
+    Args:
+        github_url:
+        target_method_name:
+    Returns:
+        method content from the source code
+
+    Details:
+        - convert github url into raw github url
+        - create request to the github url, 
+        - if the response is valid, parse the code and find the snippet code containg the target_method_name
+        - otherwise return an empty string
     """
 
     raw_github_url = convert_github_url_into_raw_url(github_url)
