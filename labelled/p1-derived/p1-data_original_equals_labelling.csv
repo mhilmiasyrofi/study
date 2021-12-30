@@ -1,0 +1,1799 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,350,derby,BC_EQUALS_METHOD_SHOULD_WORK_FOR_ALL_OBJECTS,B,last,,BAD_PRACTICE,org.apache.derby.client,org.apache.derby.client.ClientXid,,equals,,obj,"obj,org,this,NetXAResource,apache,client,derby,net,xidsEqual",204,204,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/ClientXid.java#L204,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/ClientXid.java,,close,"public boolean equals(Object obj) {
+        return org.apache.derby.client.net.NetXAResource.xidsEqual(this, (javax.transaction.xa.Xid) obj);
+    }"
+1,793,derby,HE_EQUALS_USE_HASHCODE,A,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.EmbeddedDataSource,,equals,,,,-2,-2,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/jdbc/EmbeddedDataSource.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/EmbeddedDataSource.java,,close,"public boolean equals(Object p0) {
+    if (p0 instanceof EmbeddedDataSource) {
+      EmbeddedDataSource ds = (EmbeddedDataSource)p0;
+
+      boolean match = true;
+      
+			if (databaseName != null) {
+        if  (!(databaseName.equals(ds.databaseName)))
+					match = false;
+			} else if (ds.databaseName != null)
+        match = false;
+
+			if (dataSourceName != null) {
+        if  (!(dataSourceName.equals(ds.dataSourceName)))
+					match = false;
+			} else if (ds.dataSourceName != null)
+        match = false;
+
+			if (description != null) {
+        if  (!(description.equals(ds.description)))
+					match = false;
+			} else if (ds.description != null)
+        match = false;
+
+			if (createDatabase != null) {
+        if  (!(createDatabase.equals(ds.createDatabase)))
+					match = false;
+			} else if (ds.createDatabase != null)
+        match = false;
+
+			if (shutdownDatabase != null) {
+        if  (!(shutdownDatabase.equals(ds.shutdownDatabase)))
+					match = false;
+			} else if (ds.shutdownDatabase != null)
+        match = false;
+
+			if (connectionAttributes != null) {
+        if  (!(connectionAttributes.equals(ds.connectionAttributes)))
+					match = false;
+			} else if (ds.connectionAttributes != null)
+        match = false;
+
+      if (loginTimeout != ds.loginTimeout)
+        match = false;
+
+      return match;
+
+    }
+
+    return false;
+	}"
+2,15,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource.java,,open,
+3,96,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.EmbeddedXADataSource,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/EmbeddedXADataSource.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/EmbeddedXADataSource.java,,open,
+4,444,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.BasicEmbeddedConnectionPoolDataSource40,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/BasicEmbeddedConnectionPoolDataSource40.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/BasicEmbeddedConnectionPoolDataSource40.java,,open,
+5,477,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.BasicEmbeddedXADataSource40,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/BasicEmbeddedXADataSource40.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/BasicEmbeddedXADataSource40.java,,open,
+6,557,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.iapi.types,org.apache.derby.iapi.types.SQLRef,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/iapi/types/SQLRef.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/types/SQLRef.java,,close,
+7,614,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.ReferenceableDataSource,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/ReferenceableDataSource.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/ReferenceableDataSource.java,,open,
+8,859,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.EmbeddedDataSource,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/EmbeddedDataSource.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/EmbeddedDataSource.java,,open,
+9,861,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.BasicEmbeddedDataSource40,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/BasicEmbeddedDataSource40.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/BasicEmbeddedDataSource40.java,,close,
+10,902,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.EmbeddedDataSource40,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/EmbeddedDataSource40.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/EmbeddedDataSource40.java,,open,
+11,962,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource40,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource40.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/EmbeddedConnectionPoolDataSource40.java,,open,
+12,967,derby,HE_INHERITS_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.derby.jdbc,org.apache.derby.jdbc.EmbeddedXADataSource40,,,,,,-2,-2,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/jdbc/EmbeddedXADataSource40.java#L-2,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/jdbc/EmbeddedXADataSource40.java,,open,
+13,1983,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestIndexWriterExceptions$CrashingFilter,,equals,,package org.apache.lucene.index;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestIndexWriterExceptions.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestIndexWriterExceptions.java,,unknown,
+14,1992,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.analysis,org.apache.lucene.analysis.TestCachingTokenFilter$1,,equals,,package org.apache.lucene.analysis;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/analysis/TestCachingTokenFilter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/analysis/TestCachingTokenFilter.java,,unknown,
+15,2083,lucene-solr,NP_EQUALS_SHOULD_HANDLE_NULL_ARGUMENT,A,last,,BAD_PRACTICE,org.apache.lucene.codecs,org.apache.lucene.codecs.BlockTermsReader$FieldAndTerm,,equals,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/java/org/apache/lucene/codecs/BlockTermsReader.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/java/org/apache/lucene/codecs/BlockTermsReader.java,,unknown,"@Override
+    public boolean equals(Object _other) {
+      FieldAndTerm other = (FieldAndTerm) _other;
+      return other.field.equals(field) && term.bytesEquals(other.term);
+    }"
+16,2135,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestDocumentWriter$2$1,,equals,,package org.apache.lucene.index;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestDocumentWriter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestDocumentWriter.java,,unknown,
+17,2224,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.analysis.standard,org.apache.lucene.analysis.standard.StandardFilter,,equals,,package org.apache.lucene.analysis.standard;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/analysis/common/src/java/org/apache/lucene/analysis/standard/StandardFilter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/analysis/common/src/java/org/apache/lucene/analysis/standard/StandardFilter.java,,unknown,
+18,2238,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.analysis.fr,org.apache.lucene.analysis.fr.ElisionFilter,,equals,,package org.apache.lucene.analysis.fr;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/analysis/common/src/java/org/apache/lucene/analysis/fr/ElisionFilter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/analysis/common/src/java/org/apache/lucene/analysis/fr/ElisionFilter.java,,unknown,
+19,2278,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.analysis,org.apache.lucene.analysis.MockTokenFilter,,equals,,package org.apache.lucene.analysis;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test-framework/java/org/apache/lucene/analysis/MockTokenFilter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test-framework/java/org/apache/lucene/analysis/MockTokenFilter.java,,unknown,
+20,2325,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.search,org.apache.lucene.search.TestTermRangeQuery$SingleCharAnalyzer$SingleCharTokenizer,,equals,,package org.apache.lucene.search;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/search/TestTermRangeQuery.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/search/TestTermRangeQuery.java,,unknown,
+21,2447,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.search.payloads,org.apache.lucene.search.payloads.PayloadHelper$PayloadFilter,,equals,,package org.apache.lucene.search.payloads;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/search/payloads/PayloadHelper.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/search/payloads/PayloadHelper.java,,unknown,
+22,2530,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestIndexWriter$1,,equals,,package org.apache.lucene.index;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestIndexWriter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestIndexWriter.java,,unknown,
+23,2566,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.search,org.apache.lucene.search.TestMultiPhraseQuery$CannedTokenizer,,equals,,package org.apache.lucene.search;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/search/TestMultiPhraseQuery.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/search/TestMultiPhraseQuery.java,,unknown,
+24,2576,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.Test2BPostings$MyTokenStream,,equals,,package org.apache.lucene.index;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/Test2BPostings.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/Test2BPostings.java,,unknown,
+25,2603,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.analysis,org.apache.lucene.analysis.MockVariableLengthPayloadFilter,,equals,,package org.apache.lucene.analysis;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test-framework/java/org/apache/lucene/analysis/MockVariableLengthPayloadFilter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test-framework/java/org/apache/lucene/analysis/MockVariableLengthPayloadFilter.java,,unknown,
+26,2636,lucene-solr,FE_FLOATING_POINT_EQUALITY,A,last,,STYLE,org.apache.lucene.search,org.apache.lucene.search.TestFieldCache,,test,,Double,"Double,Double,assertTrue,doubles,doubles,i,i,i,i,MAX_VALUE,MAX_VALUE",135,135,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/search/TestFieldCache.java#L135,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/search/TestFieldCache.java,,unknown,"public void test() throws IOException {
+    FieldCache cache = FieldCache.DEFAULT;
+    double [] doubles = cache.getDoubles(reader, ""theDouble"", random.nextBoolean());
+    assertSame(""Second request to cache return same array"", doubles, cache.getDoubles(reader, ""theDouble"", random.nextBoolean()));
+    assertSame(""Second request with explicit parser return same array"", doubles, cache.getDoubles(reader, ""theDouble"", FieldCache.DEFAULT_DOUBLE_PARSER, random.nextBoolean()));
+    assertTrue(""doubles Size: "" + doubles.length + "" is not: "" + NUM_DOCS, doubles.length == NUM_DOCS);
+    for (int i = 0; i < doubles.length; i++) {
+      assertTrue(doubles[i] + "" does not equal: "" + (Double.MAX_VALUE - i), doubles[i] == (Double.MAX_VALUE - i));
+
+    }
+    
+    long [] longs = cache.getLongs(reader, ""theLong"", random.nextBoolean());
+    assertSame(""Second request to cache return same array"", longs, cache.getLongs(reader, ""theLong"", random.nextBoolean()));
+    assertSame(""Second request with explicit parser return same array"", longs, cache.getLongs(reader, ""theLong"", FieldCache.DEFAULT_LONG_PARSER, random.nextBoolean()));
+    assertTrue(""longs Size: "" + longs.length + "" is not: "" + NUM_DOCS, longs.length == NUM_DOCS);
+    for (int i = 0; i < longs.length; i++) {
+      assertTrue(longs[i] + "" does not equal: "" + (Long.MAX_VALUE - i) + "" i="" + i, longs[i] == (Long.MAX_VALUE - i));
+
+    }
+    
+    byte [] bytes = cache.getBytes(reader, ""theByte"", random.nextBoolean());
+    assertSame(""Second request to cache return same array"", bytes, cache.getBytes(reader, ""theByte"", random.nextBoolean()));
+    assertSame(""Second request with explicit parser return same array"", bytes, cache.getBytes(reader, ""theByte"", FieldCache.DEFAULT_BYTE_PARSER, random.nextBoolean()));
+    assertTrue(""bytes Size: "" + bytes.length + "" is not: "" + NUM_DOCS, bytes.length == NUM_DOCS);
+    for (int i = 0; i < bytes.length; i++) {
+      assertTrue(bytes[i] + "" does not equal: "" + (Byte.MAX_VALUE - i), bytes[i] == (byte) (Byte.MAX_VALUE - i));
+
+    }
+    
+    short [] shorts = cache.getShorts(reader, ""theShort"", random.nextBoolean());
+    assertSame(""Second request to cache return same array"", shorts, cache.getShorts(reader, ""theShort"", random.nextBoolean()));
+    assertSame(""Second request with explicit parser return same array"", shorts, cache.getShorts(reader, ""theShort"", FieldCache.DEFAULT_SHORT_PARSER, random.nextBoolean()));
+    assertTrue(""shorts Size: "" + shorts.length + "" is not: "" + NUM_DOCS, shorts.length == NUM_DOCS);
+    for (int i = 0; i < shorts.length; i++) {
+      assertTrue(shorts[i] + "" does not equal: "" + (Short.MAX_VALUE - i), shorts[i] == (short) (Short.MAX_VALUE - i));
+
+    }
+    
+    int [] ints = cache.getInts(reader, ""theInt"", random.nextBoolean());
+    assertSame(""Second request to cache return same array"", ints, cache.getInts(reader, ""theInt"", random.nextBoolean()));
+    assertSame(""Second request with explicit parser return same array"", ints, cache.getInts(reader, ""theInt"", FieldCache.DEFAULT_INT_PARSER, random.nextBoolean()));
+    assertTrue(""ints Size: "" + ints.length + "" is not: "" + NUM_DOCS, ints.length == NUM_DOCS);
+    for (int i = 0; i < ints.length; i++) {
+      assertTrue(ints[i] + "" does not equal: "" + (Integer.MAX_VALUE - i), ints[i] == (Integer.MAX_VALUE - i));
+
+    }
+    
+    float [] floats = cache.getFloats(reader, ""theFloat"", random.nextBoolean());
+    assertSame(""Second request to cache return same array"", floats, cache.getFloats(reader, ""theFloat"", random.nextBoolean()));
+    assertSame(""Second request with explicit parser return same array"", floats, cache.getFloats(reader, ""theFloat"", FieldCache.DEFAULT_FLOAT_PARSER, random.nextBoolean()));
+    assertTrue(""floats Size: "" + floats.length + "" is not: "" + NUM_DOCS, floats.length == NUM_DOCS);
+    for (int i = 0; i < floats.length; i++) {
+      assertTrue(floats[i] + "" does not equal: "" + (Float.MAX_VALUE - i), floats[i] == (Float.MAX_VALUE - i));
+
+    }
+
+    Bits docsWithField = cache.getDocsWithField(reader, ""theLong"");
+    assertSame(""Second request to cache return same array"", docsWithField, cache.getDocsWithField(reader, ""theLong""));
+    assertTrue(""docsWithField(theLong) must be class Bits.MatchAllBits"", docsWithField instanceof Bits.MatchAllBits);
+    assertTrue(""docsWithField(theLong) Size: "" + docsWithField.length() + "" is not: "" + NUM_DOCS, docsWithField.length() == NUM_DOCS);
+    for (int i = 0; i < docsWithField.length(); i++) {
+      assertTrue(docsWithField.get(i));
+    }
+    
+    docsWithField = cache.getDocsWithField(reader, ""sparse"");
+    assertSame(""Second request to cache return same array"", docsWithField, cache.getDocsWithField(reader, ""sparse""));
+    assertFalse(""docsWithField(sparse) must not be class Bits.MatchAllBits"", docsWithField instanceof Bits.MatchAllBits);
+    assertTrue(""docsWithField(sparse) Size: "" + docsWithField.length() + "" is not: "" + NUM_DOCS, docsWithField.length() == NUM_DOCS);
+    for (int i = 0; i < docsWithField.length(); i++) {
+      assertEquals(i%2 == 0, docsWithField.get(i));
+    }
+
+    // getTermsIndex
+    FieldCache.DocTermsIndex termsIndex = cache.getTermsIndex(reader, ""theRandomUnicodeString"");
+    assertSame(""Second request to cache return same array"", termsIndex, cache.getTermsIndex(reader, ""theRandomUnicodeString""));
+    assertTrue(""doubles Size: "" + termsIndex.size() + "" is not: "" + NUM_DOCS, termsIndex.size() == NUM_DOCS);
+    final BytesRef br = new BytesRef();
+    for (int i = 0; i < NUM_DOCS; i++) {
+      final BytesRef term = termsIndex.getTerm(i, br);
+      final String s = term == null ? null : term.utf8ToString();
+      assertTrue(""for doc "" + i + "": "" + s + "" does not equal: "" + unicodeStrings[i], unicodeStrings[i] == null || unicodeStrings[i].equals(s));
+    }
+
+    int nTerms = termsIndex.numOrd();
+    // System.out.println(""nTerms=""+nTerms);
+
+    TermsEnum tenum = termsIndex.getTermsEnum();
+    BytesRef val = new BytesRef();
+    for (int i=1; i<nTerms; i++) {
+      BytesRef val1 = tenum.next();
+      BytesRef val2 = termsIndex.lookup(i,val);
+      // System.out.println(""i=""+i);
+      assertEquals(val2, val1);
+    }
+
+    // seek the enum around (note this isn't a great test here)
+    int num = atLeast(100);
+    for (int i = 0; i < num; i++) {
+      int k = _TestUtil.nextInt(random, 1, nTerms-1);
+      BytesRef val1 = termsIndex.lookup(k, val);
+      assertEquals(TermsEnum.SeekStatus.FOUND, tenum.seekCeil(val1));
+      assertEquals(val1, tenum.term());
+    }
+    
+    // test bad field
+    termsIndex = cache.getTermsIndex(reader, ""bogusfield"");
+
+    // getTerms
+    FieldCache.DocTerms terms = cache.getTerms(reader, ""theRandomUnicodeString"");
+    assertSame(""Second request to cache return same array"", terms, cache.getTerms(reader, ""theRandomUnicodeString""));
+    assertTrue(""doubles Size: "" + terms.size() + "" is not: "" + NUM_DOCS, terms.size() == NUM_DOCS);
+    for (int i = 0; i < NUM_DOCS; i++) {
+      final BytesRef term = terms.getTerm(i, br);
+      final String s = term == null ? null : term.utf8ToString();
+      assertTrue(""for doc "" + i + "": "" + s + "" does not equal: "" + unicodeStrings[i], unicodeStrings[i] == null || unicodeStrings[i].equals(s));
+    }
+
+    // test bad field
+    terms = cache.getTerms(reader, ""bogusfield"");
+
+    // getDocTermOrds
+    DocTermOrds termOrds = cache.getDocTermOrds(reader, ""theRandomUnicodeMultiValuedField"");
+    TermsEnum termsEnum = termOrds.getOrdTermsEnum(reader);
+    assertSame(""Second request to cache return same DocTermOrds"", termOrds, cache.getDocTermOrds(reader, ""theRandomUnicodeMultiValuedField""));
+    DocTermOrds.TermOrdsIterator reuse = null;
+    for (int i = 0; i < NUM_DOCS; i++) {
+      reuse = termOrds.lookup(i, reuse);
+      final int[] buffer = new int[5];
+      // This will remove identical terms. A DocTermOrds doesn't return duplicate ords for a docId
+      List<BytesRef> values = new ArrayList<BytesRef>(new LinkedHashSet<BytesRef>(Arrays.asList(multiValued[i])));
+      for (;;) {
+        int chunk = reuse.read(buffer);
+        if (chunk == 0) {
+          for (int ord = 0; ord < values.size(); ord++) {
+            BytesRef term = values.get(ord);
+            assertNull(String.format(""Document[%d] misses field must be null. Has value %s for ord %d"", i, term, ord), term);
+          }
+          break;
+        }
+
+        for(int idx=0; idx < chunk; idx++) {
+          int key = buffer[idx];
+          termsEnum.seekExact((long) key);
+          String actual = termsEnum.term().utf8ToString();
+          String expected = values.get(idx).utf8ToString();
+          if (!expected.equals(actual)) {
+              reuse = termOrds.lookup(i, reuse);
+              reuse.read(buffer);
+          }
+          assertTrue(String.format(""Expected value %s for doc %d and ord %d, but was %s"", expected, i, idx, actual), expected.equals(actual));
+        }
+
+        if (chunk <= buffer.length) {
+          break;
+        }
+      }
+    }
+
+    // test bad field
+    termOrds = cache.getDocTermOrds(reader, ""bogusfield"");
+
+    FieldCache.DEFAULT.purge(reader);
+  }"
+27,2691,lucene-solr,EQ_COMPARETO_USE_OBJECT_EQUALS,A,last,,BAD_PRACTICE,org.apache.lucene.benchmark.quality,org.apache.lucene.benchmark.quality.QualityQuery,,compareTo,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/benchmark/src/java/org/apache/lucene/benchmark/quality/QualityQuery.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/benchmark/src/java/org/apache/lucene/benchmark/quality/QualityQuery.java,,unknown,"public int compareTo(QualityQuery other) {
+    try {
+      // compare as ints when ids ints
+      int n = Integer.parseInt(queryID);
+      int nOther = Integer.parseInt(other.queryID);
+      return n - nOther;
+    } catch (NumberFormatException e) {
+      // fall back to string comparison
+      return queryID.compareTo(other.queryID);
+    }
+  }"
+28,2755,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.search,org.apache.lucene.search.TestPositionIncrement$1$1,,equals,,package org.apache.lucene.search;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/search/TestPositionIncrement.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/search/TestPositionIncrement.java,,unknown,
+29,2788,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.lucene.search.spans,org.apache.lucene.search.spans.TestPayloadSpans$PayloadFilter,,equals,,package org.apache.lucene.search.spans;,,1,1,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/search/spans/TestPayloadSpans.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/search/spans/TestPayloadSpans.java,,unknown,
+30,2875,lucene-solr,EQ_COMPARETO_USE_OBJECT_EQUALS,A,last,,BAD_PRACTICE,org.apache.lucene.index,org.apache.lucene.index.TestCodecs$TermData,,compareTo,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestCodecs.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestCodecs.java,,unknown,"public int compareTo(final Object other) {
+      return fieldInfo.name.compareTo(((FieldData) other).fieldInfo.name);
+    }"
+31,2911,lucene-solr,EQ_COMPARETO_USE_OBJECT_EQUALS,A,last,,BAD_PRACTICE,org.apache.lucene.util,org.apache.lucene.util.TestArrayUtil$Item,,compareTo,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/util/TestArrayUtil.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/util/TestArrayUtil.java,,unknown,"public int compareTo(Item other) {
+      return this.order - other.order;
+    }"
+32,2141,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,B,last,,STYLE,org.apache.lucene.analysis.miscellaneous,org.apache.lucene.analysis.miscellaneous.KeywordMarkerFilter,,equals,,package org.apache.lucene.analysis.miscellaneous;,,1,1,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//lucene/analysis/common/src/java/org/apache/lucene/analysis/miscellaneous/KeywordMarkerFilter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/analysis/common/src/java/org/apache/lucene/analysis/miscellaneous/KeywordMarkerFilter.java,,open,
+33,1736,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,C,last,,STYLE,org.apache.lucene.search.highlight,org.apache.lucene.search.highlight.TokenSources$1StoredTokenStream,,equals,,/*,,1,1,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/highlighter/src/java/org/apache/lucene/search/highlight/TokenSources.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/highlighter/src/java/org/apache/lucene/search/highlight/TokenSources.java,,open,
+34,1769,lucene-solr,EQ_COMPARETO_USE_OBJECT_EQUALS,C,last,,BAD_PRACTICE,org.apache.lucene.util.fst,org.apache.lucene.util.fst.FST$NodeAndInCount,,compareTo,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/util/fst/FST.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/util/fst/FST.java,,unknown,"@Override
+    public int compareTo(NodeAndInCount other) {
+      if (count > other.count) {
+        return 1;
+      } else if (count < other.count) {
+        return -1;
+      } else {
+        // Tie-break: smaller node compares as greater than
+        return other.node - node;
+      }
+    }"
+35,1870,lucene-solr,EQ_COMPARETO_USE_OBJECT_EQUALS,C,last,,BAD_PRACTICE,org.apache.solr.handler,org.apache.solr.handler.SnapShooter$OldBackupDirectory,,compareTo,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/handler/SnapShooter.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/SnapShooter.java,,unknown,"@Override
+    public int compareTo(OldBackupDirectory that) {
+      return that.timestamp.compareTo(this.timestamp);
+    }"
+36,1943,lucene-solr,EQ_OVERRIDING_EQUALS_NOT_SYMMETRIC,C,last,,CORRECTNESS,org.apache.lucene.search.spans,org.apache.lucene.search.spans.SpanFirstQuery,,equals,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/search/spans/SpanFirstQuery.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/search/spans/SpanFirstQuery.java,,unknown,"@Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof SpanFirstQuery)) return false;
+
+    SpanFirstQuery other = (SpanFirstQuery)o;
+    return this.end == other.end
+         && this.match.equals(other.match)
+         && this.getBoost() == other.getBoost();
+  }"
+37,2077,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,C,last,,STYLE,org.apache.lucene.spatial.prefix,org.apache.lucene.spatial.prefix.PrefixTreeStrategy$CellTokenStream,,equals,,package org.apache.lucene.spatial.prefix;,,1,1,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/spatial/src/java/org/apache/lucene/spatial/prefix/PrefixTreeStrategy.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/spatial/src/java/org/apache/lucene/spatial/prefix/PrefixTreeStrategy.java,,unknown,
+38,2311,lucene-solr,NP_EQUALS_SHOULD_HANDLE_NULL_ARGUMENT,C,last,,BAD_PRACTICE,org.apache.lucene.spatial.bbox,org.apache.lucene.spatial.bbox.BBoxSimilarityValueSource,,equals,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/spatial/src/java/org/apache/lucene/spatial/bbox/BBoxSimilarityValueSource.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/spatial/src/java/org/apache/lucene/spatial/bbox/BBoxSimilarityValueSource.java,,unknown,"@Override
+  public boolean equals(Object o) {
+    if (o.getClass() != BBoxSimilarityValueSource.class) {
+      return false;
+    }
+
+    BBoxSimilarityValueSource other = (BBoxSimilarityValueSource) o;
+    return similarity.equals(other.similarity);
+  }"
+39,2557,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,C,last,,STYLE,org.apache.lucene.analysis.core,org.apache.lucene.analysis.core.LowerCaseFilter,,equals,,package org.apache.lucene.analysis.core;,,1,1,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LowerCaseFilter.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/analysis/common/src/java/org/apache/lucene/analysis/core/LowerCaseFilter.java,,open,
+40,2798,lucene-solr,EQ_COMPARETO_USE_OBJECT_EQUALS,C,last,,BAD_PRACTICE,org.apache.lucene.facet.search,org.apache.lucene.facet.search.DrillSidewaysScorer$DocsEnumsAndFreq,,compareTo,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/facet/src/java/org/apache/lucene/facet/search/DrillSidewaysScorer.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/facet/src/java/org/apache/lucene/facet/search/DrillSidewaysScorer.java,,unknown,"@Override
+    public int compareTo(DocsEnumsAndFreq other) {
+      if (maxCost < other.maxCost) {
+        return -1;
+      } else if (maxCost > other.maxCost) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }"
+41,2937,lucene-solr,EQ_DOESNT_OVERRIDE_EQUALS,C,last,,STYLE,org.apache.lucene.search.join,org.apache.lucene.search.join.ToParentBlockJoinSortField,,equals,,package org.apache.lucene.search.join;,,1,1,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/join/src/java/org/apache/lucene/search/join/ToParentBlockJoinSortField.java#L1,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/join/src/java/org/apache/lucene/search/join/ToParentBlockJoinSortField.java,,close,
+42,9787,ant,EQ_COMPARETO_USE_OBJECT_EQUALS,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional,org.apache.tools.ant.taskdefs.optional.EchoProperties$Tuple,,compareTo,,,,-2,-2,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/optional/EchoProperties.java#L-2,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/optional/EchoProperties.java,,close,"public int compareTo(Object o) {
+            Tuple that = (Tuple) o;
+            return key.compareTo(that.key);
+        }"
+43,9834,ant,EQ_DOESNT_OVERRIDE_EQUALS,A,last,,STYLE,org.apache.tools.ant,org.apache.tools.ant.ComponentHelper$AntTypeTable,,equals,,/*,,1,1,close,https://github.com/apache/ant/tree/02d9f46c2941a8ae665322e49d4d12ae7343ab3b//src/main/org/apache/tools/ant/ComponentHelper.java#L1,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/ComponentHelper.java,,open,
+44,9929,ant,EQ_COMPARETO_USE_OBJECT_EQUALS,A,last,,BAD_PRACTICE,org.apache.tools.zip,org.apache.tools.zip.Simple8BitZipEncoding$Simple8BitChar,,compareTo,,,,-2,-2,close,https://github.com/apache/ant/tree/02d9f46c2941a8ae665322e49d4d12ae7343ab3b//src/main/org/apache/tools/zip/Simple8BitZipEncoding.java#L-2,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/zip/Simple8BitZipEncoding.java,,close,"public int compareTo(Object o) {
+            Simple8BitChar a = (Simple8BitChar) o;
+
+            return this.unicode - a.unicode;
+        }"
+45,1582,tomcat,HE_EQUALS_USE_HASHCODE,A,last,,BAD_PRACTICE,org.apache.jasper.compiler,org.apache.jasper.compiler.Mark,,equals,,,,-2,-2,close,https://github.com/apache/tomcat/tree/3787242a83ee5555c79fd2e4c6b6952e9195ed8b//java/org/apache/jasper/compiler/Mark.java#L-2,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/compiler/Mark.java,,close,"@Override
+    public boolean equals(Object other) {
+        if (other instanceof Mark) {
+            Mark m = (Mark) other;
+            return this.reader == m.reader && this.fileId == m.fileId
+                && this.cursor == m.cursor && this.line == m.line
+                && this.col == m.col;
+        }
+        return false;
+    }"
+46,9635,jmeter,HE_EQUALS_USE_HASHCODE,C,last,,BAD_PRACTICE,org.apache.jmeter.testbeans.gui,org.apache.jmeter.testbeans.gui.ComboStringEditor$UniqueObject,,equals,,,,-2,-2,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/testbeans/gui/ComboStringEditor.java#L-2,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/testbeans/gui/ComboStringEditor.java,,close,"@Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other instanceof UniqueObject) {
+                return propKey.equals(((UniqueObject) other).propKey);
+            }
+            return false;
+        }"
+47,5152,cassandra,FE_FLOATING_POINT_EQUALITY,C,last,,STYLE,org.apache.cassandra.streaming,org.apache.cassandra.streaming.StreamManager,,getRateLimiter,,currentThroughput,"currentThroughput,limiter,getRate",66,66,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/streaming/StreamManager.java#L66,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/streaming/StreamManager.java,,unknown,"public static RateLimiter getRateLimiter()
+    {
+        double currentThroughput = ((double) DatabaseDescriptor.getStreamThroughputOutboundMegabitsPerSec()) * 1024 * 1024;
+        // if throughput is set to 0, throttling is disabled
+        if (currentThroughput == 0)
+            currentThroughput = Double.MAX_VALUE;
+        if (limiter.getRate() != currentThroughput)
+            limiter.setRate(currentThroughput);
+        return limiter;
+    }"
+48,8697,cassandra,HE_EQUALS_USE_HASHCODE,A,last,,BAD_PRACTICE,org.apache.cassandra.utils,org.apache.cassandra.utils.EstimatedHistogram,,equals,,,,-2,-2,close,https://github.com/apache/cassandra/tree/7efab48e72247734ae38eabfc61a9ff0a5aa87ec//src/java/org/apache/cassandra/utils/EstimatedHistogram.java#L-2,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/utils/EstimatedHistogram.java,,close,"@Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+            return true;
+        
+        if (!(o instanceof EstimatedHistogram))
+            return false;
+        
+        EstimatedHistogram that = (EstimatedHistogram) o;
+        return Arrays.equals(getBucketOffsets(), that.getBucketOffsets()) &&
+               Arrays.equals(getBuckets(false), that.getBuckets(false));
+    }"
+49,349,derby,RV_CHECK_COMPARETO_FOR_SPECIFIC_RETURN_VALUE,B,last,,CORRECTNESS,org.apache.derby.iapi.types,org.apache.derby.iapi.types.NumberDataType,,setBigDecimal,,NumberDataType,"NumberDataType,bdc,MINLONG_MINUS_ONE,compareTo",432,432,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/iapi/types/NumberDataType.java#L432,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/types/NumberDataType.java,,open,"public void setBigDecimal(Number bigDecimal) throws StandardException
+	{
+		if (objectNull(bigDecimal))
+			return;
+
+		Comparable bdc = (Comparable) bigDecimal;
+
+
+		// See comment in SQLDecimal.getLong()
+
+		if (   (bdc.compareTo(NumberDataType.MINLONG_MINUS_ONE) == 1)
+			&& (bdc.compareTo(NumberDataType.MAXLONG_PLUS_ONE) == -1)) {
+
+			setValue(bigDecimal.longValue());
+		} else {
+
+			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, getTypeName());
+		}
+	}"
+50,2020,lucene-solr,EC_BAD_ARRAY_COMPARE,A,last,,CORRECTNESS,org.apache.lucene.util,org.apache.lucene.util.TestBytesRef,bytes,testFromBytes,[byte,assertEquals,"assertEquals,b,bytes,bytes",31,31,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/util/TestBytesRef.java#L31,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/util/TestBytesRef.java,,unknown,"public void testFromBytes() {
+    byte bytes[] = new byte[] { (byte)'a', (byte)'b', (byte)'c', (byte)'d' };
+    BytesRef b = new BytesRef(bytes);
+    assertEquals(bytes, b.bytes);
+    assertEquals(0, b.offset);
+    assertEquals(4, b.length);
+    
+    BytesRef b2 = new BytesRef(bytes, 1, 3);
+    assertEquals(""bcd"", b2.utf8ToString());
+    
+    assertFalse(b.equals(b2));
+  }"
+51,2273,lucene-solr,EC_BAD_ARRAY_COMPARE,A,last,,CORRECTNESS,org.apache.lucene.util,org.apache.lucene.util.TestBytesRef,bytes,testEmpty,[byte,BytesRef,"BytesRef,assertEquals,b,EMPTY_BYTES,bytes",23,23,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/util/TestBytesRef.java#L23,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/util/TestBytesRef.java,,unknown,"public void testEmpty() {
+    BytesRef b = new BytesRef();
+    assertEquals(BytesRef.EMPTY_BYTES, b.bytes);
+    assertEquals(0, b.offset);
+    assertEquals(0, b.length);
+  }"
+52,1762,lucene-solr,CO_COMPARETO_INCORRECT_FLOATING,B,last,,BAD_PRACTICE,org.apache.lucene.index,org.apache.lucene.index.LogMergePolicy$SegmentInfoAndLevel,level,compareTo,float,level,"level,other,level",550,550,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java#L550,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java,,close,"@Override
+    public int compareTo(SegmentInfoAndLevel other) {
+      if (level < other.level) {
+        return 1;
+      } else if (level > other.level) {
+        return -1;
+      } else {
+        return 0;
+      }
+    }"
+53,1927,lucene-solr,SE_COMPARATOR_SHOULD_BE_SERIALIZABLE,C,last,,BAD_PRACTICE,org.apache.lucene.util,org.apache.lucene.util.ArrayUtil$NaturalComparator,,,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/util/ArrayUtil.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/util/ArrayUtil.java,,unknown,
+54,2023,lucene-solr,SE_COMPARATOR_SHOULD_BE_SERIALIZABLE,C,last,,BAD_PRACTICE,org.apache.lucene.util.automaton,org.apache.lucene.util.automaton.Transition$CompareByDestThenMinMaxSingle,,,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/util/automaton/Transition.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/util/automaton/Transition.java,,unknown,
+55,2203,lucene-solr,CO_COMPARETO_INCORRECT_FLOATING,C,last,,BAD_PRACTICE,org.apache.solr.handler,org.apache.solr.handler.MoreLikeThisHandler$InterestingTerm$1,,compare,float,return (d>0)?1:-1;,,266,266,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/handler/MoreLikeThisHandler.java#L266,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/MoreLikeThisHandler.java,,unknown,"@Override
+      public int compare(InterestingTerm t1, InterestingTerm t2) {
+        float d = t1.boost - t2.boost;
+        if( d == 0 ) {
+          return 0;
+        }
+        return (d>0)?1:-1;
+      }"
+56,2442,lucene-solr,SE_COMPARATOR_SHOULD_BE_SERIALIZABLE,C,last,,BAD_PRACTICE,org.apache.lucene.util,org.apache.lucene.util.BytesRef$UTF8SortedAsUnicodeComparator,,,,,,-2,-2,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/util/BytesRef.java#L-2,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/util/BytesRef.java,,unknown,
+57,10269,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,,lexx,lang,,"null,previous,previous,value,getValue",542,542,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L542,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static Token[] lexx(final String format) {
+        final char[] array = format.toCharArray();
+        final ArrayList<Token> list = new ArrayList<Token>(array.length);
+
+        boolean inLiteral = false;
+        // Although the buffer is stored in a Token, the Tokens are only
+        // used internally, so cannot be accessed by other threads
+        StringBuilder buffer = null;
+        Token previous = null;
+        final int sz = array.length;
+        for (int i = 0; i < sz; i++) {
+            final char ch = array[i];
+            if (inLiteral && ch != '\'') {
+                buffer.append(ch); // buffer can't be null if inLiteral is true
+                continue;
+            }
+            Object value = null;
+            switch (ch) {
+            // TODO: Need to handle escaping of '
+            case '\'':
+                if (inLiteral) {
+                    buffer = null;
+                    inLiteral = false;
+                } else {
+                    buffer = new StringBuilder();
+                    list.add(new Token(buffer));
+                    inLiteral = true;
+                }
+                break;
+            case 'y':
+                value = y;
+                break;
+            case 'M':
+                value = M;
+                break;
+            case 'd':
+                value = d;
+                break;
+            case 'H':
+                value = H;
+                break;
+            case 'm':
+                value = m;
+                break;
+            case 's':
+                value = s;
+                break;
+            case 'S':
+                value = S;
+                break;
+            default:
+                if (buffer == null) {
+                    buffer = new StringBuilder();
+                    list.add(new Token(buffer));
+                }
+                buffer.append(ch);
+            }
+
+            if (value != null) {
+                if (previous != null && previous.getValue() == value) {
+                    previous.increment();
+                } else {
+                    final Token token = new Token(value);
+                    list.add(token);
+                    previous = token;
+                }
+                buffer = null;
+            }
+        }
+        return list.toArray(new Token[list.size()]);
+    }"
+58,10365,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,H,format,lang,H,"H,value",438,438,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L438,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static String format(final Token[] tokens, final int years, final int months, final int days, final int hours, final int minutes, final int seconds,
+            int milliseconds, final boolean padWithZeros) {
+        final StringBuilder buffer = new StringBuilder();
+        boolean lastOutputSeconds = false;
+        final int sz = tokens.length;
+        for (int i = 0; i < sz; i++) {
+            final Token token = tokens[i];
+            final Object value = token.getValue();
+            final int count = token.getCount();
+            if (value instanceof StringBuilder) {
+                buffer.append(value.toString());
+            } else {
+                if (value == y) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(years), count, '0') : Integer
+                            .toString(years));
+                    lastOutputSeconds = false;
+                } else if (value == M) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(months), count, '0') : Integer
+                            .toString(months));
+                    lastOutputSeconds = false;
+                } else if (value == d) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(days), count, '0') : Integer
+                            .toString(days));
+                    lastOutputSeconds = false;
+                } else if (value == H) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(hours), count, '0') : Integer
+                            .toString(hours));
+                    lastOutputSeconds = false;
+                } else if (value == m) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(minutes), count, '0') : Integer
+                            .toString(minutes));
+                    lastOutputSeconds = false;
+                } else if (value == s) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(seconds), count, '0') : Integer
+                            .toString(seconds));
+                    lastOutputSeconds = true;
+                } else if (value == S) {
+                    if (lastOutputSeconds) {
+                        milliseconds += 1000;
+                        final String str = padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds);
+                        buffer.append(str.substring(1));
+                    } else {
+                        buffer.append(padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds));
+                    }
+                    lastOutputSeconds = false;
+                }
+            }
+        }
+        return buffer.toString();
+    }"
+59,10533,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,S,format,lang,S,"S,value",450,450,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L450,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static String format(final Token[] tokens, final int years, final int months, final int days, final int hours, final int minutes, final int seconds,
+            int milliseconds, final boolean padWithZeros) {
+        final StringBuilder buffer = new StringBuilder();
+        boolean lastOutputSeconds = false;
+        final int sz = tokens.length;
+        for (int i = 0; i < sz; i++) {
+            final Token token = tokens[i];
+            final Object value = token.getValue();
+            final int count = token.getCount();
+            if (value instanceof StringBuilder) {
+                buffer.append(value.toString());
+            } else {
+                if (value == y) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(years), count, '0') : Integer
+                            .toString(years));
+                    lastOutputSeconds = false;
+                } else if (value == M) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(months), count, '0') : Integer
+                            .toString(months));
+                    lastOutputSeconds = false;
+                } else if (value == d) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(days), count, '0') : Integer
+                            .toString(days));
+                    lastOutputSeconds = false;
+                } else if (value == H) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(hours), count, '0') : Integer
+                            .toString(hours));
+                    lastOutputSeconds = false;
+                } else if (value == m) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(minutes), count, '0') : Integer
+                            .toString(minutes));
+                    lastOutputSeconds = false;
+                } else if (value == s) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(seconds), count, '0') : Integer
+                            .toString(seconds));
+                    lastOutputSeconds = true;
+                } else if (value == S) {
+                    if (lastOutputSeconds) {
+                        milliseconds += 1000;
+                        final String str = padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds);
+                        buffer.append(str.substring(1));
+                    } else {
+                        buffer.append(padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds));
+                    }
+                    lastOutputSeconds = false;
+                }
+            }
+        }
+        return buffer.toString();
+    }"
+60,10670,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,m,format,lang,m,"m,value",442,442,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L442,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static String format(final Token[] tokens, final int years, final int months, final int days, final int hours, final int minutes, final int seconds,
+            int milliseconds, final boolean padWithZeros) {
+        final StringBuilder buffer = new StringBuilder();
+        boolean lastOutputSeconds = false;
+        final int sz = tokens.length;
+        for (int i = 0; i < sz; i++) {
+            final Token token = tokens[i];
+            final Object value = token.getValue();
+            final int count = token.getCount();
+            if (value instanceof StringBuilder) {
+                buffer.append(value.toString());
+            } else {
+                if (value == y) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(years), count, '0') : Integer
+                            .toString(years));
+                    lastOutputSeconds = false;
+                } else if (value == M) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(months), count, '0') : Integer
+                            .toString(months));
+                    lastOutputSeconds = false;
+                } else if (value == d) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(days), count, '0') : Integer
+                            .toString(days));
+                    lastOutputSeconds = false;
+                } else if (value == H) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(hours), count, '0') : Integer
+                            .toString(hours));
+                    lastOutputSeconds = false;
+                } else if (value == m) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(minutes), count, '0') : Integer
+                            .toString(minutes));
+                    lastOutputSeconds = false;
+                } else if (value == s) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(seconds), count, '0') : Integer
+                            .toString(seconds));
+                    lastOutputSeconds = true;
+                } else if (value == S) {
+                    if (lastOutputSeconds) {
+                        milliseconds += 1000;
+                        final String str = padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds);
+                        buffer.append(str.substring(1));
+                    } else {
+                        buffer.append(padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds));
+                    }
+                    lastOutputSeconds = false;
+                }
+            }
+        }
+        return buffer.toString();
+    }"
+61,10787,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,s,format,lang,s,"s,value",446,446,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L446,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static String format(final Token[] tokens, final int years, final int months, final int days, final int hours, final int minutes, final int seconds,
+            int milliseconds, final boolean padWithZeros) {
+        final StringBuilder buffer = new StringBuilder();
+        boolean lastOutputSeconds = false;
+        final int sz = tokens.length;
+        for (int i = 0; i < sz; i++) {
+            final Token token = tokens[i];
+            final Object value = token.getValue();
+            final int count = token.getCount();
+            if (value instanceof StringBuilder) {
+                buffer.append(value.toString());
+            } else {
+                if (value == y) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(years), count, '0') : Integer
+                            .toString(years));
+                    lastOutputSeconds = false;
+                } else if (value == M) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(months), count, '0') : Integer
+                            .toString(months));
+                    lastOutputSeconds = false;
+                } else if (value == d) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(days), count, '0') : Integer
+                            .toString(days));
+                    lastOutputSeconds = false;
+                } else if (value == H) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(hours), count, '0') : Integer
+                            .toString(hours));
+                    lastOutputSeconds = false;
+                } else if (value == m) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(minutes), count, '0') : Integer
+                            .toString(minutes));
+                    lastOutputSeconds = false;
+                } else if (value == s) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(seconds), count, '0') : Integer
+                            .toString(seconds));
+                    lastOutputSeconds = true;
+                } else if (value == S) {
+                    if (lastOutputSeconds) {
+                        milliseconds += 1000;
+                        final String str = padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds);
+                        buffer.append(str.substring(1));
+                    } else {
+                        buffer.append(padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds));
+                    }
+                    lastOutputSeconds = false;
+                }
+            }
+        }
+        return buffer.toString();
+    }"
+62,11157,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,y,format,lang,value,"value,y",426,426,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L426,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static String format(final Token[] tokens, final int years, final int months, final int days, final int hours, final int minutes, final int seconds,
+            int milliseconds, final boolean padWithZeros) {
+        final StringBuilder buffer = new StringBuilder();
+        boolean lastOutputSeconds = false;
+        final int sz = tokens.length;
+        for (int i = 0; i < sz; i++) {
+            final Token token = tokens[i];
+            final Object value = token.getValue();
+            final int count = token.getCount();
+            if (value instanceof StringBuilder) {
+                buffer.append(value.toString());
+            } else {
+                if (value == y) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(years), count, '0') : Integer
+                            .toString(years));
+                    lastOutputSeconds = false;
+                } else if (value == M) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(months), count, '0') : Integer
+                            .toString(months));
+                    lastOutputSeconds = false;
+                } else if (value == d) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(days), count, '0') : Integer
+                            .toString(days));
+                    lastOutputSeconds = false;
+                } else if (value == H) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(hours), count, '0') : Integer
+                            .toString(hours));
+                    lastOutputSeconds = false;
+                } else if (value == m) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(minutes), count, '0') : Integer
+                            .toString(minutes));
+                    lastOutputSeconds = false;
+                } else if (value == s) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(seconds), count, '0') : Integer
+                            .toString(seconds));
+                    lastOutputSeconds = true;
+                } else if (value == S) {
+                    if (lastOutputSeconds) {
+                        milliseconds += 1000;
+                        final String str = padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds);
+                        buffer.append(str.substring(1));
+                    } else {
+                        buffer.append(padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds));
+                    }
+                    lastOutputSeconds = false;
+                }
+            }
+        }
+        return buffer.toString();
+    }"
+63,11401,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,d,format,lang,d,"d,value",434,434,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L434,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static String format(final Token[] tokens, final int years, final int months, final int days, final int hours, final int minutes, final int seconds,
+            int milliseconds, final boolean padWithZeros) {
+        final StringBuilder buffer = new StringBuilder();
+        boolean lastOutputSeconds = false;
+        final int sz = tokens.length;
+        for (int i = 0; i < sz; i++) {
+            final Token token = tokens[i];
+            final Object value = token.getValue();
+            final int count = token.getCount();
+            if (value instanceof StringBuilder) {
+                buffer.append(value.toString());
+            } else {
+                if (value == y) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(years), count, '0') : Integer
+                            .toString(years));
+                    lastOutputSeconds = false;
+                } else if (value == M) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(months), count, '0') : Integer
+                            .toString(months));
+                    lastOutputSeconds = false;
+                } else if (value == d) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(days), count, '0') : Integer
+                            .toString(days));
+                    lastOutputSeconds = false;
+                } else if (value == H) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(hours), count, '0') : Integer
+                            .toString(hours));
+                    lastOutputSeconds = false;
+                } else if (value == m) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(minutes), count, '0') : Integer
+                            .toString(minutes));
+                    lastOutputSeconds = false;
+                } else if (value == s) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(seconds), count, '0') : Integer
+                            .toString(seconds));
+                    lastOutputSeconds = true;
+                } else if (value == S) {
+                    if (lastOutputSeconds) {
+                        milliseconds += 1000;
+                        final String str = padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds);
+                        buffer.append(str.substring(1));
+                    } else {
+                        buffer.append(padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds));
+                    }
+                    lastOutputSeconds = false;
+                }
+            }
+        }
+        return buffer.toString();
+    }"
+64,11514,commons-lang,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.commons.lang3.time,org.apache.commons.lang3.time.DurationFormatUtils,M,format,lang,M,"M,value",430,430,close,https://github.com/apache/commons-lang/tree/c4ecd75ecd8b78c66cc51b49dd32989a3f1cde2e//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java#L430,https://github.com/apache/commons-lang/tree/551101299da7f75ea5478db1a6bc194963e0ac34//src/main/java/org/apache/commons/lang3/time/DurationFormatUtils.java,,close,"static String format(final Token[] tokens, final int years, final int months, final int days, final int hours, final int minutes, final int seconds,
+            int milliseconds, final boolean padWithZeros) {
+        final StringBuilder buffer = new StringBuilder();
+        boolean lastOutputSeconds = false;
+        final int sz = tokens.length;
+        for (int i = 0; i < sz; i++) {
+            final Token token = tokens[i];
+            final Object value = token.getValue();
+            final int count = token.getCount();
+            if (value instanceof StringBuilder) {
+                buffer.append(value.toString());
+            } else {
+                if (value == y) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(years), count, '0') : Integer
+                            .toString(years));
+                    lastOutputSeconds = false;
+                } else if (value == M) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(months), count, '0') : Integer
+                            .toString(months));
+                    lastOutputSeconds = false;
+                } else if (value == d) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(days), count, '0') : Integer
+                            .toString(days));
+                    lastOutputSeconds = false;
+                } else if (value == H) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(hours), count, '0') : Integer
+                            .toString(hours));
+                    lastOutputSeconds = false;
+                } else if (value == m) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(minutes), count, '0') : Integer
+                            .toString(minutes));
+                    lastOutputSeconds = false;
+                } else if (value == s) {
+                    buffer.append(padWithZeros ? StringUtils.leftPad(Integer.toString(seconds), count, '0') : Integer
+                            .toString(seconds));
+                    lastOutputSeconds = true;
+                } else if (value == S) {
+                    if (lastOutputSeconds) {
+                        milliseconds += 1000;
+                        final String str = padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds);
+                        buffer.append(str.substring(1));
+                    } else {
+                        buffer.append(padWithZeros
+                                ? StringUtils.leftPad(Integer.toString(milliseconds), count, '0')
+                                : Integer.toString(milliseconds));
+                    }
+                    lastOutputSeconds = false;
+                }
+            }
+        }
+        return buffer.toString();
+    }"
+65,9857,ant,ES_COMPARING_STRINGS_WITH_EQ,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional.vss,org.apache.tools.ant.taskdefs.optional.vss.MSVSSTest,,checkCommandLines,lang,genIndex,"genIndex,sGeneratedCmdLine",425,425,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/optional/vss/MSVSSTest.java#L425,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/optional/vss/MSVSSTest.java,,close,"private void checkCommandLines(String[] sTestCmdLine, String[] sGeneratedCmdLine) {
+        int testLength = sTestCmdLine.length;
+        int genLength = sGeneratedCmdLine.length;
+
+        int genIndex = 0;
+        int testIndex = 0;
+
+        while (testIndex < testLength) {
+            try {
+                if (sGeneratedCmdLine[genIndex] == """") {
+                    genIndex++;
+                    continue;
+                }
+                assertEquals(""arg # "" + testIndex,
+                        sTestCmdLine[testIndex],
+                        sGeneratedCmdLine[genIndex]);
+                testIndex++;
+                genIndex++;
+            } catch (ArrayIndexOutOfBoundsException aioob) {
+                fail(""missing arg "" + sTestCmdLine[testIndex]);
+            }
+        }
+
+        // Count the number of empty strings
+        int cnt = 0;
+        for (int i = 0; i < genLength; i++) {
+            if (sGeneratedCmdLine[i] == """") {
+                cnt++;
+            }
+        }
+        if (genLength - cnt > sTestCmdLine.length) {
+            // We have extra elements
+            fail(""extra args"");
+        }
+    }"
+66,9850,ant,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,A,last,,BAD_PRACTICE,org.apache.tools.ant,org.apache.tools.ant.ProjectHelper,TRUE,isInIncludeMode,lang,Boolean,"Boolean,inIncludeMode,TRUE,get",249,249,close,https://github.com/apache/ant/tree/02d9f46c2941a8ae665322e49d4d12ae7343ab3b//src/main/org/apache/tools/ant/ProjectHelper.java#L249,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/ProjectHelper.java,,close,"public static boolean isInIncludeMode() {
+        return inIncludeMode.get() == Boolean.TRUE;
+    }"
+67,1092,tomcat,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,C,last,,BAD_PRACTICE,async,async.Async0,TRUE,service,lang,Boolean,"Boolean,req,TRUE,getAttribute",38,38,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//webapps/examples/WEB-INF/classes/async/Async0.java#L38,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//webapps/examples/WEB-INF/classes/async/Async0.java,,close,"@Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        if (Boolean.TRUE == req.getAttribute(""dispatch"")) {
+            log.info(""Received dispatch, completing on the worker thread."");
+            log.info(""After complete called started:""+req.isAsyncStarted());
+            resp.getWriter().write(""Async dispatch worked:+""+System.currentTimeMillis()+""\n"");
+        } else {
+            resp.setContentType(""text/plain"");
+            final AsyncContext actx = req.startAsync();
+            actx.setTimeout(Long.MAX_VALUE);
+            Runnable run = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        req.setAttribute(""dispatch"", Boolean.TRUE);
+                        Thread.currentThread().setName(""Async0-Thread"");
+                        log.info(""Putting AsyncThread to sleep"");
+                        Thread.sleep(2*1000);
+                        log.info(""Dispatching"");
+                        actx.dispatch();
+                    }catch (InterruptedException x) {
+                        log.error(""Async1"",x);
+                    }catch (IllegalStateException x) {
+                        log.error(""Async1"",x);
+                    }
+                }
+            };
+            Thread t = new Thread(run);
+            t.start();
+        }
+    }"
+68,1103,tomcat,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,C,last,,BAD_PRACTICE,org.apache.catalina.core,org.apache.catalina.core.StandardWrapperValve,TRUE,invoke,lang,instanceof,"instanceof,request,getAttribute",170,170,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/core/StandardWrapperValve.java#L170,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/core/StandardWrapperValve.java,,unknown,"@Override
+    public final void invoke(Request request, Response response)
+        throws IOException, ServletException {
+
+        // Initialize local variables we may need
+        boolean unavailable = false;
+        Throwable throwable = null;
+        // This should be a Request attribute...
+        long t1=System.currentTimeMillis();
+        requestCount.incrementAndGet();
+        StandardWrapper wrapper = (StandardWrapper) getContainer();
+        Servlet servlet = null;
+        Context context = (Context) wrapper.getParent();
+
+        // Check for the application being marked unavailable
+        if (!context.getState().isAvailable()) {
+            response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                           sm.getString(""standardContext.isUnavailable""));
+            unavailable = true;
+        }
+
+        // Check for the servlet being marked unavailable
+        if (!unavailable && wrapper.isUnavailable()) {
+            container.getLogger().info(sm.getString(""standardWrapper.isUnavailable"",
+                    wrapper.getName()));
+            long available = wrapper.getAvailable();
+            if ((available > 0L) && (available < Long.MAX_VALUE)) {
+                response.setDateHeader(""Retry-After"", available);
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                        sm.getString(""standardWrapper.isUnavailable"",
+                                wrapper.getName()));
+            } else if (available == Long.MAX_VALUE) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        sm.getString(""standardWrapper.notFound"",
+                                wrapper.getName()));
+            }
+            unavailable = true;
+        }
+
+        // Allocate a servlet instance to process this request
+        try {
+            if (!unavailable) {
+                servlet = wrapper.allocate();
+            }
+        } catch (UnavailableException e) {
+            container.getLogger().error(
+                    sm.getString(""standardWrapper.allocateException"",
+                            wrapper.getName()), e);
+            long available = wrapper.getAvailable();
+            if ((available > 0L) && (available < Long.MAX_VALUE)) {
+                response.setDateHeader(""Retry-After"", available);
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                           sm.getString(""standardWrapper.isUnavailable"",
+                                        wrapper.getName()));
+            } else if (available == Long.MAX_VALUE) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                           sm.getString(""standardWrapper.notFound"",
+                                        wrapper.getName()));
+            }
+        } catch (ServletException e) {
+            container.getLogger().error(sm.getString(""standardWrapper.allocateException"",
+                             wrapper.getName()), StandardWrapper.getRootCause(e));
+            throwable = e;
+            exception(request, response, e);
+        } catch (Throwable e) {
+            ExceptionUtils.handleThrowable(e);
+            container.getLogger().error(sm.getString(""standardWrapper.allocateException"",
+                             wrapper.getName()), e);
+            throwable = e;
+            exception(request, response, e);
+            servlet = null;
+        }
+
+        // Identify if the request is Comet related now that the servlet has been allocated
+        boolean comet = false;
+        if (servlet instanceof CometProcessor && request.getAttribute(
+                Globals.COMET_SUPPORTED_ATTR) == Boolean.TRUE) {
+            comet = true;
+            request.setComet(true);
+        }
+
+        MessageBytes requestPathMB = request.getRequestPathMB();
+        DispatcherType dispatcherType = DispatcherType.REQUEST;
+        if (request.getDispatcherType()==DispatcherType.ASYNC) dispatcherType = DispatcherType.ASYNC;
+        request.setAttribute(Globals.DISPATCHER_TYPE_ATTR,dispatcherType);
+        request.setAttribute(Globals.DISPATCHER_REQUEST_PATH_ATTR,
+                requestPathMB);
+        // Create the filter chain for this request
+        ApplicationFilterFactory factory =
+            ApplicationFilterFactory.getInstance();
+        ApplicationFilterChain filterChain =
+            factory.createFilterChain(request, wrapper, servlet);
+
+        // Reset comet flag value after creating the filter chain
+        request.setComet(false);
+
+        // Call the filter chain for this request
+        // NOTE: This also calls the servlet's service() method
+        try {
+            if ((servlet != null) && (filterChain != null)) {
+                // Swallow output if needed
+                if (context.getSwallowOutput()) {
+                    try {
+                        SystemLogHandler.startCapture();
+                        if (request.isAsyncDispatching()) {
+                            ((AsyncContextImpl)request.getAsyncContext()).doInternalDispatch();
+                        } else if (comet) {
+                            filterChain.doFilterEvent(request.getEvent());
+                            request.setComet(true);
+                        } else {
+                            filterChain.doFilter(request.getRequest(),
+                                    response.getResponse());
+                        }
+                    } finally {
+                        String log = SystemLogHandler.stopCapture();
+                        if (log != null && log.length() > 0) {
+                            context.getLogger().info(log);
+                        }
+                    }
+                } else {
+                    if (request.isAsyncDispatching()) {
+                        ((AsyncContextImpl)request.getAsyncContext()).doInternalDispatch();
+                    } else if (comet) {
+                        request.setComet(true);
+                        filterChain.doFilterEvent(request.getEvent());
+                    } else {
+                        filterChain.doFilter
+                            (request.getRequest(), response.getResponse());
+                    }
+                }
+
+            }
+        } catch (ClientAbortException e) {
+            throwable = e;
+            exception(request, response, e);
+        } catch (IOException e) {
+            container.getLogger().error(sm.getString(
+                    ""standardWrapper.serviceException"", wrapper.getName(),
+                    context.getName()), e);
+            throwable = e;
+            exception(request, response, e);
+        } catch (UnavailableException e) {
+            container.getLogger().error(sm.getString(
+                    ""standardWrapper.serviceException"", wrapper.getName(),
+                    context.getName()), e);
+            //            throwable = e;
+            //            exception(request, response, e);
+            wrapper.unavailable(e);
+            long available = wrapper.getAvailable();
+            if ((available > 0L) && (available < Long.MAX_VALUE)) {
+                response.setDateHeader(""Retry-After"", available);
+                response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
+                           sm.getString(""standardWrapper.isUnavailable"",
+                                        wrapper.getName()));
+            } else if (available == Long.MAX_VALUE) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND,
+                            sm.getString(""standardWrapper.notFound"",
+                                        wrapper.getName()));
+            }
+            // Do not save exception in 'throwable', because we
+            // do not want to do exception(request, response, e) processing
+        } catch (ServletException e) {
+            Throwable rootCause = StandardWrapper.getRootCause(e);
+            if (!(rootCause instanceof ClientAbortException)) {
+                container.getLogger().error(sm.getString(
+                        ""standardWrapper.serviceExceptionRoot"",
+                        wrapper.getName(), context.getName(), e.getMessage()),
+                        rootCause);
+            }
+            throwable = e;
+            exception(request, response, e);
+        } catch (Throwable e) {
+            ExceptionUtils.handleThrowable(e);
+            container.getLogger().error(sm.getString(
+                    ""standardWrapper.serviceException"", wrapper.getName(),
+                    context.getName()), e);
+            throwable = e;
+            exception(request, response, e);
+        }
+
+        // Release the filter chain (if any) for this request
+        if (filterChain != null) {
+            if (request.isComet()) {
+                // If this is a Comet request, then the same chain will be used for the
+                // processing of all subsequent events.
+                filterChain.reuse();
+            } else {
+                filterChain.release();
+            }
+        }
+
+        // Deallocate the allocated servlet instance
+        try {
+            if (servlet != null) {
+                wrapper.deallocate(servlet);
+            }
+        } catch (Throwable e) {
+            ExceptionUtils.handleThrowable(e);
+            container.getLogger().error(sm.getString(""standardWrapper.deallocateException"",
+                             wrapper.getName()), e);
+            if (throwable == null) {
+                throwable = e;
+                exception(request, response, e);
+            }
+        }
+
+        // If this servlet has been marked permanently unavailable,
+        // unload it and release this instance
+        try {
+            if ((servlet != null) &&
+                (wrapper.getAvailable() == Long.MAX_VALUE)) {
+                wrapper.unload();
+            }
+        } catch (Throwable e) {
+            ExceptionUtils.handleThrowable(e);
+            container.getLogger().error(sm.getString(""standardWrapper.unloadException"",
+                             wrapper.getName()), e);
+            if (throwable == null) {
+                throwable = e;
+                exception(request, response, e);
+            }
+        }
+        long t2=System.currentTimeMillis();
+
+        long time=t2-t1;
+        processingTime += time;
+        if( time > maxTime) maxTime=time;
+        if( time < minTime) minTime=time;
+
+    }"
+69,1245,tomcat,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,C,last,,BAD_PRACTICE,org.apache.catalina.servlets,org.apache.catalina.servlets.DefaultServlet,TRUE,checkSendfile,lang,sendfileSize,sendfileSize,1567,1567,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/servlets/DefaultServlet.java#L1567,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/servlets/DefaultServlet.java,,close,"protected boolean checkSendfile(HttpServletRequest request,
+                                  HttpServletResponse response,
+                                  WebResource resource,
+                                  long length, Range range) {
+        if (sendfileSize > 0
+            && resource.isFile()
+            && length > sendfileSize
+            && (resource.getCanonicalPath() != null)
+            && (Boolean.TRUE == request.getAttribute(Globals.SENDFILE_SUPPORTED_ATTR))
+            && (request.getClass().getName().equals(""org.apache.catalina.connector.RequestFacade""))
+            && (response.getClass().getName().equals(""org.apache.catalina.connector.ResponseFacade""))) {
+            request.setAttribute(Globals.SENDFILE_FILENAME_ATTR, resource.getCanonicalPath());
+            if (range == null) {
+                request.setAttribute(Globals.SENDFILE_FILE_START_ATTR, Long.valueOf(0L));
+                request.setAttribute(Globals.SENDFILE_FILE_END_ATTR, Long.valueOf(length));
+            } else {
+                request.setAttribute(Globals.SENDFILE_FILE_START_ATTR, Long.valueOf(range.start));
+                request.setAttribute(Globals.SENDFILE_FILE_END_ATTR, Long.valueOf(range.end + 1));
+            }
+            return true;
+        }
+        return false;
+    }"
+70,1640,tomcat,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,C,last,,BAD_PRACTICE,org.apache.catalina.valves.rewrite,org.apache.catalina.valves.rewrite.RewriteValve,TRUE,invoke,lang,if (invoked.get() == Boolean.TRUE) {,,290,290,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/valves/rewrite/RewriteValve.java#L290,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/valves/rewrite/RewriteValve.java,,close,"@Override
+    public void invoke(Request request, Response response)
+        throws IOException, ServletException {
+
+        if (!getEnabled() || rules == null || rules.length == 0) {
+            getNext().invoke(request, response);
+            return;
+        }
+
+        if (invoked.get() == Boolean.TRUE) {
+            try {
+                getNext().invoke(request, response);
+            } finally {
+                invoked.set(null);
+            }
+            return;
+        }
+
+        try {
+
+            Resolver resolver = new ResolverImpl(request);
+
+            invoked.set(Boolean.TRUE);
+
+            // As long as MB isn't a char sequence or affiliated, this has to be
+            // converted to a string
+            MessageBytes urlMB = context ? request.getRequestPathMB() : request.getDecodedRequestURIMB();
+            urlMB.toChars();
+            CharSequence url = urlMB.getCharChunk();
+            CharSequence host = request.getServerName();
+            boolean rewritten = false;
+            boolean done = false;
+            for (int i = 0; i < rules.length; i++) {
+                RewriteRule rule = rules[i];
+                CharSequence test = (rule.isHost()) ? host : url;
+                CharSequence newtest = rule.evaluate(test, resolver);
+                if (newtest != null && !test.equals(newtest.toString())) {
+                    if (container.getLogger().isDebugEnabled()) {
+                        container.getLogger().debug(""Rewrote "" + test + "" as "" + newtest
+                                + "" with rule pattern "" + rule.getPatternString());
+                    }
+                    if (rule.isHost()) {
+                        host = newtest;
+                    } else {
+                        url = newtest;
+                    }
+                    rewritten = true;
+                }
+
+                // Final reply
+
+                // - forbidden
+                if (rule.isForbidden() && newtest != null) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    done = true;
+                    break;
+                }
+                // - gone
+                if (rule.isGone() && newtest != null) {
+                    response.sendError(HttpServletResponse.SC_GONE);
+                    done = true;
+                    break;
+                }
+                // - redirect (code)
+                if (rule.isRedirect() && newtest != null) {
+                    // append the query string to the url if there is one and it hasn't been rewritten
+                    String queryString = request.getQueryString();
+                    StringBuffer urlString = new StringBuffer(url);
+                    if (queryString != null && queryString.length() > 0) {
+                        int index = urlString.indexOf(""?"");
+                        if (index != -1) {
+                            // if qsa is specified append the query
+                            if (rule.isQsappend()) {
+                                urlString.append('&');
+                                urlString.append(queryString);
+                            }
+                            // if the ? is the last character delete it, its only purpose was to
+                            // prevent the rewrite module from appending the query string
+                            else if (index == urlString.length() - 1) {
+                                urlString.deleteCharAt(index);
+                            }
+                        } else {
+                            urlString.append('?');
+                            urlString.append(queryString);
+                        }
+                    }
+                    // Insert the context if
+                    // 1. this valve is associated with a context
+                    // 2. the url starts with a leading slash
+                    // 3. the url isn't absolute
+                    if (context && urlString.charAt(0) == '/' && !hasScheme(urlString)) {
+                        urlString.insert(0, request.getContext().getEncodedPath());
+                    }
+                    response.sendRedirect(urlString.toString());
+                    response.setStatus(rule.getRedirectCode());
+                    done = true;
+                    break;
+                }
+
+                // Reply modification
+
+                // - cookie
+                if (rule.isCookie() && newtest != null) {
+                    Cookie cookie = new Cookie(rule.getCookieName(),
+                            rule.getCookieResult());
+                    cookie.setDomain(rule.getCookieDomain());
+                    cookie.setMaxAge(rule.getCookieLifetime());
+                    cookie.setPath(rule.getCookiePath());
+                    cookie.setSecure(rule.isCookieSecure());
+                    cookie.setHttpOnly(rule.isCookieHttpOnly());
+                    response.addCookie(cookie);
+                }
+                // - env (note: this sets a request attribute)
+                if (rule.isEnv() && newtest != null) {
+                    for (int j = 0; j < rule.getEnvSize(); j++) {
+                        request.setAttribute(rule.getEnvName(j), rule.getEnvResult(j));
+                    }
+                }
+                // - content type (note: this will not force the content type, use a filter
+                //   to do that)
+                if (rule.isType() && newtest != null) {
+                    request.setContentType(rule.getTypeValue());
+                }
+                // - qsappend
+                if (rule.isQsappend() && newtest != null) {
+                    String queryString = request.getQueryString();
+                    String urlString = url.toString();
+                    if (urlString.indexOf('?') != -1 && queryString != null) {
+                        url = urlString + ""&"" + queryString;
+                    }
+                }
+
+                // Control flow processing
+
+                // - chain (skip remaining chained rules if this one does not match)
+                if (rule.isChain() && newtest == null) {
+                    for (int j = i; j < rules.length; j++) {
+                        if (!rules[j].isChain()) {
+                            i = j;
+                            break;
+                        }
+                    }
+                    continue;
+                }
+                // - last (stop rewriting here)
+                if (rule.isLast() && newtest != null) {
+                    break;
+                }
+                // - next (redo again)
+                if (rule.isNext() && newtest != null) {
+                    i = 0;
+                    continue;
+                }
+                // - skip (n rules)
+                if (newtest != null) {
+                    i += rule.getSkip();
+                }
+
+            }
+
+            if (rewritten) {
+                if (!done) {
+                    // See if we need to replace the query string
+                    String urlString = url.toString();
+                    String queryString = null;
+                    int queryIndex = urlString.indexOf('?');
+                    if (queryIndex != -1) {
+                        queryString = urlString.substring(queryIndex+1);
+                        urlString = urlString.substring(0, queryIndex);
+                    }
+                    // Set the new URL
+                    request.getCoyoteRequest().requestURI().setString(null);
+                    CharChunk chunk = request.getCoyoteRequest().requestURI().getCharChunk();
+                    chunk.recycle();
+                    if (context) {
+                        chunk.append(request.getContextPath());
+                    }
+                    chunk.append(urlString);
+                    request.getCoyoteRequest().requestURI().toChars();
+                    // Set the new Query if there is one
+                    if (queryString != null) {
+                        request.getCoyoteRequest().queryString().setString(null);
+                        chunk = request.getCoyoteRequest().queryString().getCharChunk();
+                        chunk.recycle();
+                        chunk.append(queryString);
+                        request.getCoyoteRequest().queryString().toChars();
+                    }
+                    // Set the new host if it changed
+                    if (!host.equals(request.getServerName())) {
+                        request.getCoyoteRequest().serverName().setString(null);
+                        chunk = request.getCoyoteRequest().serverName().getCharChunk();
+                        chunk.recycle();
+                        chunk.append(host.toString());
+                        request.getCoyoteRequest().serverName().toChars();
+                    }
+                    request.getMappingData().recycle();
+                    // Reinvoke the whole request recursively
+                    try {
+                        request.getConnector().getProtocolHandler().getAdapter().service
+                        (request.getCoyoteRequest(), response.getCoyoteResponse());
+                    } catch (Exception e) {
+                        // This doesn't actually happen in the Catalina adapter implementation
+                    }
+                }
+            } else {
+                getNext().invoke(request, response);
+            }
+
+        } finally {
+            invoked.set(null);
+        }
+
+    }"
+71,1148,tomcat,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,A,last,,BAD_PRACTICE,org.apache.tomcat.jdbc.pool,org.apache.tomcat.jdbc.pool.ConnectionPool,FALSE,terminateTransaction,lang,if (con.getPoolProperties().getDefaultAutoCommit()==Boolean.FALSE) {,,792,792,close,https://github.com/apache/tomcat/tree/3787242a83ee5555c79fd2e4c6b6952e9195ed8b//modules/jdbc-pool/src/main/java/org/apache/tomcat/jdbc/pool/jmx/ConnectionPool.java#L792,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//modules/jdbc-pool/src/main/java/org/apache/tomcat/jdbc/pool/jmx/ConnectionPool.java,,close,
+72,1484,tomcat,INT_BAD_COMPARISON_WITH_NONNEGATIVE_VALUE,A,last,,CORRECTNESS,org.apache.jasper.compiler,org.apache.jasper.compiler.ELParser,,nextToken,,Character,"Character,ch,isJavaIdentifierPart",247,247,close,https://github.com/apache/tomcat/tree/3787242a83ee5555c79fd2e4c6b6952e9195ed8b//java/org/apache/jasper/compiler/ELParser.java#L247,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/compiler/ELParser.java,,close,"private Token nextToken() {
+        prevToken = curToken;
+        skipSpaces();
+        if (hasNextChar()) {
+            char ch = nextChar();
+            if (Character.isJavaIdentifierStart(ch)) {
+                StringBuilder buf = new StringBuilder();
+                buf.append(ch);
+                while ((ch = peekChar()) != -1
+                        && Character.isJavaIdentifierPart(ch)) {
+                    buf.append(ch);
+                    nextChar();
+                }
+                return new Id(buf.toString());
+            }
+
+            if (ch == '\'' || ch == '""') {
+                return parseQuotedChars(ch);
+            } else {
+                // For now...
+                return new Char(ch);
+            }
+        }
+        return null;
+    }"
+73,3072,cassandra,SE_COMPARATOR_SHOULD_BE_SERIALIZABLE,C,last,,BAD_PRACTICE,org.apache.cassandra.io.sstable,org.apache.cassandra.io.sstable.SSTableReader$SizeComparator,,,,,,-2,-2,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/io/sstable/SSTableReader.java#L-2,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/io/sstable/SSTableReader.java,,unknown,
+74,3659,cassandra,SE_COMPARATOR_SHOULD_BE_SERIALIZABLE,C,last,,BAD_PRACTICE,org.apache.cassandra.db.marshal,org.apache.cassandra.db.marshal.DynamicCompositeType,,,,,,-2,-2,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/db/marshal/DynamicCompositeType.java#L-2,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/db/marshal/DynamicCompositeType.java,,open,
+75,5092,cassandra,RC_REF_COMPARISON_BAD_PRACTICE_BOOLEAN,C,last,,BAD_PRACTICE,org.apache.cassandra.cql3.statements,org.apache.cassandra.cql3.statements.SelectStatement$RawStatement,,prepare,lang,if (isReversed != b),,1385,1385,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/cql3/statements/SelectStatement.java#L1385,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/cql3/statements/SelectStatement.java,,unknown,"public ParsedStatement.Prepared prepare() throws InvalidRequestException
+        {
+            CFMetaData cfm = ThriftValidation.validateColumnFamily(keyspace(), columnFamily());
+
+            CFDefinition cfDef = cfm.getCfDef();
+
+            VariableSpecifications names = getBoundVariables();
+
+            // Select clause
+            if (parameters.isCount && !selectClause.isEmpty())
+                throw new InvalidRequestException(""Only COUNT(*) and COUNT(1) operations are currently supported."");
+
+            Selection selection = selectClause.isEmpty()
+                                ? Selection.wildcard(cfDef)
+                                : Selection.fromSelectors(cfDef, selectClause);
+
+            if (parameters.isDistinct)
+                validateDistinctSelection(selection.getColumnsList(), cfDef.keys.values());
+
+            Term prepLimit = null;
+            if (limit != null)
+            {
+                prepLimit = limit.prepare(limitReceiver());
+                prepLimit.collectMarkerSpecification(names);
+            }
+
+            SelectStatement stmt = new SelectStatement(cfDef, names.size(), parameters, selection, prepLimit);
+
+            /*
+             * WHERE clause. For a given entity, rules are:
+             *   - EQ relation conflicts with anything else (including a 2nd EQ)
+             *   - Can't have more than one LT(E) relation (resp. GT(E) relation)
+             *   - IN relation are restricted to row keys (for now) and conflicts with anything else
+             *     (we could allow two IN for the same entity but that doesn't seem very useful)
+             *   - The value_alias cannot be restricted in any way (we don't support wide rows with indexed value in CQL so far)
+             */
+            boolean hasQueriableIndex = false;
+            boolean hasQueriableClusteringColumnIndex = false;
+            for (Relation rel : whereClause)
+            {
+                CFDefinition.Name name = cfDef.get(rel.getEntity());
+                if (name == null)
+                {
+                    if (containsAlias(rel.getEntity()))
+                        throw new InvalidRequestException(String.format(""Aliases aren't allowed in where clause ('%s')"", rel));
+                    else
+                        throw new InvalidRequestException(String.format(""Undefined name %s in where clause ('%s')"", rel.getEntity(), rel));
+                }
+
+                ColumnDefinition def = cfDef.cfm.getColumnDefinition(name.name.key);
+                stmt.restrictedNames.add(name);
+                if (def.isIndexed() && rel.operator() == Relation.Type.EQ)
+                {
+                    hasQueriableIndex = true;
+                    if (name.kind == CFDefinition.Name.Kind.COLUMN_ALIAS)
+                        hasQueriableClusteringColumnIndex = true;
+                }
+
+                switch (name.kind)
+                {
+                    case KEY_ALIAS:
+                        stmt.keyRestrictions[name.position] = updateRestriction(name, stmt.keyRestrictions[name.position], rel, names);
+                        break;
+                    case COLUMN_ALIAS:
+                        stmt.columnRestrictions[name.position] = updateRestriction(name, stmt.columnRestrictions[name.position], rel, names);
+                        break;
+                    case VALUE_ALIAS:
+                        throw new InvalidRequestException(String.format(""Predicates on the non-primary-key column (%s) of a COMPACT table are not yet supported"", name.name));
+                    case COLUMN_METADATA:
+                        // We only all IN on the row key and last clustering key so far, never on non-PK columns, and this even if there's an index
+                        Restriction r = updateRestriction(name, stmt.metadataRestrictions.get(name), rel, names);
+                        if (r.isIN() && !((Restriction.IN)r).canHaveOnlyOneValue())
+                            // Note: for backward compatibility reason, we conside a IN of 1 value the same as a EQ, so we let that slide.
+                            throw new InvalidRequestException(String.format(""IN predicates on non-primary-key columns (%s) is not yet supported"", name));
+                        stmt.metadataRestrictions.put(name, r);
+                        break;
+                }
+            }
+
+            /*
+             * At this point, the select statement if fully constructed, but we still have a few things to validate
+             */
+
+            // If there is a queriable index, no special condition are required on the other restrictions.
+            // But we still need to know 2 things:
+            //   - If we don't have a queriable index, is the query ok
+            //   - Is it queriable without 2ndary index, which is always more efficient
+            // If a component of the partition key is restricted by a relation, all preceding
+            // components must have a EQ. Only the last partition key component can be in IN relation.
+            boolean canRestrictFurtherComponents = true;
+            CFDefinition.Name previous = null;
+            stmt.keyIsInRelation = false;
+            Iterator<CFDefinition.Name> iter = cfDef.keys.values().iterator();
+            for (int i = 0; i < stmt.keyRestrictions.length; i++)
+            {
+                CFDefinition.Name cname = iter.next();
+                Restriction restriction = stmt.keyRestrictions[i];
+
+                if (restriction == null)
+                {
+                    if (stmt.onToken)
+                        throw new InvalidRequestException(""The token() function must be applied to all partition key components or none of them"");
+
+                    // The only time not restricting a key part is allowed is if none are restricted or an index is used.
+                    if (i > 0 && stmt.keyRestrictions[i - 1] != null)
+                    {
+                        if (hasQueriableIndex)
+                        {
+                            stmt.usesSecondaryIndexing = true;
+                            stmt.isKeyRange = true;
+                            break;
+                        }
+                        throw new InvalidRequestException(String.format(""Partition key part %s must be restricted since preceding part is"", cname));
+                    }
+
+                    stmt.isKeyRange = true;
+                    canRestrictFurtherComponents = false;
+                }
+                else if (!canRestrictFurtherComponents)
+                {
+                    if (hasQueriableIndex)
+                    {
+                        stmt.usesSecondaryIndexing = true;
+                        break;
+                    }
+                    throw new InvalidRequestException(String.format(""partition key part %s cannot be restricted (preceding part %s is either not restricted or by a non-EQ relation)"", cname, previous));
+                }
+                else if (restriction.isOnToken())
+                {
+                    // If this is a query on tokens, it's necessarily a range query (there can be more than one key per token).
+                    stmt.isKeyRange = true;
+                    stmt.onToken = true;
+                }
+                else if (stmt.onToken)
+                {
+                    throw new InvalidRequestException(String.format(""The token() function must be applied to all partition key components or none of them""));
+                }
+                else if (!restriction.isSlice())
+                {
+                    if (restriction.isIN())
+                    {
+                        // We only support IN for the last name so far
+                        if (i != stmt.keyRestrictions.length - 1)
+                            throw new InvalidRequestException(String.format(""Partition KEY part %s cannot be restricted by IN relation (only the last part of the partition key can)"", cname));
+                        stmt.keyIsInRelation = true;
+                    }
+                }
+                else
+                {
+                    // Non EQ relation is not supported without token(), even if we have a 2ndary index (since even those are ordered by partitioner).
+                    // Note: In theory we could allow it for 2ndary index queries with ALLOW FILTERING, but that would probably require some special casing
+                    throw new InvalidRequestException(""Only EQ and IN relation are supported on the partition key (unless you use the token() function)"");
+                }
+                previous = cname;
+            }
+
+            // All (or none) of the partition key columns have been specified;
+            // hence there is no need to turn these restrictions into index expressions.
+            if (!stmt.usesSecondaryIndexing)
+                stmt.restrictedNames.removeAll(cfDef.keys.values());
+
+            // If a clustering key column is restricted by a non-EQ relation, all preceding
+            // columns must have a EQ, and all following must have no restriction. Unless
+            // the column is indexed that is.
+            canRestrictFurtherComponents = true;
+            previous = null;
+            iter = cfDef.columns.values().iterator();
+            for (int i = 0; i < stmt.columnRestrictions.length; i++)
+            {
+                CFDefinition.Name cname = iter.next();
+                Restriction restriction = stmt.columnRestrictions[i];
+
+                if (restriction == null)
+                {
+                    canRestrictFurtherComponents = false;
+                }
+                else if (!canRestrictFurtherComponents)
+                {
+                    if (hasQueriableIndex)
+                    {
+                        stmt.usesSecondaryIndexing = true; // handle gaps and non-keyrange cases.
+                        break;
+                    }
+                    throw new InvalidRequestException(String.format(""PRIMARY KEY part %s cannot be restricted (preceding part %s is either not restricted or by a non-EQ relation)"", cname, previous));
+                }
+                else if (restriction.isSlice())
+                {
+                    canRestrictFurtherComponents = false;
+                    Restriction.Slice slice = (Restriction.Slice)restriction;
+                    // For non-composite slices, we don't support internally the difference between exclusive and
+                    // inclusive bounds, so we deal with it manually.
+                    if (!cfDef.isComposite && (!slice.isInclusive(Bound.START) || !slice.isInclusive(Bound.END)))
+                        stmt.sliceRestriction = slice;
+                }
+                else if (restriction.isIN())
+                {
+                    // We only support IN for the last name and for compact storage so far
+                    // TODO: #3885 allows us to extend to non compact as well, but that remains to be done
+                    if (i != stmt.columnRestrictions.length - 1)
+                        throw new InvalidRequestException(String.format(""PRIMARY KEY part %s cannot be restricted by IN relation"", cname));
+                    else if (stmt.selectACollection())
+                        throw new InvalidRequestException(String.format(""Cannot restrict PRIMARY KEY part %s by IN relation as a collection is selected by the query"", cname));
+                }
+
+                previous = cname;
+            }
+
+            // Covers indexes on the first clustering column (among others).
+            if (stmt.isKeyRange && hasQueriableClusteringColumnIndex)
+                stmt.usesSecondaryIndexing = true;
+
+            if (!stmt.usesSecondaryIndexing)
+                stmt.restrictedNames.removeAll(cfDef.columns.values());
+
+            // Even if usesSecondaryIndexing is false at this point, we'll still have to use one if
+            // there is restrictions not covered by the PK.
+            if (!stmt.metadataRestrictions.isEmpty())
+            {
+                if (!hasQueriableIndex)
+                    throw new InvalidRequestException(""No indexed columns present in by-columns clause with Equal operator"");
+                stmt.usesSecondaryIndexing = true;
+            }
+
+            if (stmt.usesSecondaryIndexing && stmt.keyIsInRelation)
+                throw new InvalidRequestException(""Select on indexed columns and with IN clause for the PRIMARY KEY are not supported"");
+
+            if (!stmt.parameters.orderings.isEmpty())
+            {
+                if (stmt.usesSecondaryIndexing)
+                    throw new InvalidRequestException(""ORDER BY with 2ndary indexes is not supported."");
+
+                if (stmt.isKeyRange)
+                    throw new InvalidRequestException(""ORDER BY is only supported when the partition key is restricted by an EQ or an IN."");
+
+                // If we order an IN query, we'll have to do a manual sort post-query. Currently, this sorting requires that we
+                // have queried the column on which we sort (TODO: we should update it to add the column on which we sort to the one
+                // queried automatically, and then removing it from the resultSet afterwards if needed)
+                if (stmt.keyIsInRelation)
+                {
+                    stmt.orderingIndexes = new HashMap<CFDefinition.Name, Integer>();
+                    for (ColumnIdentifier column : stmt.parameters.orderings.keySet())
+                    {
+                        final CFDefinition.Name name = cfDef.get(column);
+                        if (name == null)
+                        {
+                            if (containsAlias(column))
+                                throw new InvalidRequestException(String.format(""Aliases are not allowed in order by clause ('%s')"", column));
+                            else
+                                throw new InvalidRequestException(String.format(""Order by on unknown column %s"", column));
+                        }
+
+                        if (selectClause.isEmpty()) // wildcard
+                        {
+                            stmt.orderingIndexes.put(name, Iterables.indexOf(cfDef, new Predicate<CFDefinition.Name>()
+                                                                                    {
+                                                                                        public boolean apply(CFDefinition.Name n)
+                                                                                        {
+                                                                                            return name.equals(n);
+                                                                                        }
+                                                                                    }));
+                        }
+                        else
+                        {
+                            boolean hasColumn = false;
+                            for (int i = 0; i < selectClause.size(); i++)
+                            {
+                                RawSelector selector = selectClause.get(i);
+                                if (name.name.equals(selector.selectable))
+                                {
+                                    stmt.orderingIndexes.put(name, i);
+                                    hasColumn = true;
+                                    break;
+                                }
+                            }
+
+                            if (!hasColumn)
+                                throw new InvalidRequestException(""ORDER BY could not be used on columns missing in select clause."");
+                        }
+                    }
+                }
+
+                Boolean[] reversedMap = new Boolean[cfDef.columns.size()];
+                int i = 0;
+                for (Map.Entry<ColumnIdentifier, Boolean> entry : stmt.parameters.orderings.entrySet())
+                {
+                    ColumnIdentifier column = entry.getKey();
+                    boolean reversed = entry.getValue();
+
+                    CFDefinition.Name name = cfDef.get(column);
+                    if (name == null)
+                    {
+                        if (containsAlias(column))
+                            throw new InvalidRequestException(String.format(""Aliases are not allowed in order by clause ('%s')"", column));
+                        else
+                            throw new InvalidRequestException(String.format(""Order by on unknown column %s"", column));
+                    }
+
+                    if (name.kind != CFDefinition.Name.Kind.COLUMN_ALIAS)
+                        throw new InvalidRequestException(String.format(""Order by is currently only supported on the clustered columns of the PRIMARY KEY, got %s"", column));
+
+                    if (i++ != name.position)
+                        throw new InvalidRequestException(String.format(""Order by currently only support the ordering of columns following their declared order in the PRIMARY KEY""));
+
+                    reversedMap[name.position] = (reversed != isReversedType(name));
+                }
+
+                // Check that all boolean in reversedMap, if set, agrees
+                Boolean isReversed = null;
+                for (Boolean b : reversedMap)
+                {
+                    // Column on which order is specified can be in any order
+                    if (b == null)
+                        continue;
+
+                    if (isReversed == null)
+                    {
+                        isReversed = b;
+                        continue;
+                    }
+                    if (isReversed != b)
+                        throw new InvalidRequestException(String.format(""Unsupported order by relation""));
+                }
+                assert isReversed != null;
+                stmt.isReversed = isReversed;
+            }
+
+            // Make sure this queries is allowed (note: non key range non indexed cannot involve filtering underneath)
+            if (!parameters.allowFiltering && (stmt.isKeyRange || stmt.usesSecondaryIndexing))
+            {
+                // We will potentially filter data if either:
+                //  - Have more than one IndexExpression
+                //  - Have no index expression and the column filter is not the identity
+                if (stmt.restrictedNames.size() > 1 || (stmt.restrictedNames.isEmpty() && !stmt.columnFilterIsIdentity()))
+                    throw new InvalidRequestException(""Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. ""
+                                                    + ""If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"");
+            }
+
+            return new ParsedStatement.Prepared(stmt, names);
+        }"
+76,7866,cassandra,RV_NEGATING_RESULT_OF_COMPARETO,A,last,,BAD_PRACTICE,org.apache.cassandra.utils,org.apache.cassandra.utils.FBUtilities$3,,compare,,o1,"o1,o2,compareTo",432,432,close,https://github.com/apache/cassandra/tree/7efab48e72247734ae38eabfc61a9ff0a5aa87ec//src/java/org/apache/cassandra/utils/FBUtilities.java#L432,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/utils/FBUtilities.java,,close,"public int compare(DecoratedKey o1, DecoratedKey o2)
+                {
+                    if ((right.compareTo(o1.token) < 0 && right.compareTo(o2.token) < 0)
+                        || (right.compareTo(o1.token) > 0 && right.compareTo(o2.token) > 0))
+                    {
+                        // both tokens are on the same side of the wrap point
+                        return o1.compareTo(o2);
+                    }
+                    return -o1.compareTo(o2);
+                }"
+77,7176,cassandra,CO_COMPARETO_INCORRECT_FLOATING,B,last,,BAD_PRACTICE,org.apache.cassandra.dht,org.apache.cassandra.dht.BootStrapper$1,,compare,double,return load1 < load2 ? -1 : 1;,,173,173,close,https://github.com/apache/cassandra/tree/69337a43670f71ae1fc55e23d6a9031230423900//src/java/org/apache/cassandra/dht/BootStrapper.java#L173,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/dht/BootStrapper.java,,unknown,"public int compare(InetAddress ia1, InetAddress ia2)
+            {
+                int n1 = metadata.pendingRangeChanges(ia1);
+                int n2 = metadata.pendingRangeChanges(ia2);
+                if (n1 != n2)
+                    return -(n1 - n2); // more targets = _less_ priority!
+
+                double load1 = load.get(ia1);
+                double load2 = load.get(ia2);
+                if (load1 == load2)
+                    return 0;
+                return load1 < load2 ? -1 : 1;
+            }"

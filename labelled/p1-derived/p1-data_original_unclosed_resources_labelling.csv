@@ -1,0 +1,771 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,1753,lucene-solr,OBL_UNSATISFIED_OBLIGATION,B,last,,EXPERIMENTAL,org.apache.lucene.search.suggest.fst,org.apache.lucene.search.suggest.fst.Sort,,copy,,FileOutputStream,"FileOutputStream,os,output",303,303,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/Sort.java#L303,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/Sort.java,,unknown,"private static void copy(File file, File output) throws IOException {
+    // 64kb copy buffer (empirical pick).
+    byte [] buffer = new byte [16 * 1024];
+    InputStream is = null;
+    OutputStream os = null;
+    try {
+      is = new FileInputStream(file);
+      os = new FileOutputStream(output);
+      int length;
+      while ((length = is.read(buffer)) > 0) {
+        os.write(buffer, 0, length);
+      }
+    } finally {
+      IOUtils.close(is, os);
+    }
+  }"
+1,2168,lucene-solr,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.lucene.analysis.cn.smart.hhmm,org.apache.lucene.analysis.cn.smart.hhmm.WordDictionary,,loadFromObj,,FileInputStream,"FileInputStream,loadFromObjectInputStream,serialObj",145,145,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/analysis/smartcn/src/java/org/apache/lucene/analysis/cn/smart/hhmm/WordDictionary.java#L145,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/analysis/smartcn/src/java/org/apache/lucene/analysis/cn/smart/hhmm/WordDictionary.java,,unknown,"private boolean loadFromObj(File serialObj) {
+    try {
+      loadFromObjectInputStream(new FileInputStream(serialObj));
+      return true;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }"
+2,2699,lucene-solr,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.lucene.search.suggest,org.apache.lucene.search.suggest.Sort,,copy,,FileOutputStream,"FileOutputStream,os,output",303,303,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/suggest/src/java/org/apache/lucene/search/suggest/Sort.java#L303,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/suggest/src/java/org/apache/lucene/search/suggest/Sort.java,,unknown,"private static void copy(File file, File output) throws IOException {
+    // 64kb copy buffer (empirical pick).
+    byte [] buffer = new byte [16 * 1024];
+    InputStream is = null;
+    OutputStream os = null;
+    try {
+      is = new FileInputStream(file);
+      os = new FileOutputStream(output);
+      int length;
+      while ((length = is.read(buffer)) > 0) {
+        os.write(buffer, 0, length);
+      }
+    } finally {
+      IOUtils.close(is, os);
+    }
+  }"
+3,2775,lucene-solr,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.lucene.util,org.apache.lucene.util.IOUtils,,copy,,FileInputStream,"FileInputStream,fis,source",319,319,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/util/IOUtils.java#L319,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/util/IOUtils.java,,unknown,"public static void copy(File source, File target) throws IOException {
+    FileInputStream fis = null;
+    FileOutputStream fos = null;
+    try {
+      fis = new FileInputStream(source);
+      fos = new FileOutputStream(target);
+      
+      final byte [] buffer = new byte [1024 * 8];
+      int len;
+      while ((len = fis.read(buffer)) > 0) {
+        fos.write(buffer, 0, len);
+      }
+    } finally {
+      close(fis, fos);
+    }
+  }"
+4,2905,lucene-solr,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.lucene.index,org.apache.lucene.index.IndexSplitter,,copyFile,,FileInputStream,"FileInputStream,src",160,160,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/misc/src/java/org/apache/lucene/index/IndexSplitter.java#L160,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/misc/src/java/org/apache/lucene/index/IndexSplitter.java,,unknown,"private static void copyFile(File src, File dst) throws IOException {
+    InputStream in = new FileInputStream(src);
+    OutputStream out = new FileOutputStream(dst);
+    int len;
+    while ((len = in.read(copyBuffer)) > 0) {
+      out.write(copyBuffer, 0, len);
+    }
+    in.close();
+    out.close();
+  }"
+5,9673,ant,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.tools.ant.taskdefs.cvslib,org.apache.tools.ant.taskdefs.cvslib.ChangeLogTask,,loadUserlist,,FileInputStream,"FileInputStream,userList,usersFile,load",388,388,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/cvslib/ChangeLogTask.java#L388,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/cvslib/ChangeLogTask.java,,open,"private void loadUserlist(final Properties userList)
+         throws BuildException {
+        if (null != usersFile) {
+            try {
+                userList.load(new FileInputStream(usersFile));
+            } catch (final IOException ioe) {
+                throw new BuildException(ioe.toString(), ioe);
+            }
+        }
+    }"
+6,9704,ant,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.tools.ant.input,org.apache.tools.ant.input.PropertyFileInputHandler,,readProps,,FileInputStream,"FileInputStream,props,propsFile,load",84,84,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/input/PropertyFileInputHandler.java#L84,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/input/PropertyFileInputHandler.java,,open,"private synchronized void readProps() throws BuildException {
+        if (props == null) {
+            String propsFile = System.getProperty(FILE_NAME_KEY);
+            if (propsFile == null) {
+                throw new BuildException(""System property ""
+                                         + FILE_NAME_KEY
+                                         + "" for PropertyFileInputHandler not""
+                                         + "" set"");
+            }
+
+            props = new Properties();
+
+            try {
+                props.load(new FileInputStream(propsFile));
+            } catch (IOException e) {
+                throw new BuildException(""Couldn't load "" + propsFile, e);
+            }
+        }
+    }"
+7,9724,ant,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.tools.ant.taskdefs.optional.jlink,org.apache.tools.ant.taskdefs.optional.jlink.jlink,,addFile,,FileInputStream,"FileInputStream,file",346,346,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/optional/jlink/jlink.java#L346,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/optional/jlink/jlink.java,,open,"private void addFile(ZipOutputStream output, File file, String prefix,
+                         boolean compress) throws IOException {
+        //Make sure file exists
+        if (!file.exists()) {
+            return;
+        }
+        ZipEntry entry = new ZipEntry(getEntryName(file, prefix));
+
+        entry.setTime(file.lastModified());
+        entry.setSize(file.length());
+        if (!compress) {
+            entry.setCrc(calcChecksum(file));
+        }
+        FileInputStream input = new FileInputStream(file);
+
+        addToOutputStream(output, input, entry);
+    }"
+8,9833,ant,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.tools.ant.util,org.apache.tools.ant.util.LayoutPreservingProperties,,saveAs,,FileOutputStream fos = new FileOutputStream(dest);,,249,249,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/util/LayoutPreservingProperties.java#L249,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/util/LayoutPreservingProperties.java,,open,"public void saveAs(File dest) throws IOException {
+        FileOutputStream fos = new FileOutputStream(dest);
+        store(fos, null);
+        fos.close();
+    }"
+9,9945,ant,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.tools.ant.taskdefs.optional.i18n,org.apache.tools.ant.taskdefs.optional.i18n.Translate,,processBundle,,FileInputStream,"FileInputStream,ins,propsFile",411,411,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/optional/i18n/Translate.java#L411,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/optional/i18n/Translate.java,,open,"private void processBundle(final String bundleFile, final int i,
+                               final boolean checkLoaded) throws BuildException {
+        final File propsFile = getProject().resolveFile(bundleFile + "".properties"");
+        FileInputStream ins = null;
+        try {
+            ins = new FileInputStream(propsFile);
+            loaded = true;
+            bundleLastModified[i] = propsFile.lastModified();
+            log(""Using "" + propsFile, Project.MSG_DEBUG);
+            loadResourceMap(ins);
+        } catch (IOException ioe) {
+            log(propsFile + "" not found."", Project.MSG_DEBUG);
+            //if all resource files associated with this bundle
+            //have been scanned for and still not able to
+            //find a single resrouce file, throw exception
+            if (!loaded && checkLoaded) {
+                throw new BuildException(ioe.getMessage(), getLocation());
+            }
+        }
+    }"
+10,1060,tomcat,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.catalina.startup,org.apache.catalina.startup.Catalina,,load,,FileInputStream,"FileInputStream,file,inputStream",524,524,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/startup/Catalina.java#L524,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/startup/Catalina.java,,close,"public void load() {
+
+        long t1 = System.nanoTime();
+
+        initDirs();
+
+        // Before digester - it may be needed
+
+        initNaming();
+
+        // Create and execute our Digester
+        Digester digester = createStartDigester();
+
+        InputSource inputSource = null;
+        InputStream inputStream = null;
+        File file = null;
+        try {
+            file = configFile();
+            inputStream = new FileInputStream(file);
+            inputSource = new InputSource(file.toURI().toURL().toString());
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug(sm.getString(""catalina.configFail"", file), e);
+            }
+        }
+        if (inputStream == null) {
+            try {
+                inputStream = getClass().getClassLoader()
+                    .getResourceAsStream(getConfigFile());
+                inputSource = new InputSource
+                    (getClass().getClassLoader()
+                     .getResource(getConfigFile()).toString());
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug(sm.getString(""catalina.configFail"",
+                            getConfigFile()), e);
+                }
+            }
+        }
+
+        // This should be included in catalina.jar
+        // Alternative: don't bother with xml, just create it manually.
+        if( inputStream==null ) {
+            try {
+                inputStream = getClass().getClassLoader()
+                        .getResourceAsStream(""server-embed.xml"");
+                inputSource = new InputSource
+                (getClass().getClassLoader()
+                        .getResource(""server-embed.xml"").toString());
+            } catch (Exception e) {
+                if (log.isDebugEnabled()) {
+                    log.debug(sm.getString(""catalina.configFail"",
+                            ""server-embed.xml""), e);
+                }
+            }
+        }
+
+
+        if (inputStream == null || inputSource == null) {
+            if  (file == null) {
+                log.warn(sm.getString(""catalina.configFail"",
+                        getConfigFile() + ""] or [server-embed.xml]""));
+            } else {
+                log.warn(sm.getString(""catalina.configFail"",
+                        file.getAbsolutePath()));
+                if (file.exists() && !file.canRead()) {
+                    log.warn(""Permissions incorrect, read permission is not allowed on the file."");
+                }
+            }
+            return;
+        }
+
+        try {
+            inputSource.setByteStream(inputStream);
+            digester.push(this);
+            digester.parse(inputSource);
+        } catch (SAXParseException spe) {
+            log.warn(""Catalina.start using "" + getConfigFile() + "": "" +
+                    spe.getMessage());
+            return;
+        } catch (Exception e) {
+            log.warn(""Catalina.start using "" + getConfigFile() + "": "" , e);
+            return;
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                // Ignore
+            }
+        }
+
+        getServer().setCatalina(this);
+        getServer().setCatalinaHome(Bootstrap.getCatalinaHomeFile());
+        getServer().setCatalinaBase(Bootstrap.getCatalinaBaseFile());
+
+        // Stream redirection
+        initStreams();
+
+        // Start the new server
+        try {
+            getServer().init();
+        } catch (LifecycleException e) {
+            if (Boolean.getBoolean(""org.apache.catalina.startup.EXIT_ON_INIT_FAILURE"")) {
+                throw new java.lang.Error(e);
+            } else {
+                log.error(""Catalina.start"", e);
+            }
+
+        }
+
+        long t2 = System.nanoTime();
+        if(log.isInfoEnabled()) {
+            log.info(""Initialization processed in "" + ((t2 - t1) / 1000000) + "" ms"");
+        }
+
+    }"
+11,1067,tomcat,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.catalina.util,org.apache.catalina.util.ServerInfo,,<clinit>,,InputStream is = ServerInfo.class.getResourceAsStream,,64,64,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/util/ServerInfo.java#L64,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/util/ServerInfo.java,,close,
+12,1098,tomcat,OBL_UNSATISFIED_OBLIGATION,C,last,,EXPERIMENTAL,org.apache.tomcat.util.descriptor.web,org.apache.tomcat.util.descriptor.web.FragmentJarScannerCallback,,scan,,FileInputStream,"FileInputStream,fragmentFile,stream",122,122,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/tomcat/util/descriptor/web/FragmentJarScannerCallback.java#L122,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/tomcat/util/descriptor/web/FragmentJarScannerCallback.java,,close,"@Override
+    public void scan(JarURLConnection jarConn, String webappPath, boolean isWebapp)
+            throws IOException {
+
+        URL url = jarConn.getURL();
+        URL resourceURL = jarConn.getJarFileURL();
+        Jar jar = null;
+        InputStream is = null;
+        WebXml fragment = new WebXml();
+        fragment.setWebappJar(isWebapp);
+        fragment.setDelegate(delegate);
+
+        try {
+            // Only web application JARs are checked for web-fragment.xml
+            // files.
+            // web-fragment.xml files don't need to be parsed if they are never
+            // going to be used.
+            if (isWebapp && parseRequired) {
+                jar = JarFactory.newInstance(url);
+                is = jar.getInputStream(FRAGMENT_LOCATION);
+            }
+
+            if (is == null) {
+                // If there is no web.xml, normal JAR no impact on
+                // distributable
+                fragment.setDistributable(true);
+            } else {
+                InputSource source = new InputSource(
+                        ""jar:"" + resourceURL.toString() + ""!/"" + FRAGMENT_LOCATION);
+                source.setByteStream(is);
+                if (!webXmlParser.parseWebXml(source, fragment, true)) {
+                    ok = false;
+                }
+            }
+        } finally {
+            if (jar != null) {
+                jar.close();
+            }
+            fragment.setURL(url);
+            if (fragment.getName() == null) {
+                fragment.setName(fragment.getURL().toString());
+            }
+            fragment.setJarName(extractJarFileName(url));
+            fragments.put(fragment.getName(), fragment);
+        }
+    }"
+13,1110,tomcat,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.catalina.ha.deploy,org.apache.catalina.ha.deploy.FarmWarDeployer,,copy,,FileInputStream,"FileInputStream,from",737,737,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/ha/deploy/FarmWarDeployer.java#L737,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/ha/deploy/FarmWarDeployer.java,,close,"protected boolean copy(File from, File to) {
+        try {
+            if (!to.exists()) {
+                if (!to.createNewFile()) {
+                    log.error(sm.getString(""fileNewFail"", to));
+                    return false;
+                }
+            }
+            java.io.FileInputStream is = new java.io.FileInputStream(from);
+            java.io.FileOutputStream os = new java.io.FileOutputStream(to,
+                    false);
+            byte[] buf = new byte[4096];
+            while (true) {
+                int len = is.read(buf);
+                if (len < 0)
+                    break;
+                os.write(buf, 0, len);
+            }
+            is.close();
+            os.close();
+        } catch (IOException e) {
+            log.error(sm.getString(""farmWarDeployer.fileCopyFail"",
+                    from, to), e);
+            return false;
+        }
+        return true;
+    }"
+14,1194,tomcat,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.catalina.startup,org.apache.catalina.startup.Catalina,,stopServer,,FileInputStream,"FileInputStream,file,fis",432,432,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/startup/Catalina.java#L432,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/startup/Catalina.java,,open,"public void stopServer() {
+        stopServer(null);
+    }"
+15,1248,tomcat,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.catalina.startup,org.apache.catalina.startup.CatalinaProperties,,loadProperties,,CatalinaProperties,"CatalinaProperties,is,class,getResourceAsStream",84,84,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/startup/CatalinaProperties.java#L84,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/startup/CatalinaProperties.java,,close,"private static void loadProperties() {
+
+        InputStream is = null;
+        Throwable error = null;
+
+        try {
+            String configUrl = getConfigUrl();
+            if (configUrl != null) {
+                is = (new URL(configUrl)).openStream();
+            }
+        } catch (Throwable t) {
+            handleThrowable(t);
+        }
+
+        if (is == null) {
+            try {
+                File home = new File(Bootstrap.getCatalinaBase());
+                File conf = new File(home, ""conf"");
+                File propsFile = new File(conf, ""catalina.properties"");
+                is = new FileInputStream(propsFile);
+            } catch (Throwable t) {
+                handleThrowable(t);
+            }
+        }
+
+        if (is == null) {
+            try {
+                is = CatalinaProperties.class.getResourceAsStream
+                    (""/org/apache/catalina/startup/catalina.properties"");
+            } catch (Throwable t) {
+                handleThrowable(t);
+            }
+        }
+
+        if (is != null) {
+            try {
+                properties = new Properties();
+                properties.load(is);
+                is.close();
+            } catch (Throwable t) {
+                handleThrowable(t);
+                error = t;
+            }
+        }
+
+        if ((is == null) || (error != null)) {
+            // Do something
+            log.warn(""Failed to load catalina.properties"", error);
+            // That's fine - we have reasonable defaults.
+            properties=new Properties();
+        }
+
+        // Register the properties as system properties
+        Enumeration<?> enumeration = properties.propertyNames();
+        while (enumeration.hasMoreElements()) {
+            String name = (String) enumeration.nextElement();
+            String value = properties.getProperty(name);
+            if (value != null) {
+                System.setProperty(name, value);
+            }
+        }
+    }"
+16,1572,tomcat,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.jasper.compiler,org.apache.jasper.compiler.SmapUtil$SDEInstaller,,install,,FileOutputStream,"FileOutputStream,outClassFile",226,226,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/jasper/compiler/SmapUtil.java#L226,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/compiler/SmapUtil.java,,close,"static void install(File classFile, byte[] smap) throws IOException {
+            File tmpFile = new File(classFile.getPath() + ""tmp"");
+            SDEInstaller installer = new SDEInstaller(classFile, smap);
+            installer.install(tmpFile);
+            if (!classFile.delete()) {
+                throw new IOException(""classFile.delete() failed"");
+            }
+            if (!tmpFile.renameTo(classFile)) {
+                throw new IOException(""tmpFile.renameTo(classFile) failed"");
+            }
+        }"
+17,1244,tomcat,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,A,last,,EXPERIMENTAL,org.apache.jasper.compiler,org.apache.jasper.compiler.SmapUtil$SDEInstaller,,readWhole,,FileInputStream,"FileInputStream,input",229,229,close,https://github.com/apache/tomcat/tree/3787242a83ee5555c79fd2e4c6b6952e9195ed8b//java/org/apache/jasper/compiler/SmapUtil.java#L229,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/compiler/SmapUtil.java,,close,"static byte[] readWhole(File input) throws IOException {
+            FileInputStream inStream = new FileInputStream(input);
+            int len = (int)input.length();
+            byte[] bytes = new byte[len];
+            if (inStream.read(bytes, 0, len) != len) {
+                throw new IOException(""expected size: "" + len);
+            }
+            inStream.close();
+            return bytes;
+        }"
+18,1561,tomcat,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,A,last,,EXPERIMENTAL,org.apache.jasper.compiler,org.apache.jasper.compiler.SmapUtil$SDEInstaller,,<init>,,FileOutputStream,"FileOutputStream,outClassFile",223,223,close,https://github.com/apache/tomcat/tree/3787242a83ee5555c79fd2e4c6b6952e9195ed8b//java/org/apache/jasper/compiler/SmapUtil.java#L223,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/compiler/SmapUtil.java,,unknown,
+19,9544,jmeter,OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE,C,last,,EXPERIMENTAL,org.apache.jmeter.protocol.jdbc,org.apache.jmeter.protocol.jdbc.AbstractJDBCTestElement,,getPreparedStatement,,conn,"conn,getQuery,pstmt,prepareStatement",351,351,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/protocol/jdbc/org/apache/jmeter/protocol/jdbc/AbstractJDBCTestElement.java#L351,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/protocol/jdbc/org/apache/jmeter/protocol/jdbc/AbstractJDBCTestElement.java,,open,"private PreparedStatement getPreparedStatement(Connection conn) throws SQLException {
+        return getPreparedStatement(conn,false);
+    }"
+20,7512,cassandra,OBL_UNSATISFIED_OBLIGATION,B,last,,EXPERIMENTAL,org.apache.cassandra.db,org.apache.cassandra.db.CommitLogTest,,testRecovery,,FileOutputStream,"FileOutputStream,logFile",207,207,close,https://github.com/apache/cassandra/tree/69337a43670f71ae1fc55e23d6a9031230423900//test/unit/org/apache/cassandra/db/CommitLogTest.java#L207,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/db/CommitLogTest.java,,unknown,"protected void testRecovery(byte[] logData) throws Exception
+    {
+        File logFile = tmpFile();
+        OutputStream lout = new FileOutputStream(logFile);
+        lout.write(logData);
+        //statics make it annoying to test things correctly
+        CommitLog.instance.recover(new File[]{ logFile }); //CASSANDRA-1119 / CASSANDRA-1179 throw on failure*/
+    }"
+21,725,derby,OS_OPEN_STREAM,A,last,,BAD_PRACTICE,org.apache.derby.client.net,org.apache.derby.client.net.Request,,writeUDT,io,ObjectOutputStream,"ObjectOutputStream,dbaos",1431,1431,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/client/org/apache/derby/client/net/Request.java#L1431,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/net/Request.java,,open,"final void writeUDT( Object val ) throws SqlException
+    {
+        byte[] buffer = null;
+        int length = 0;
+        
+        try
+        {
+            DynamicByteArrayOutputStream dbaos = new DynamicByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream( dbaos );
+
+            oos.writeObject( val );
+
+            buffer = dbaos.getByteArray();
+            length = dbaos.getUsed();
+        }
+        catch (Exception e)
+        {
+            throw new SqlException
+                (
+                 netAgent_.logWriter_, 
+                 new ClientMessageId (SQLState.NET_MARSHALLING_UDT_ERROR),
+                 e.getMessage(),
+                 e
+                 );
+        }
+
+        if ( length > DRDAConstants.MAX_DRDA_UDT_SIZE )
+        {
+            throw new SqlException
+                (
+                 netAgent_.logWriter_, 
+                 new ClientMessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                 Integer.toString( DRDAConstants.MAX_DRDA_UDT_SIZE ),
+                 val.getClass().getName()
+                 );
+        }
+
+        writeLDBytesXSubset( length, length, buffer );
+    }"
+22,1882,lucene-solr,OS_OPEN_STREAM,A,last,,BAD_PRACTICE,org.apache.lucene.benchmark.byTask.feeds,org.apache.lucene.benchmark.byTask.feeds.FileBasedQueryMaker,,prepareQueries,io,BufferedReader,"BufferedReader,reader",73,73,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/benchmark/src/java/org/apache/lucene/benchmark/byTask/feeds/FileBasedQueryMaker.java#L73,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/benchmark/src/java/org/apache/lucene/benchmark/byTask/feeds/FileBasedQueryMaker.java,,unknown,"@Override
+  protected Query[] prepareQueries() throws Exception {
+
+    Analyzer anlzr = NewAnalyzerTask.createAnalyzer(config.get(""analyzer"",
+            ""org.apache.lucene.analysis.standard.StandardAnalyzer""));
+    String defaultField = config.get(""file.query.maker.default.field"", DocMaker.BODY_FIELD);
+    QueryParser qp = new QueryParser(Version.LUCENE_CURRENT, defaultField, anlzr);
+    qp.setAllowLeadingWildcard(true);
+
+    List<Query> qq = new ArrayList<Query>();
+    String fileName = config.get(""file.query.maker.file"", null);
+    if (fileName != null)
+    {
+      File file = new File(fileName);
+      Reader reader = null;
+      if (file.exists()) {
+        reader = new FileReader(file);
+      } else {
+        //see if we can find it as a resource
+        InputStream asStream = FileBasedQueryMaker.class.getClassLoader().getResourceAsStream(fileName);
+        if (asStream != null) {
+          reader = new InputStreamReader(asStream);
+        }
+      }
+      if (reader != null) {
+        try {
+          BufferedReader buffered = new BufferedReader(reader);
+          String line = null;
+          int lineNum = 0;
+          while ((line = buffered.readLine()) != null) {
+            line = line.trim();
+            if (line.length() != 0 && !line.startsWith(""#"")) {
+              try {
+                qq.add(qp.parse(line));
+              } catch (ParseException e) {
+                System.err.println(""Exception: "" + e.getMessage() + "" occurred while parsing line: "" + lineNum + "" Text: "" + line);
+              }
+            }
+            lineNum++;
+          }
+        } finally {
+          reader.close();
+        }
+      } else {
+        System.err.println(""No Reader available for: "" + fileName);
+      }
+      
+    }
+    return qq.toArray(new Query[qq.size()]) ;
+  }"
+23,2149,lucene-solr,OS_OPEN_STREAM,A,last,,BAD_PRACTICE,org.apache.solr.common.util,org.apache.solr.common.util.FastInputStream,,readLine,io,DataInputStream,"DataInputStream,this,readLine",209,209,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/solrj/src/java/org/apache/solr/common/util/FastInputStream.java#L209,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/solrj/src/java/org/apache/solr/common/util/FastInputStream.java,,close,"public String readLine() throws IOException {
+    return new DataInputStream(this).readLine();
+  }"
+24,2462,lucene-solr,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.solr.response,org.apache.solr.response.VelocityResponseWriter,,getEngine,io,IOUtils,"IOUtils,InputStreamReader,is,props,CHARSET_UTF_8,load",135,135,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/contrib/velocity/src/java/org/apache/solr/response/VelocityResponseWriter.java#L135,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/contrib/velocity/src/java/org/apache/solr/response/VelocityResponseWriter.java,,unknown,"private VelocityEngine getEngine(SolrQueryRequest request) {
+    VelocityEngine engine = new VelocityEngine();
+
+    engine.setProperty(""params.resource.loader.instance"", new SolrParamResourceLoader(request));
+    SolrVelocityResourceLoader resourceLoader =
+        new SolrVelocityResourceLoader(request.getCore().getSolrConfig().getResourceLoader());
+    engine.setProperty(""solr.resource.loader.instance"", resourceLoader);
+    engine.setProperty(RuntimeConstants.RESOURCE_LOADER, ""params,solr"");
+
+    // TODO: Externalize Velocity properties
+    String propFile = request.getParams().get(""v.properties"");
+    try {
+      if (propFile == null)
+        engine.init();
+      else {
+        InputStream is = null;
+        try {
+          is = resourceLoader.getResourceStream(propFile);
+          Properties props = new Properties();
+          props.load(new InputStreamReader(is, IOUtils.CHARSET_UTF_8));
+          engine.init(props);
+        }
+        finally {
+          if (is != null) is.close();
+        }
+      }
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
+    return engine;
+  }"
+25,9706,ant,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs,org.apache.tools.ant.taskdefs.ManifestTest,,testLongLine,io,BufferedReader,"BufferedReader,EXPANDED_MANIFEST,File,FileReader,System,getProperty",227,227,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/ManifestTest.java#L227,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/ManifestTest.java,,open,"public void testLongLine() throws IOException, ManifestException {
+        Project p = getProject();
+        p.setUserProperty(""test.longline"", LONG_LINE);
+        p.setUserProperty(""test.long68name"" , LONG_68_NAME);
+        p.setUserProperty(""test.long70name"" , LONG_70_NAME);
+        p.setUserProperty(""test.notlongname"" , NOT_LONG_NAME);
+        p.setUserProperty(""test.value"", VALUE);
+        executeTarget(""testLongLine"");
+
+        Manifest manifest = getManifest(EXPANDED_MANIFEST);
+        Manifest.Section mainSection = manifest.getMainSection();
+        String classpath = mainSection.getAttributeValue(""class-path"");
+        assertEquals(""Class-Path attribute was not set correctly - "",
+            LONG_LINE, classpath);
+        
+        String value = mainSection.getAttributeValue(LONG_68_NAME);
+        assertEquals(""LONG_68_NAME_VALUE_MISMATCH"", VALUE, value);
+        value = mainSection.getAttributeValue(LONG_70_NAME);
+        assertEquals(""LONG_70_NAME_VALUE_MISMATCH"", VALUE, value);
+        value = mainSection.getAttributeValue(NOT_LONG_NAME);
+        assertEquals(""NOT_LONG_NAME_VALUE_MISMATCH"", VALUE, value);
+        
+        BufferedReader in = new BufferedReader(new FileReader(new File(System.getProperty(""root""), EXPANDED_MANIFEST)));
+        
+        Set set = new HashSet();
+        String read = in.readLine();
+        while (read != null)
+        {
+            set.add(read);
+            read = in.readLine();
+        }
+        
+        assertTrue(""Manifest file should have contained string "", set
+                .remove("" NOT_LONG""));
+        assertTrue(""Manifest file should have contained string "", set
+                .remove("" NG""));
+        assertTrue(""Manifest file should have contained string "", set
+                .remove(LONG_70_NAME + "": ""));
+        assertTrue(""Manifest file should have contained string "", set
+                .remove(NOT_LONG_NAME + "": NOT_LO""));
+    }"
+26,9766,ant,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional,org.apache.tools.ant.taskdefs.optional.EchoPropertiesTest,,testEchoToGoodFileXml,io,BufferedReader,"BufferedReader,fr",119,119,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/optional/EchoPropertiesTest.java#L119,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/optional/EchoPropertiesTest.java,,close,"public void testEchoToGoodFileXml() throws Exception {
+        executeTarget( ""testEchoToGoodFileXml"" );
+
+        // read in the file
+        File f = createRelativeFile( GOOD_OUTFILE_XML );
+        FileReader fr = new FileReader( f );
+        try {
+            BufferedReader br = new BufferedReader( fr );
+            String read = null;
+            while ( (read = br.readLine()) != null) {
+                if (read.indexOf(""<property name=\""test.property\"" value=\""""+TEST_VALUE+""\"" />"") >= 0) {
+                    // found the property we set - it's good.
+                    return;
+                }
+            }
+            fail( ""did not encounter set property in generated file."" );
+        } finally {
+            try {
+                fr.close();
+            } catch(IOException e) {}
+        }
+    }"
+27,9806,ant,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional,org.apache.tools.ant.taskdefs.optional.PropertyFile,,readFile,io,BufferedInputStream,"BufferedInputStream,fis",180,180,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/optional/PropertyFile.java#L180,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/optional/PropertyFile.java,,close,"private void readFile() throws BuildException {
+        if (useJDKProperties) {
+            // user chose to use standard Java properties, which loose
+            // comments and layout
+            properties = new Properties();
+        } else {
+            properties = new LayoutPreservingProperties();
+        }
+        try {
+            if (propertyfile.exists()) {
+                log(""Updating property file: ""
+                    + propertyfile.getAbsolutePath());
+                FileInputStream fis = null;
+                try {
+                    fis = new FileInputStream(propertyfile);
+                    BufferedInputStream bis = new BufferedInputStream(fis);
+                    properties.load(bis);
+                } finally {
+                    if (fis != null) {
+                        fis.close();
+                    }
+                }
+            } else {
+                log(""Creating new property file: ""
+                    + propertyfile.getAbsolutePath());
+                FileOutputStream out = null;
+                try {
+                    out = new FileOutputStream(propertyfile.getAbsolutePath());
+                    out.flush();
+                } finally {
+                    if (out != null) {
+                        out.close();
+                    }
+                }
+            }
+        } catch (IOException ioe) {
+            throw new BuildException(ioe.toString());
+        }
+    }"
+28,9814,ant,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional.extension,org.apache.tools.ant.taskdefs.optional.extension.ExtensionUtil,,getManifest,util,JarFile,"JarFile,file",205,205,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/optional/extension/ExtensionUtil.java#L205,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/optional/extension/ExtensionUtil.java,,close,"static Manifest getManifest(final File file)
+        throws BuildException {
+        try {
+            final JarFile jarFile = new JarFile(file);
+            Manifest m = jarFile.getManifest();
+            if (m == null) {
+                throw new BuildException(file + "" doesn't have a MANIFEST"");
+            }
+            return m;
+        } catch (final IOException ioe) {
+            throw new BuildException(ioe.getMessage(), ioe);
+        }
+    }"
+29,9874,ant,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.email,org.apache.tools.ant.taskdefs.email.PlainMailer,,attach,io,BufferedInputStream,"BufferedInputStream,buf,finstr,length",152,152,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/email/PlainMailer.java#L152,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/email/PlainMailer.java,,close,"protected void attach(File file, PrintStream out)
+         throws IOException {
+        if (!file.exists() || !file.canRead()) {
+            throw new BuildException(""File \"""" + file.getName()
+                 + ""\"" does not exist or is not ""
+                 + ""readable."");
+        }
+
+        if (includeFileNames) {
+            out.println();
+
+            String filename = file.getName();
+            int filenamelength = filename.length();
+
+            out.println(filename);
+            for (int star = 0; star < filenamelength; star++) {
+                out.print('=');
+            }
+            out.println();
+        }
+
+        int length;
+        final int maxBuf = 1024;
+        byte[] buf = new byte[maxBuf];
+        FileInputStream finstr = new FileInputStream(file);
+
+        try {
+            BufferedInputStream in = new BufferedInputStream(finstr, buf.length);
+
+            while ((length = in.read(buf)) != -1) {
+                out.write(buf, 0, length);
+            }
+        } finally {
+            finstr.close();
+        }
+    }"
+30,9876,ant,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.email,org.apache.tools.ant.taskdefs.email.Message,,print,io,BufferedReader,"BufferedReader,freader",128,128,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/email/Message.java#L128,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/email/Message.java,,close,"public void print(PrintStream ps)
+         throws IOException {
+        // We need character encoding aware printing here.
+        // So, using BufferedWriter over OutputStreamWriter instead of PrintStream
+        BufferedWriter out = null;
+        try {
+            out
+                = charset != null ? new BufferedWriter(new OutputStreamWriter(ps, charset))
+                : new BufferedWriter(new OutputStreamWriter(ps));
+            if (messageSource != null) {
+                // Read message from a file
+                FileReader freader = new FileReader(messageSource);
+
+                try {
+                    BufferedReader in = new BufferedReader(freader);
+                    String line = null;
+                    while ((line = in.readLine()) != null) {
+                        out.write(getProject().replaceProperties(line));
+                        out.newLine();
+                    }
+                } finally {
+                    freader.close();
+                }
+            } else {
+                out.write(getProject().replaceProperties(buffer.substring(0)));
+                out.newLine();
+            }
+            out.flush();
+        } finally {
+            //do not close the out writer as it is reused afterwards by the mail task
+        }
+    }"
+31,9940,ant,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional.extension,org.apache.tools.ant.taskdefs.optional.extension.ExtensionUtil,,loadExtensions,util,JarFile,"JarFile,file",134,134,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/optional/extension/ExtensionUtil.java#L134,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/optional/extension/ExtensionUtil.java,,close,"private static void loadExtensions(final File file,
+                                        final List extensionList,
+                                        final boolean includeImpl,
+                                        final boolean includeURL)
+        throws BuildException {
+        try {
+            final JarFile jarFile = new JarFile(file);
+            final Extension[] extensions =
+                Extension.getAvailable(jarFile.getManifest());
+            for (int i = 0; i < extensions.length; i++) {
+                final Extension extension = extensions[ i ];
+                addExtension(extensionList, extension, includeImpl, includeURL);
+            }
+        } catch (final Exception e) {
+            throw new BuildException(e.getMessage(), e);
+        }
+    }"
+32,1470,tomcat,OS_OPEN_STREAM,C,last,,BAD_PRACTICE,org.apache.catalina.startup,org.apache.catalina.startup.WebappServiceLoader,,parseConfigFile,io,BufferedReader,"BufferedReader,in",141,141,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/startup/WebappServiceLoader.java#L141,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/startup/WebappServiceLoader.java,,close,"void parseConfigFile(LinkedHashSet<String> servicesFound, URL url)
+            throws IOException {
+        try (InputStream is = url.openStream()) {
+            InputStreamReader in =
+                    new InputStreamReader(is, StandardCharsets.UTF_8);
+            BufferedReader reader = new BufferedReader(in);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int i = line.indexOf('#');
+                if (i >= 0) {
+                    line = line.substring(0, i);
+                }
+                line = line.trim();
+                if (line.length() == 0) {
+                    continue;
+                }
+                servicesFound.add(line);
+            }
+        }
+    }"

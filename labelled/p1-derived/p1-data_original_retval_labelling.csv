@@ -1,0 +1,2135 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,188,derby,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,B,last,,BAD_PRACTICE,org.apache.derby.impl.io,org.apache.derby.impl.io.DirFile,,getExclusiveFileLock,,delete,delete,169,169,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/io/DirFile.java#L169,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/io/DirFile.java,,unknown,"public synchronized int getExclusiveFileLock() throws StandardException
+	{
+		if (exists())
+		{
+			delete();
+		}
+		try
+        {
+			//Just create an empty file
+			RandomAccessFile lockFileOpen = new RandomAccessFile( (File) this, ""rw"");
+            limitAccessToOwner();
+			lockFileOpen.getFD().sync( );
+			lockFileOpen.close();
+		}catch(IOException ioe)
+		{
+			// do nothing - it may be read only medium, who knows what the
+			// problem is
+			if (SanityManager.DEBUG)
+			{
+				SanityManager.THROWASSERT(
+                    ""Unable to create Exclusive Lock File "" + getPath(), ioe);
+			}
+		}
+		
+		return NO_FILE_LOCK_SUPPORT;
+	}"
+1,76,derby,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,A,last,,STYLE,org.apache.derby.impl.store.access.btree,org.apache.derby.impl.store.access.btree.BTreeController,,do_load_insert,,if (num_rows_on_page < this.getConglomerate().maxRowsPerPage),,1076,1076,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/store/access/btree/BTreeController.java#L1076,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/btree/BTreeController.java,,close,"private boolean do_load_insert(
+    DataValueDescriptor[]   rowToInsert,
+    LeafControlRow          leaf,
+    int                     insert_slot)
+        throws StandardException
+	{
+		LeafControlRow old_leaf         = null;
+        boolean        row_inserted     = false;
+        int            num_rows_on_page = leaf.page.recordCount() - 1;
+
+
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT(insert_slot == leaf.page.recordCount());
+            SanityManager.ASSERT(
+                leaf.getrightSiblingPageNumber() == 
+                    ContainerHandle.INVALID_PAGE_NUMBER);
+            this.isIndexableRowConsistent(rowToInsert);
+        }
+
+        if (num_rows_on_page < this.getConglomerate().maxRowsPerPage)
+        {
+            // By default maxRowsPerPage is set to MAXINT, some tests
+            // set it small to cause splitting to happen quicker with
+            // less data.
+
+            if (SanityManager.DEBUG)
+            {
+                // Caller should have sorted and done duplicate checking.
+
+                if (insert_slot > 1)
+                {
+                    // verify that the row inserted is >= than previous row.
+                    int compare_result =
+                        ControlRow.compareIndexRowFromPageToKey(
+                            leaf,
+                            insert_slot - 1,
+                            scratch_template,
+                            rowToInsert,
+                            this.getConglomerate().nUniqueColumns,
+                            0,
+							this.getConglomerate().ascDescInfo);
+                    
+                    if (compare_result >= 0)
+                    {
+                        // Rows must be presented in order, so the row we are
+                        // inserting must always be greater than the previous 
+                        // row on the page.
+                        SanityManager.THROWASSERT(""result = "" + compare_result);
+                    }
+                }
+            }
+
+
+            if (leaf.page.insertAtSlot(
+                    insert_slot, 
+                    rowToInsert, 
+                    (FormatableBitSet) null, 
+                    this.btree_undo,
+                    Page.INSERT_DEFAULT,
+					AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD) != null)
+            {
+                // Insert succeeded, so we're done.
+                row_inserted = true;
+            }
+            else
+            {
+                // RESOLVE (mikem) - another long row issue.
+                // For now if a row does not fit on a page and there 
+                // is only the control row on the page and at most one
+                // other row on the page, throw an exception
+
+                if (leaf.page.recordCount() <= 2)
+                {
+                    throw StandardException.newException(
+                            SQLState.BTREE_NO_SPACE_FOR_KEY);
+                }
+            }
+        }
+
+        // Check that page just updated is consistent.
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""enableBtreeConsistencyCheck""))
+            {
+                leaf.checkConsistency(this, null, true);
+            }
+        }
+
+        return(row_inserted);
+	}"
+2,222,derby,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,A,last,,STYLE,org.apache.derby.impl.store.access.btree,org.apache.derby.impl.store.access.btree.LeafControlRow,,splitFor,,if ((this.page.recordCount() - 1 <,,533,533,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/store/access/btree/LeafControlRow.java#L533,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/btree/LeafControlRow.java,,close,"protected long splitFor(
+    OpenBTree               open_btree, 
+    DataValueDescriptor[]   template,
+    BranchControlRow        parent_page, 
+    DataValueDescriptor[]	splitrow,
+    int                     flag)
+        throws StandardException
+    {
+        long current_leaf_pageno = this.page.getPageNumber();
+
+        if (SanityManager.DEBUG)
+        {
+			if (parent_page == null && ( ! this.getIsRoot()))
+            	SanityManager.THROWASSERT(
+                	this + "" splitFor null parent and non-root"");
+        }
+
+        // See if this page has space.
+        if ((this.page.recordCount() - 1 < 
+                open_btree.getConglomerate().maxRowsPerPage) &&
+            (this.page.spaceForInsert(splitrow, (FormatableBitSet) null,
+				AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD)))
+        {
+            // The splitFor() operation is complete, commit the work done
+            // before releasing the latches.
+            open_btree.getXactMgr().commit();
+             
+            if (parent_page != null)
+                 parent_page.release();
+
+            this.release();
+
+            return(current_leaf_pageno);
+        }
+
+        // RESOLVE (mikem) - for rows bigger than pages this assert may 
+        // trigger until we have long rows.
+        if (SanityManager.DEBUG)
+            SanityManager.ASSERT(this.page.recordCount() > 1);
+
+        // Track.LeafSplit++;
+
+        if (this.getIsRoot())
+        {
+            // Track.LeafSplitRoot++;
+
+            growRoot(open_btree, template, this);
+
+         
+            // At this point, this page has been unlatched.  So code below this
+            // point must not access this object's fields.
+            
+            ControlRow new_root = ControlRow.get(open_btree, BTree.ROOTPAGEID);
+
+            return(
+                new_root.splitFor(open_btree, template, null, splitrow, flag));
+        }
+
+        // At this point we know that this page has to be split and
+        // that it isn't a root page.
+
+        int splitpoint = (this.page.recordCount() - 1) / 2 + 1;
+
+        if ((flag & ControlRow.SPLIT_FLAG_FIRST_ON_PAGE) != 0)
+        {
+            // move all the row to the new page
+            splitpoint = 1;
+        }
+        else if ((flag & ControlRow.SPLIT_FLAG_LAST_ON_PAGE) != 0)
+        {
+            // This is not optimal as we would rather move no rows to the
+            // next page, but what should we use as a discriminator?
+            splitpoint = this.page.recordCount() - 1;
+        }
+
+        if (SanityManager.DEBUG)
+        {
+			if (splitpoint <= 0)
+            	SanityManager.THROWASSERT(this + "" yikes! splitpoint of 0!"");
+        }
+
+        // Save away current split point leaf row, and build a branch row
+        // based on it.
+        DataValueDescriptor[] split_leaf_row = 
+            open_btree.getConglomerate().createTemplate(
+                    open_btree.getRawTran());
+
+        this.page.fetchFromSlot(
+            (RecordHandle) null, splitpoint, split_leaf_row, 
+            (FetchDescriptor) null, true); 
+
+        // Create the branch row to insert onto the parent page.  For now
+        // use a fake page number because we don't know the real page 
+        // number until the allocate is done, but want to delay the 
+        // allocate until we know the insert will succeed.
+        BranchRow branchrow = BranchRow.createBranchRowFromOldLeafRow(
+            split_leaf_row, BranchRow.DUMMY_PAGE_NUMBER);
+
+
+        // At this point we have guaranteed there is space in the parent
+        // page for splitrow, but it could be the case that the new
+        // ""branchrow"" does not fit on the parent page.
+        if (!parent_page.page.spaceForInsert(
+                branchrow.getRow(), (FormatableBitSet) null,
+				AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD))
+        {
+            // There is no room on the parent page to complete a split at
+            // the current level, so restart the split at top with the 
+            // branchrow that did not fit.  On return from this routine
+            // there is no way to know the state of the tree, so the
+            // current split pass recursion must end.
+            return(
+                BranchControlRow.restartSplitFor(
+                    open_btree, template, parent_page, this, 
+                    branchrow.getRow(), splitrow, flag));
+
+        }
+
+        // Create a new leaf page under the parent.
+        LeafControlRow newleaf = 
+            LeafControlRow.allocate(open_btree, parent_page);
+
+        // Now that we know the page number of the new child page update
+        // the branch row to be inserted with the correct value.
+        branchrow.setPageNumber(newleaf.page.getPageNumber());
+
+        // Test fail after allocation
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""leaf_split_abort1""))
+            {
+                throw StandardException.newException(
+                        SQLState.BTREE_ABORT_THROUGH_TRACE);
+            }
+        }
+
+        // Link it to the right of the current page.
+        newleaf.linkRight(open_btree, this);
+
+
+		// Copy the index rows (from the splitpoint to the end of the page) 
+        // from the old page to the new leaf, do not
+        // copy the control row.  This routine will purge all the copied rows
+        // and maintain the deleted status of the moved rows.
+        int num_rows_to_move = this.page.recordCount() - splitpoint;
+
+        if (SanityManager.DEBUG)
+            SanityManager.ASSERT(num_rows_to_move >= 0);
+
+        if (num_rows_to_move != 0)
+        {
+            this.page.copyAndPurge(
+                newleaf.page, splitpoint, num_rows_to_move, 1);
+        }
+
+        // Test fail after new page has been updated.
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""leaf_split_abort2""))
+            {
+                throw StandardException.newException(
+                        SQLState.BTREE_ABORT_THROUGH_TRACE);
+            }
+        }
+
+        // Test fail after new page has been updated.
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""leaf_split_abort3""))
+            {
+                throw StandardException.newException(
+                        SQLState.BTREE_ABORT_THROUGH_TRACE);
+            }
+        }
+
+        // Find spot to insert branch row, and insert it.
+
+
+        BranchRow branch_template = 
+            BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
+
+        SearchParameters sp = 
+            new SearchParameters(
+                branchrow.getRow(),
+                SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
+                branch_template.getRow(),
+                open_btree, false);
+
+        parent_page.searchForEntry(sp);
+
+        // There must be space on the parent to insert the row!
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT(
+                parent_page.page.spaceForInsert(
+                    branchrow.getRow(), (FormatableBitSet) null,
+					AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD));
+        }
+
+		byte insertFlag = Page.INSERT_INITIAL;
+		insertFlag |= Page.INSERT_DEFAULT;
+		insertFlag |= Page.INSERT_UNDO_WITH_PURGE;
+        if (parent_page.page.insertAtSlot(
+            sp.resultSlot + 1,
+            branchrow.getRow(),
+            (FormatableBitSet) null,
+			(LogicalUndo)null, 
+            insertFlag,
+			AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD) == null) {
+
+            throw StandardException.newException(
+                    SQLState.BTREE_NO_SPACE_FOR_KEY);
+		}
+
+        // branchrow is only valid while split_leaf_row remains unchanged.
+        branchrow = null;
+
+        // RESOLVE (mikem) - this case breaks the btree currently - as the
+        // abort of the insert leaves a logical delete in the tree.
+        //
+        // Test fail after parent page has been updated.
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""leaf_split_abort4""))
+            {
+                throw StandardException.newException(
+                        SQLState.BTREE_ABORT_THROUGH_TRACE);
+            }
+        }
+
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""enableBtreeConsistencyCheck""))
+            {
+                this.checkConsistency(open_btree, parent_page, false);
+                newleaf.checkConsistency(open_btree, parent_page, false);
+                parent_page.checkConsistency(open_btree, null, false);
+            }
+        }
+
+        // Set a hint in the page that any scan positioned on it needs
+        // to reposition because rows may have moved off the page.
+        page.setRepositionNeeded();
+
+        // At this point a unit of work in the split down the tree has
+        // been performed in an internal transaction.  This work must
+        // be committed before any latches are released.
+        open_btree.getXactMgr().commit();
+
+        parent_page.release();
+        this.release();  // XXX (nat) Not good form to unlatch self.
+
+        long new_leaf_pageno = newleaf.page.getPageNumber();
+        newleaf.release();
+
+        // Because we are at the leaf level and have completed the split
+        // there is no more work, no latches should be held, and control
+        // is returned up the recursive stack, to the insert causing the
+        // split.  Because latches are released, the inserter must recheck
+        // that there is now space available as some other thread of control
+        // could get in before he latches the page again.
+        return(new_leaf_pageno);
+    }"
+3,230,derby,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,A,last,,STYLE,org.apache.derby.impl.store.access.btree,org.apache.derby.impl.store.access.btree.BTreeController,,doIns,,else if (targetleaf.page.recordCount() - 1 <,,917,917,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/store/access/btree/BTreeController.java#L917,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/btree/BTreeController.java,,close,"private int doIns(DataValueDescriptor[] rowToInsert)
+        throws StandardException
+	{
+		LeafControlRow  targetleaf                      = null;
+		LeafControlRow  save_targetleaf                 = null;
+        int             insert_slot                     = 0;
+        int             result_slot                     = 0;
+        int             ret_val                         = 0;
+        boolean         reclaim_deleted_rows_attempted  = false;
+
+        if (scratch_template == null)
+        {
+            scratch_template = runtime_mem.get_template(getRawTran());
+        }
+
+        if (SanityManager.DEBUG)
+            this.isIndexableRowConsistent(rowToInsert);
+
+        // Create the objects needed for the insert.
+        // RESOLVE (mikem) - should we cache this in the controller?
+        SearchParameters sp = 
+            new SearchParameters(
+                rowToInsert,
+                SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
+                scratch_template, this, false);
+
+        // RowLocation column is in last column of template.
+        FetchDescriptor lock_fetch_desc = 
+            RowUtil.getFetchDescriptorConstant(
+                scratch_template.length - 1);
+        RowLocation lock_row_loc = 
+            (RowLocation) scratch_template[scratch_template.length - 1];
+
+        // Row locking - lock the row being inserted.
+
+        if (get_insert_row_lock)
+        {
+            // I don't hold any latch yet so I can wait on this lock, so I
+            // don't care about return value from this call.  This
+            // lock can only wait if the base table row was inserted in a
+            // separate transaction which never happens in sql tables, but
+            // does happen in the sparse indexes that synchronization builds.
+        
+            this.getLockingPolicy().lockNonScanRow(
+                this.getConglomerate(),
+                (LeafControlRow) null,
+                (LeafControlRow) null,
+                rowToInsert, 
+                (ConglomerateController.LOCK_INS | 
+                 ConglomerateController.LOCK_UPD));
+        }
+
+        while (true)
+        {
+            // Search the location at which the new row should be inserted.
+            if (SanityManager.DEBUG)
+                SanityManager.ASSERT(this.container != null);
+
+            targetleaf = (LeafControlRow)
+                ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
+
+
+            // Row locking - first lock row previous to row being inserted:
+            //     o if (sp.resultExact) then the row must be deleted and
+            //           we will be replacing it with the new row, lock
+            //           the row before the slot as the previous key.
+            //     o else 
+            //           we will be inserting after the current slot so
+            //           lock the current slot as the previous key.
+            //
+            int slot_after_previous = 
+                (sp.resultExact ? sp.resultSlot : sp.resultSlot + 1);
+
+            boolean latch_released = false;
+
+            latch_released = 
+                !this.getLockingPolicy().lockNonScanPreviousRow(
+                    this.getConglomerate(),
+                    targetleaf, 
+                    slot_after_previous, 
+                    lock_fetch_desc,
+                    scratch_template,
+                    lock_row_loc,
+                    this, 
+                    (ConglomerateController.LOCK_INS_PREVKEY |
+                     ConglomerateController.LOCK_UPD),
+                    TransactionManager.LOCK_INSTANT_DURATION);
+
+            // special test to see if latch release code works
+            if (SanityManager.DEBUG)
+            {
+                latch_released = 
+                    test_errors(
+                        this,
+                        ""BTreeController_doIns"", null,
+                        this.getLockingPolicy(), 
+                        targetleaf, latch_released);
+            }
+
+            if (latch_released)
+            {
+                // Had to release latch in order to get the lock, probably 
+                // because of a forward scanner, research tree, and try again.
+                targetleaf = null;
+                continue;
+            }
+
+            // If the row is there already, simply undelete it.
+            // The rationale for this is, since the index does
+            // not support duplicates, the only way we could
+            // find a duplicate is if we found a deleted row.
+            // If we could lock it, then no other transaction
+            // is deleting it; either this transaction deleted
+            // it earlier, or it's simply a row that the space
+            // reclaimer hasn't reclaimed yet.
+            // Since inserts are done directly (i.e., not to a
+            // location provided by a scan, we will see the 
+            // deleted row).
+            if (sp.resultExact)
+            {
+                result_slot = insert_slot = sp.resultSlot;
+
+                if (this.getConglomerate().nKeyFields != 
+                        this.getConglomerate().nUniqueColumns)
+                {
+                    // The key fields match, but not the row location.  We
+                    // must wait on the lock on the other row location before
+                    // preceding, so as to serialize behind any work being done
+                    // to the row as part of another transaction.
+
+                    latch_released = 
+                        !this.getLockingPolicy().lockNonScanRowOnPage(
+                            this.getConglomerate(), targetleaf, insert_slot, 
+                            lock_fetch_desc, scratch_template, lock_row_loc,
+                            ConglomerateController.LOCK_UPD);
+
+                    if (latch_released)
+                    {
+                        // Had to release latch in order to get the lock, 
+                        // probably to wait for deleting xact to commit or 
+                        // abort.  Research tree, and try again.
+                        targetleaf = null;
+                        continue;
+                    }
+                }
+
+                // The row better be deleted, or something is very wrong.
+
+                if (!(targetleaf.page.isDeletedAtSlot(insert_slot)))
+                {
+                    // attempt to insert a duplicate into the index.
+                    ret_val = ConglomerateController.ROWISDUPLICATE;
+                    break;
+                }
+                else
+                {
+                    if (this.getConglomerate().nKeyFields == 
+                        this.getConglomerate().nUniqueColumns)
+                    {
+                        // The row that we found deleted is exactly the new row.
+                        targetleaf.page.deleteAtSlot(
+                            insert_slot, false, this.btree_undo);
+
+                        break;
+                    }
+                    else if (this.getConglomerate().nUniqueColumns == 
+                             (this.getConglomerate().nKeyFields - 1))
+                    {
+                        // The row that we found deleted has matching keys
+                        // which form the unique key fields,
+                        // but the nonkey fields may differ (for now the
+                        // heap rowlocation is the only nonkey field 
+                        // allowed).
+                        
+                        // RESOLVE BT39 (mikem) - when/if heap row location
+                        // is not fixed we must handle update failing for
+                        // out of space and split if it does.  For now
+                        // if the update fails because of lack of space
+                        // an exception is thrown and the statement is 
+                        // backed out.  Should not happen very often.
+                        targetleaf.page.deleteAtSlot(
+                            insert_slot, false, this.btree_undo);
+
+                        boolean update_succeeded = true;
+                        try 
+                        {
+                            if (runtime_mem.hasCollatedTypes())
+                            {
+                                // See DERBY-5367.
+                                // There are types in the BTree with a 
+                                // collation different than UCS BASIC, we
+                                // update all fields to make sure they hold
+                                // the correct values.
+                                // NOTE: We could optimize here by only
+                                // updating the fields that actually hold
+                                // collated types.
+                                int rowsToUpdate = getConglomerate().nKeyFields;
+                                for (int i=0; i < rowsToUpdate; i++) {
+                                targetleaf.page.updateFieldAtSlot(
+                                    insert_slot, i, 
+                                    (DataValueDescriptor) RowUtil.getColumn(
+                                        rowToInsert, 
+                                        (FormatableBitSet) null, i),
+                                    this.btree_undo);
+                                }
+                            }
+                            else
+                            {
+                                // There are no collated types in the BTree,
+                                // which means that the values currently
+                                // stored in the undeleted row are correct.
+                                // We simply update the row location to point
+                                // to the correct row in the heap.
+                                int rowloc_index =
+                                        this.getConglomerate().nKeyFields - 1;
+                                targetleaf.page.updateFieldAtSlot(
+                                    insert_slot, rowloc_index, 
+                                    (DataValueDescriptor) RowUtil.getColumn(
+                                        rowToInsert, 
+                                        (FormatableBitSet) null, rowloc_index),
+                                    this.btree_undo);
+                            }
+                        }
+                        catch (StandardException se)
+                        {
+                            // check if the exception is for out of space
+                            if (!se.getMessageId().equals(SQLState.DATA_NO_SPACE_FOR_RECORD))
+                            {
+                                throw se;
+                            }
+
+                            // The statement exception is
+                            // because the update failed for out of
+                            // space (ie. the field got longer and there
+                            // is no room on the page for the expanded
+                            // field).  Address this error by falling
+                            // through the code and doing a split.
+                            update_succeeded = false;                          // update failed.
+                            targetleaf.page.deleteAtSlot(
+                                insert_slot, true, this.btree_undo);
+                        }
+
+                        if (update_succeeded)
+                            break;
+                    }
+                    else
+                    {
+                        // Can only happen with non key fields in the btree.
+                        throw(
+                            StandardException.newException(
+                                SQLState.BTREE_UNIMPLEMENTED_FEATURE));
+                    }
+                }
+            }
+            else if (targetleaf.page.recordCount() - 1 < 
+                    this.getConglomerate().maxRowsPerPage)
+            {
+                // The row wasn't there, so try to insert it
+                // on the page returned by the search.
+                insert_slot = sp.resultSlot + 1;
+                result_slot = insert_slot + 1;
+                if (getConglomerate().isUniqueWithDuplicateNulls()) 
+                {
+                    int ret = compareLeftAndRightSiblings(rowToInsert, 
+                            insert_slot, targetleaf);
+                    if (ret == MATCH_FOUND) 
+                    {
+                        ret_val = ConglomerateController.ROWISDUPLICATE;
+                        break;
+                    }
+                    if (ret == RESCAN_REQUIRED)
+                        continue;
+                }
+                // By default maxRowsPerPage is set to MAXINT, some tests
+                // set it small to cause splitting to happen quicker with
+                // less data.
+
+                if (targetleaf.page.insertAtSlot(
+                        insert_slot, 
+                        rowToInsert, (FormatableBitSet) null,
+                        this.btree_undo,
+                        Page.INSERT_DEFAULT,
+						AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD) != null)
+                {
+                    // Insert succeeded, so we're done.
+
+                    break;
+                }
+
+                // RESOLVE (mikem) - another long row issue.
+                // For now if a row does not fit on a page and there 
+                // is only the control row on the page and at most one
+                // other row on the page, throw an exception
+
+                if (targetleaf.page.recordCount() <= 2)
+                {
+                    throw StandardException.newException(
+                            SQLState.BTREE_NO_SPACE_FOR_KEY);
+                }
+
+                // start splitting ...
+            }
+            if (getConglomerate().isUniqueWithDuplicateNulls()) 
+            {
+                int ret = compareLeftAndRightSiblings(rowToInsert, 
+                        insert_slot, targetleaf);
+                if (ret == MATCH_FOUND) 
+                {
+                    ret_val = ConglomerateController.ROWISDUPLICATE;
+                    break;
+                }
+                if (ret == RESCAN_REQUIRED)
+                    continue;
+            }
+            
+            // Create some space by splitting pages.
+
+            // determine where in page/table row causing split would go
+            int flag = 0;
+            if (insert_slot == 1)
+            {
+                flag |= ControlRow.SPLIT_FLAG_FIRST_ON_PAGE;
+                if (targetleaf.isLeftmostLeaf())
+                    flag |= ControlRow.SPLIT_FLAG_FIRST_IN_TABLE;
+            }
+            else if (insert_slot == targetleaf.page.recordCount())
+            {
+                flag |= ControlRow.SPLIT_FLAG_LAST_ON_PAGE;
+                if (targetleaf.isRightmostLeaf())
+                    flag |= ControlRow.SPLIT_FLAG_LAST_IN_TABLE;
+            }
+
+            long targetleaf_pageno = targetleaf.page.getPageNumber();
+
+            if ((targetleaf.page.recordCount() - 
+                 targetleaf.page.nonDeletedRecordCount()) <= 0)
+            {
+                // Don't do reclaim work if there are no deleted records.
+                reclaim_deleted_rows_attempted = true;
+            }
+
+            BranchRow branchrow = 
+                BranchRow.createBranchRowFromOldLeafRow(
+                    rowToInsert, targetleaf_pageno);
+
+            // Release the target page because (a) it may change as a 
+            // result of the split, (b) the latch ordering requires us 
+            // to acquire latches from top to bottom, and (c) this 
+            // loop should be done in a system transaction.
+            targetleaf.release();
+            targetleaf = null;
+
+            start_xact_and_dosplit(
+                !reclaim_deleted_rows_attempted, targetleaf_pageno, 
+                scratch_template, branchrow.getRow(), flag);
+
+            // only attempt to reclaim deleted rows once, otherwise the
+            // split loop could loop forever, trying to reclaim a deleted
+            // row that was not committed.
+            reclaim_deleted_rows_attempted = true;
+
+            // RESOLVE (mikem) possible optimization could be to save
+            // split location and look there first, if this has 
+            // already caused a split.  Or even return a latched page
+            // from splitFor().  For now just execute the loop again
+            // searching the tree for somewhere to put the row.
+        }
+
+        // set in-memory hint of where last row on page was inserted.
+        targetleaf.last_search_result = result_slot;
+
+        // Check that page just updated is consistent.
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""enableBtreeConsistencyCheck""))
+            {
+                targetleaf.checkConsistency(this, null, true);
+            }
+        }
+
+        // Done with the target page.
+        targetleaf.release();
+        targetleaf = null;
+
+        // return the status about insert - 0 is ok, or duplicate status.
+        return(ret_val);
+	}"
+4,551,derby,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,A,last,,STYLE,org.apache.derby.impl.store.access.btree,org.apache.derby.impl.store.access.btree.BranchControlRow,,splitFor,,this.page,"page,recordCount",604,604,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/store/access/btree/BranchControlRow.java#L604,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/btree/BranchControlRow.java,,close,"protected long splitFor(
+    OpenBTree               open_btree,
+    DataValueDescriptor[]	template,
+    BranchControlRow        parent,
+    DataValueDescriptor[]	splitrow,
+    int                     flag)
+        throws StandardException
+	{
+		int        childpageid;
+		ControlRow childpage;
+
+		// On entry, the parent page is either latched by the caller,
+		// or it's null (which implies that this object is the root).
+
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.ASSERT(parent != null || this.getIsRoot());
+
+            SanityManager.ASSERT(
+                parent == null || parent.page.isLatched(),
+                ""parent page is not latched"");
+
+            SanityManager.ASSERT(this.page.isLatched(),
+                ""page is not latched:"");
+        }
+
+        if ((this.page.recordCount() - 1 >=
+                open_btree.getConglomerate().maxRowsPerPage) ||
+            (!this.page.spaceForInsert(splitrow, (FormatableBitSet) null,
+				AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD)))
+        {
+
+            if (this.page.recordCount() == 1)
+            {
+                // RESOLVE (mikem) long row issue.  For now it makes no sense
+                // to split if there are no rows.  So if spaceForRecord() fails
+                // on empty page, we throw exception.
+                throw StandardException.newException(
+                        SQLState.BTREE_NO_SPACE_FOR_KEY);
+            }
+
+			// Track.BranchSplit++;
+
+			if (this.getIsRoot())
+			{
+				// Track.BranchSplitRoot++;
+				growRoot(open_btree, template, this);
+
+				parent = (BranchControlRow)
+                    ControlRow.get(open_btree, BTree.ROOTPAGEID);
+
+
+				return(parent.splitFor(
+                        open_btree, template, null, splitrow, flag));
+			}
+
+			// At this point we know that this page has to be split and
+			// that it isn't a root page.
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.ASSERT(!this.getIsRoot());
+                SanityManager.ASSERT(parent != null);
+            }
+
+            int splitpoint = (this.page.recordCount() - 1) / 2 + 1;
+
+            if ((flag & ControlRow.SPLIT_FLAG_FIRST_ON_PAGE) != 0)
+            {
+                // move all the row to the new page
+                splitpoint = 1;
+            }
+            else if ((flag & ControlRow.SPLIT_FLAG_LAST_ON_PAGE) != 0)
+            {
+                // This is not optimal as we would rather move no rows to the
+                // next page, but what should we use as a discriminator?
+                splitpoint = this.page.recordCount() - 1;
+            }
+
+            if (SanityManager.DEBUG)
+            {
+				if (splitpoint <= 0)
+                	SanityManager.THROWASSERT(this + ""yikes! splitpoint of 0!"");
+            }
+
+
+            // Before any logged operation is done in the current internal
+            // xact, make sure that there is room in the parent to insert
+            // the new branch row.
+            //
+			// Create a new branch row which points to the new page,
+            // and insert it on parent page.
+
+            // Read in the branch row which is at the split point.
+            BranchRow split_branch_row =
+                BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
+
+            this.page.fetchFromSlot(
+                (RecordHandle) null, splitpoint, split_branch_row.getRow(), 
+                (FetchDescriptor) null, true);
+
+            // Create the branch row to insert onto the parent page.  For now
+            // use a fake page number because we don't know the real page
+            // number until the allocate is done, but want to delay the
+            // allocate until we know the insert will succeed.
+			BranchRow newbranchrow =
+                split_branch_row.createBranchRowFromOldBranchRow(
+                        BranchRow.DUMMY_PAGE_NUMBER);
+
+            // At this point we have guaranteed there is space in the parent
+            // page for splitrow, but it could be the case that the new
+            // ""newbranchrow"" does not fit on the parent page.
+            if (!parent.page.spaceForInsert(
+                    newbranchrow.getRow(), (FormatableBitSet) null,
+					AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD))
+            {
+                // There is no room on the parent page to complete a split at
+                // the current level, so restart the split at top with the
+                // branchrow that did not fit.  On return from this routine
+                // there is no way to know the state of the tree, so the
+                // current split pass recursion must end.
+                return(
+                    BranchControlRow.restartSplitFor(
+                        open_btree, template, parent, this,
+                        newbranchrow.getRow(), splitrow, flag));
+            }
+
+			// Get the child page for the index row at the split point
+			// This will be the left child for	the new page.  We're
+			// getting the page because BranchControlRow.Allocate
+			// sets the left child pointer from a BranchControlRow.
+			// If there were a version which just took the pageid,
+			// we wouldn't have to get the page (the latch on this
+			// page is enough to ensure that the child page won't
+			// disappear).
+
+            childpage = this.getChildPageAtSlot(open_btree, splitpoint);
+
+			// Allocate a new branch page and link it to the
+			// right of the current page.
+			BranchControlRow newbranch =
+                BranchControlRow.allocate(open_btree, childpage,
+                    this.getLevel(), parent);
+			newbranch.linkRight(open_btree, this);
+
+
+            // Test fail after allocation
+            if (SanityManager.DEBUG)
+            {
+                if (SanityManager.DEBUG_ON(""branch_split_abort1""))
+                {
+                    throw StandardException.newException(
+                            SQLState.BTREE_ABORT_THROUGH_TRACE);
+                }
+            }
+
+			// Done with the child page.
+			childpage.release();
+
+            // Now that we know the page number of the new child page update
+            // the branch row to be inserted with the correct value.
+            newbranchrow.setPageNumber(newbranch.page.getPageNumber());
+
+            BranchRow branch_template =
+                BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
+			SearchParameters sp = new SearchParameters(
+                newbranchrow.getRow(),
+                SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
+                branch_template.getRow(),
+                open_btree, false);
+
+			parent.searchForEntry(sp);
+
+			byte insertFlag = Page.INSERT_INITIAL;
+			insertFlag |= Page.INSERT_DEFAULT;
+			insertFlag |= Page.INSERT_UNDO_WITH_PURGE;
+			if (parent.page.insertAtSlot(
+                    sp.resultSlot + 1,
+                    newbranchrow.getRow(),
+                    (FormatableBitSet) null,
+                    (LogicalUndo)null,
+                    insertFlag, AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD)
+					== null)
+            {
+                throw StandardException.newException(
+                            SQLState.BTREE_NO_SPACE_FOR_KEY);
+			}
+
+
+            // Test fail after of row onto parent page.
+            if (SanityManager.DEBUG)
+            {
+                if (SanityManager.DEBUG_ON(""branch_split_abort2""))
+                {
+                    throw StandardException.newException(
+                            SQLState.BTREE_ABORT_THROUGH_TRACE);
+                }
+            }
+
+            // newbranchrow only valid while contents of split_branch_row
+            // remain unchanged.
+            newbranchrow = null;
+
+			// Copy the rows from the split point, but not including it (since
+            // the split point is turning into the left child of the new
+            // branch), onto the new page.  Purge the rows including the split
+			// point from the current page.
+            int num_rows_to_move = this.page.recordCount() - (splitpoint + 1);
+
+            if (num_rows_to_move > 0)
+            {
+                this.page.copyAndPurge(
+                    newbranch.page, splitpoint + 1, num_rows_to_move, 1);
+            }
+
+            // remove the splitpoint row, we didn't copy it because it became
+            // the ""left child"", but we do need to get rid of it.
+			this.page.purgeAtSlot(splitpoint, 1, true);
+
+            // Test fail after of copy of rows to new page.
+            if (SanityManager.DEBUG)
+            {
+                if (SanityManager.DEBUG_ON(""branch_split_abort3""))
+                {
+                    throw StandardException.newException(
+                            SQLState.BTREE_ABORT_THROUGH_TRACE);
+                }
+            }
+
+            // Test fail after purge of rows on old page.
+            if (SanityManager.DEBUG)
+            {
+                if (SanityManager.DEBUG_ON(""branch_split_abort4""))
+                {
+                    throw StandardException.newException(
+                            SQLState.BTREE_ABORT_THROUGH_TRACE);
+                }
+            }
+
+            // Check pages that have been altered by above split
+            if (SanityManager.DEBUG)
+            {
+                if (SanityManager.DEBUG_ON(""enableBtreeConsistencyCheck""))
+                {
+                    parent.checkConsistency(open_btree, null, false);
+                    newbranch.checkConsistency(open_btree, parent, false);
+                    this.checkConsistency(open_btree, parent, false);
+                }
+            }
+
+			// Fix up the parent links on the pages for the rows that moved to
+            // the new branch.
+			newbranch.fixChildrensParents(open_btree, null);
+
+            // At this point a unit of work in the split down the tree has
+            // been performed in an internal transaction (ie. writes have been
+            // done to latched pages), and the resulting
+            // tree is logically consistent, thus the work can be committed.
+            // This work must be committed before any latches are released.
+            open_btree.getXactMgr().commit();
+
+			// Decide whether we're following the current page or the new page.
+			BranchControlRow pagetofollow;
+
+            if (compareIndexRowToKey(
+                    splitrow, 
+                    split_branch_row.getRow(),
+                    split_branch_row.getRow().length - 1, 0,
+					open_btree.getConglomerate().ascDescInfo) >= 0)
+            {
+                // Follow the new branch
+				pagetofollow = newbranch;
+				this.release();
+			}
+			else
+			{
+				// Follow the current branch
+				pagetofollow = this;
+				newbranch.release();
+			}
+
+            // At this point we hold latches on the parent, and the current
+            // child of the page that we are following.  Note that committing
+            // the internal transaction did not release the latches.
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.ASSERT(parent != null);
+                SanityManager.ASSERT(parent.page.isLatched());
+                SanityManager.ASSERT(
+                        pagetofollow.page.isLatched());
+            }
+
+			// Recurse down the tree splitting if necessary.
+			return(
+                pagetofollow.splitFor(
+                    open_btree, template, parent, splitrow, flag));
+		}
+
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON(""enableBtreeConsistencyCheck""))
+            {
+                this.checkConsistency(open_btree, parent, false);
+            }
+        }
+
+		// Don't need the parent any more.
+		if (parent != null)
+			parent.release();
+
+        // RESOLVE (mikem) - should this be passed in?
+        BranchRow branch_template =
+            BranchRow.createEmptyTemplate(
+                    open_btree.getRawTran(),
+                    open_btree.getConglomerate());
+
+		SearchParameters sp = new SearchParameters(
+            splitrow, 
+            SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
+            branch_template.getRow(), 
+            open_btree, false);
+
+		searchForEntry(sp);
+
+        childpage = this.getChildPageAtSlot(open_btree, sp.resultSlot);
+
+        return(childpage.splitFor(open_btree, template, this, splitrow, flag));
+    }"
+5,310,derby,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.derby.tools,org.apache.derby.tools.PlanExporter$1,,run,,delFile,"delFile,delete",301,301,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/tools/org/apache/derby/tools/PlanExporter.java#L301,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/tools/org/apache/derby/tools/PlanExporter.java,,open,"public Object run() {
+                File delFile = new File(fileName);
+                if (!delFile.exists())
+                    return null;
+                delFile.delete();
+                return null;
+            }"
+6,843,derby,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,C,last,,STYLE,org.apache.derby.impl.tools.ij,org.apache.derby.impl.tools.ij.ConnectionEnv,,installConnection,,DriverManager,"DriverManager,value,getDriver",195,195,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/tools/org/apache/derby/impl/tools/ij/ConnectionEnv.java#L195,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/tools/org/apache/derby/impl/tools/ij/ConnectionEnv.java,,open,"private void installConnection(String name, String value, LocalizedOutput out) throws SQLException {
+		// add protocol if no driver matches url
+		boolean noDriver = false;
+		try {
+			// if we have a full URL, make sure it's loaded first
+			try {
+				if (value.startsWith(""jdbc:""))
+					util.loadDriverIfKnown(value);
+			} catch (Exception e) {
+				// want to continue with the attempt
+			}
+			DriverManager.getDriver(value);
+		} catch (SQLException se) {
+			noDriver = true;
+		}
+		if (noDriver && (protocol != null)) {
+			value = protocol + value;
+		}
+
+		if (sessions.get(name) != null) {
+			throw ijException.alreadyHaveConnectionNamed(name);
+		}
+		try {
+			
+			String user = util.getSystemProperty(""ij.user"");
+			String password = util.getSystemProperty(""ij.password"");
+			Properties connInfo =  util.updateConnInfo(user, password,null);
+														   
+			Connection theConnection = 
+				DriverManager.getConnection(value, connInfo);
+																			   
+		    addSession(theConnection,name);
+		} catch (Throwable t) {
+			JDBCDisplayUtil.ShowException(out,t);
+		}
+	}"
+7,1780,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.lucene.util,org.apache.lucene.util.LuceneTestCase,,<clinit>,,TEMP_DIR.mkdirs();,,127,127,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test-framework/java/org/apache/lucene/util/LuceneTestCase.java#L127,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test-framework/java/org/apache/lucene/util/LuceneTestCase.java,,unknown,
+8,2302,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.lucene.index,org.apache.lucene.index.TestIndexWriterOnJRECrash,,setUp,,tempDir,"tempDir,delete",46,46,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestIndexWriterOnJRECrash.java#L46,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestIndexWriterOnJRECrash.java,,unknown,"@Override
+  public void setUp() throws Exception {
+    super.setUp();
+    tempDir = _TestUtil.getTempDir(""jrecrash"");
+    tempDir.delete();
+    tempDir.mkdir();
+  }"
+9,2407,lucene-solr,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,A,last,,STYLE,org.apache.lucene.analysis.tokenattributes,org.apache.lucene.analysis.tokenattributes.TestCharTermAttributeImpl,,testExceptions,,,"t,subSequence",271,271,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/analysis/tokenattributes/TestCharTermAttributeImpl.java#L271,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/analysis/tokenattributes/TestCharTermAttributeImpl.java,,unknown,"public void testExceptions() {
+    CharTermAttributeImpl t = new CharTermAttributeImpl();
+    t.append(""test"");
+    assertEquals(""test"", t.toString());
+
+    try {
+      t.charAt(-1);
+      fail(""Should throw IndexOutOfBoundsException"");
+    } catch(IndexOutOfBoundsException iobe) {
+    }
+
+    try {
+      t.charAt(4);
+      fail(""Should throw IndexOutOfBoundsException"");
+    } catch(IndexOutOfBoundsException iobe) {
+    }
+
+    try {
+      t.subSequence(0, 5);
+      fail(""Should throw IndexOutOfBoundsException"");
+    } catch(IndexOutOfBoundsException iobe) {
+    }
+
+    try {
+      t.subSequence(5, 0);
+      fail(""Should throw IndexOutOfBoundsException"");
+    } catch(IndexOutOfBoundsException iobe) {
+    }
+  }"
+10,2424,lucene-solr,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestPayloads,,testPayload,,payload,"payload,testData,byteAt,length",77,77,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestPayloads.java#L77,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestPayloads.java,,unknown,"public void testPayload() throws Exception {
+        byte[] testData = ""This is a test!"".getBytes();
+        Payload payload = new Payload(testData);
+        assertEquals(""Wrong payload length."", testData.length, payload.length());
+        
+        // test copyTo()
+        byte[] target = new byte[testData.length - 1];
+        try {
+            payload.copyTo(target, 0);
+            fail(""Expected exception not thrown"");
+        } catch (Exception expected) {
+            // expected exception
+        }
+        
+        target = new byte[testData.length + 3];
+        payload.copyTo(target, 3);
+        
+        for (int i = 0; i < testData.length; i++) {
+            assertEquals(testData[i], target[i + 3]);
+        }
+        
+
+        // test toByteArray()
+        target = payload.toByteArray();
+        assertByteArrayEquals(testData, target);
+
+        // test byteAt()
+        for (int i = 0; i < testData.length; i++) {
+            assertEquals(payload.byteAt(i), testData[i]);
+        }
+        
+        try {
+            payload.byteAt(testData.length + 1);
+            fail(""Expected exception not thrown"");
+        } catch (Exception expected) {
+            // expected exception
+        }
+        
+        Payload clone = (Payload) payload.clone();
+        assertEquals(payload.length(), clone.length());
+        for (int i = 0; i < payload.length(); i++) {
+          assertEquals(payload.byteAt(i), clone.byteAt(i));
+        }
+        
+    }"
+11,2454,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.lucene.index,org.apache.lucene.index.TestDoc,,createOutput,,f,"f,f,delete,exists",91,91,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestDoc.java#L91,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestDoc.java,,unknown,"private File createOutput(String name, String text) throws IOException {
+        FileWriter fw = null;
+        PrintWriter pw = null;
+
+        try {
+            File f = new File(workDir, name);
+            if (f.exists()) f.delete();
+
+            fw = new FileWriter(f);
+            pw = new PrintWriter(fw);
+            pw.println(text);
+            return f;
+
+        } finally {
+            if (pw != null) pw.close();
+            if (fw != null) fw.close();
+        }
+    }"
+12,2520,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.lucene.benchmark.byTask,org.apache.lucene.benchmark.byTask.PerfRunData,,createDirectory,,indexDir,"indexDir,mkdirs",181,181,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/benchmark/src/java/org/apache/lucene/benchmark/byTask/PerfRunData.java#L181,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/benchmark/src/java/org/apache/lucene/benchmark/byTask/PerfRunData.java,,unknown,"private Directory createDirectory(boolean eraseIndex, String dirName,
+      String dirParam) throws IOException {
+    if (""FSDirectory"".equals(config.get(dirParam,""RAMDirectory""))) {
+      File workDir = new File(config.get(""work.dir"",""work""));
+      File indexDir = new File(workDir,dirName);
+      if (eraseIndex && indexDir.exists()) {
+        FileUtils.fullyDelete(indexDir);
+      }
+      indexDir.mkdirs();
+      return FSDirectory.open(indexDir);
+    } 
+
+    return new RAMDirectory();
+  }"
+13,2527,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.lucene.index,org.apache.lucene.index.TestDoc,,setUp,,workDir,"workDir,mkdirs",67,67,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestDoc.java#L67,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestDoc.java,,unknown,"@Override
+    public void setUp() throws Exception {
+        super.setUp();
+        if (VERBOSE) {
+          System.out.println(""TEST: setUp"");
+        }
+        workDir = _TestUtil.getTempDir(""TestDoc"");
+        workDir.mkdirs();
+
+        indexDir = _TestUtil.getTempDir(""testIndex"");
+        indexDir.mkdirs();
+
+        Directory directory = newFSDirectory(indexDir);
+        directory.close();
+
+        files = new LinkedList<File>();
+        files.add(createOutput(""test.txt"",
+            ""This is the first test file""
+        ));
+
+        files.add(createOutput(""test2.txt"",
+            ""This is the second test file""
+        ));
+    }"
+14,2549,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.solr.handler,org.apache.solr.handler.SnapShooter$FileCopier,,copyFile,,destination,"destination,getParentFile,mkdirs",200,200,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/core/src/java/org/apache/solr/handler/SnapShooter.java#L200,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/SnapShooter.java,,unknown,"public void copyFile(File source, File destination, boolean preserveFileDate)
+      throws IOException {
+      // check source exists
+      if (!source.exists()) {
+        String message = ""File "" + source + "" does not exist"";
+        throw new FileNotFoundException(message);
+      }
+
+      // does destinations directory exist ?
+      if (destination.getParentFile() != null
+          && !destination.getParentFile().exists()) {
+        destination.getParentFile().mkdirs();
+      }
+
+      // make sure we can write to destination
+      if (destination.exists() && !destination.canWrite()) {
+        String message = ""Unable to open file "" + destination + "" for writing."";
+        throw new IOException(message);
+      }
+
+      FileInputStream input = null;
+      FileOutputStream output = null;
+      try {
+        input = new FileInputStream(source);
+        output = new FileOutputStream(destination);
+ 
+        int count = 0;
+        int n = 0;
+        int rcnt = 0;
+        while (-1 != (n = input.read(buffer))) {
+          output.write(buffer, 0, n);
+          count += n;
+          rcnt++;
+          /***
+          // reserve every 4.6875 MB
+          if (rcnt == 150) {
+            rcnt = 0;
+            delPolicy.setReserveDuration(indexCommit.getVersion(), reserveTime);
+          }
+           ***/
+        }
+      } finally {
+        try {
+          IOUtils.closeQuietly(input);
+        } finally {
+          IOUtils.closeQuietly(output);
+        }
+      }
+
+      if (source.length() != destination.length()) {
+        String message = ""Failed to copy full contents from "" + source + "" to ""
+          + destination;
+        throw new IOException(message);
+      }
+
+      if (preserveFileDate) {
+        // file copy should preserve file date
+        destination.setLastModified(source.lastModified());
+      }
+    }"
+15,2627,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.lucene.benchmark.utils,org.apache.lucene.benchmark.utils.ExtractReuters,,main,,File,"File,args,outputDir,renameTo",142,142,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/benchmark/src/java/org/apache/lucene/benchmark/utils/ExtractReuters.java#L142,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/benchmark/src/java/org/apache/lucene/benchmark/utils/ExtractReuters.java,,unknown,"public static void main(String[] args) {
+    if (args.length != 2) {
+      usage(""Wrong number of arguments (""+args.length+"")"");
+      return;
+    }
+    File reutersDir = new File(args[0]);
+    if (!reutersDir.exists()) {
+      usage(""Cannot find Path to Reuters SGM files (""+reutersDir+"")"");
+      return;
+    }
+    
+    // First, extract to a tmp directory and only if everything succeeds, rename
+    // to output directory.
+    File outputDir = new File(args[1]);
+    outputDir = new File(outputDir.getAbsolutePath() + ""-tmp"");
+    outputDir.mkdirs();
+    ExtractReuters extractor = new ExtractReuters(reutersDir, outputDir);
+    extractor.extract();
+    // Now rename to requested output dir
+    outputDir.renameTo(new File(args[1]));
+  }"
+16,2963,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,A,last,,BAD_PRACTICE,org.apache.lucene.store,org.apache.lucene.store.TestMultiMMap,,assertChunking,,path,"path,mkdirs",148,148,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/store/TestMultiMMap.java#L148,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/store/TestMultiMMap.java,,unknown,"private void assertChunking(Random random, int chunkSize) throws Exception {
+    File path = _TestUtil.createTempFile(""mmap"" + chunkSize, ""tmp"", workDir);
+    path.delete();
+    path.mkdirs();
+    MMapDirectory mmapDir = new MMapDirectory(path);
+    mmapDir.setMaxChunkSize(chunkSize);
+    // we will map a lot, try to turn on the unmap hack
+    if (MMapDirectory.UNMAP_SUPPORTED)
+      mmapDir.setUseUnmap(true);
+    MockDirectoryWrapper dir = new MockDirectoryWrapper(random, mmapDir);
+    RandomIndexWriter writer = new RandomIndexWriter(random, dir, newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)).setMergePolicy(newLogMergePolicy()));
+    Document doc = new Document();
+    Field docid = newField(""docid"", ""0"", StringField.TYPE_STORED);
+    Field junk = newField(""junk"", """", StringField.TYPE_STORED);
+    doc.add(docid);
+    doc.add(junk);
+    
+    int numDocs = 100;
+    for (int i = 0; i < numDocs; i++) {
+      docid.setValue("""" + i);
+      junk.setValue(_TestUtil.randomUnicodeString(random));
+      writer.addDocument(doc);
+    }
+    IndexReader reader = writer.getReader();
+    writer.close();
+    
+    int numAsserts = atLeast(100);
+    for (int i = 0; i < numAsserts; i++) {
+      int docID = random.nextInt(numDocs);
+      assertEquals("""" + docID, reader.document(docID).get(""docid""));
+    }
+    reader.close();
+    dir.close();
+  }"
+17,1999,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,B,last,,BAD_PRACTICE,org.apache.lucene.search.suggest.fst,org.apache.lucene.search.suggest.fst.Sort,,sort,,output,"output,delete",213,213,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/Sort.java#L213,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/Sort.java,,unknown,"public SortInfo sort(File input, File output) throws IOException {
+    sortInfo = new SortInfo();
+    sortInfo.totalTime = System.currentTimeMillis();
+
+    output.delete();
+
+    ArrayList<File> merges = new ArrayList<File>();
+    boolean success2 = false;
+    try {
+      ByteSequencesReader is = new ByteSequencesReader(input);
+      boolean success = false;
+      try {
+        int lines = 0;
+        while ((lines = readPartition(is)) > 0) {
+          merges.add(sortPartition(lines));
+          sortInfo.tempMergeFiles++;
+          sortInfo.lines += lines;
+
+          // Handle intermediate merges.
+          if (merges.size() == maxTempFiles) {
+            File intermediate = File.createTempFile(""sort"", ""intermediate"", tempDirectory);
+            try {
+              mergePartitions(merges, intermediate);
+            } finally {
+              for (File file : merges) {
+                file.delete();
+              }
+              merges.clear();
+              merges.add(intermediate);
+            }
+            sortInfo.tempMergeFiles++;
+          }
+        }
+        success = true;
+      } finally {
+        if (success)
+          IOUtils.close(is);
+        else
+          IOUtils.closeWhileHandlingException(is);
+      }
+
+      // One partition, try to rename or copy if unsuccessful.
+      if (merges.size() == 1) {     
+        File single = merges.get(0);
+        // If simple rename doesn't work this means the output is
+        // on a different volume or something. Copy the input then.
+        if (!single.renameTo(output)) {
+          copy(single, output);
+        }
+      } else { 
+        // otherwise merge the partitions with a priority queue.
+        mergePartitions(merges, output);
+      }
+      success2 = true;
+    } finally {
+      for (File file : merges) {
+        file.delete();
+      }
+      if (!success2) {
+        output.delete();
+      }
+    }
+
+    sortInfo.totalTime = (System.currentTimeMillis() - sortInfo.totalTime); 
+    return sortInfo;
+  }"
+18,1873,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.solr.cloud,org.apache.solr.cloud.AbstractFullDistribZkTestBase,,startCloudJetty,,jettyDir.mkdirs();,,414,414,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/test-framework/src/java/org/apache/solr/cloud/AbstractFullDistribZkTestBase.java#L414,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/test-framework/src/java/org/apache/solr/cloud/AbstractFullDistribZkTestBase.java,,unknown,"protected SolrServer startCloudJetty(String collection, String shard) throws Exception {
+
+    // TODO: use the collection string!!!!
+    collection = DEFAULT_COLLECTION;
+
+    int totalReplicas = getTotalReplicas(collection);
+
+
+    int cnt = this.jettyIntCntr.incrementAndGet();
+      File jettyDir = new File(TEMP_DIR,
+          getClass().getName() + ""-jetty"" + cnt + ""-"" + System.currentTimeMillis());
+      jettyDir.mkdirs();
+      org.apache.commons.io.FileUtils.copyDirectory(new File(getSolrHome()), jettyDir);
+      JettySolrRunner j = createJetty(jettyDir, testDir + ""/jetty"" + cnt, shard, ""solrconfig.xml"", null);
+      jettys.add(j);
+      SolrServer client = createNewSolrServer(j.getLocalPort());
+      clients.add(client);
+
+    int retries = 60;
+    while (--retries >= 0) {
+      // total replicas changed.. assume it was us
+      if (getTotalReplicas(collection) != totalReplicas) {
+       break;
+      }
+      Thread.sleep(500);
+    }
+
+    if (retries <= 0) {
+      fail(""Timeout waiting for "" + j + "" to appear in clusterstate"");
+      printLayout();
+    }
+
+    updateMappingsFromZk(this.jettys, this.clients);
+    return client;
+  }"
+19,1888,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.lucene.search.suggest.fst,org.apache.lucene.search.suggest.fst.ExternalRefSorter,,close,,input,"input,input,null,delete",87,87,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/ExternalRefSorter.java#L87,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/ExternalRefSorter.java,,close,"@Override
+  public void close() throws IOException {
+    try {
+      closeWriter();
+    } finally {
+      if (input != null) input.delete();
+      if (sorted != null) sorted.delete();
+    }
+  }"
+20,1899,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.lucene.search.suggest.fst,org.apache.lucene.search.suggest.fst.ExternalRefSorter,,iterator,,input,"input,delete",65,65,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/ExternalRefSorter.java#L65,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/suggest/src/java/org/apache/lucene/search/suggest/fst/ExternalRefSorter.java,,unknown,"@Override
+  public BytesRefIterator iterator() throws IOException {
+    if (sorted == null) {
+      closeWriter();
+      
+      sorted = File.createTempFile(""RefSorter-"", "".sorted"",
+          Sort.defaultTempDir());
+      sort.sort(input, sorted);
+      
+      input.delete();
+      input = null;
+    }
+    
+    return new ByteSequenceIterator(new Sort.ByteSequencesReader(sorted));
+  }"
+21,2066,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.lucene.search.suggest.analyzing,org.apache.lucene.search.suggest.analyzing.AnalyzingSuggester,,build,,tempInput.delete();,,468,468,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/suggest/src/java/org/apache/lucene/search/suggest/analyzing/AnalyzingSuggester.java#L468,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/suggest/src/java/org/apache/lucene/search/suggest/analyzing/AnalyzingSuggester.java,,unknown,"@Override
+  public void build(InputIterator iterator) throws IOException {
+    String prefix = getClass().getSimpleName();
+    File directory = Sort.defaultTempDir();
+    File tempInput = File.createTempFile(prefix, "".input"", directory);
+    File tempSorted = File.createTempFile(prefix, "".sorted"", directory);
+
+    hasPayloads = iterator.hasPayloads();
+
+    Sort.ByteSequencesWriter writer = new Sort.ByteSequencesWriter(tempInput);
+    Sort.ByteSequencesReader reader = null;
+    BytesRef scratch = new BytesRef();
+
+    TokenStreamToAutomaton ts2a = getTokenStreamToAutomaton();
+
+    boolean success = false;
+    byte buffer[] = new byte[8];
+    try {
+      ByteArrayDataOutput output = new ByteArrayDataOutput(buffer);
+      BytesRef surfaceForm;
+
+      while ((surfaceForm = iterator.next()) != null) {
+        Set<IntsRef> paths = toFiniteStrings(surfaceForm, ts2a);
+        
+        maxAnalyzedPathsForOneInput = Math.max(maxAnalyzedPathsForOneInput, paths.size());
+
+        for (IntsRef path : paths) {
+
+          Util.toBytesRef(path, scratch);
+          
+          // length of the analyzed text (FST input)
+          if (scratch.length > Short.MAX_VALUE-2) {
+            throw new IllegalArgumentException(""cannot handle analyzed forms > "" + (Short.MAX_VALUE-2) + "" in length (got "" + scratch.length + "")"");
+          }
+          short analyzedLength = (short) scratch.length;
+
+          // compute the required length:
+          // analyzed sequence + weight (4) + surface + analyzedLength (short)
+          int requiredLength = analyzedLength + 4 + surfaceForm.length + 2;
+
+          BytesRef payload;
+
+          if (hasPayloads) {
+            if (surfaceForm.length > (Short.MAX_VALUE-2)) {
+              throw new IllegalArgumentException(""cannot handle surface form > "" + (Short.MAX_VALUE-2) + "" in length (got "" + surfaceForm.length + "")"");
+            }
+            payload = iterator.payload();
+            // payload + surfaceLength (short)
+            requiredLength += payload.length + 2;
+          } else {
+            payload = null;
+          }
+          
+          buffer = ArrayUtil.grow(buffer, requiredLength);
+          
+          output.reset(buffer);
+
+          output.writeShort(analyzedLength);
+
+          output.writeBytes(scratch.bytes, scratch.offset, scratch.length);
+
+          output.writeInt(encodeWeight(iterator.weight()));
+
+          if (hasPayloads) {
+            for(int i=0;i<surfaceForm.length;i++) {
+              if (surfaceForm.bytes[i] == PAYLOAD_SEP) {
+                throw new IllegalArgumentException(""surface form cannot contain unit separator character U+001F; this character is reserved"");
+              }
+            }
+            output.writeShort((short) surfaceForm.length);
+            output.writeBytes(surfaceForm.bytes, surfaceForm.offset, surfaceForm.length);
+            output.writeBytes(payload.bytes, payload.offset, payload.length);
+          } else {
+            output.writeBytes(surfaceForm.bytes, surfaceForm.offset, surfaceForm.length);
+          }
+
+          assert output.getPosition() == requiredLength: output.getPosition() + "" vs "" + requiredLength;
+
+          writer.write(buffer, 0, output.getPosition());
+        }
+      }
+      writer.close();
+
+      // Sort all input/output pairs (required by FST.Builder):
+      new Sort(new AnalyzingComparator(hasPayloads)).sort(tempInput, tempSorted);
+
+      // Free disk space:
+      tempInput.delete();
+
+      reader = new Sort.ByteSequencesReader(tempSorted);
+     
+      PairOutputs<Long,BytesRef> outputs = new PairOutputs<Long,BytesRef>(PositiveIntOutputs.getSingleton(), ByteSequenceOutputs.getSingleton());
+      Builder<Pair<Long,BytesRef>> builder = new Builder<Pair<Long,BytesRef>>(FST.INPUT_TYPE.BYTE1, outputs);
+
+      // Build FST:
+      BytesRef previousAnalyzed = null;
+      BytesRef analyzed = new BytesRef();
+      BytesRef surface = new BytesRef();
+      IntsRef scratchInts = new IntsRef();
+      ByteArrayDataInput input = new ByteArrayDataInput();
+
+      // Used to remove duplicate surface forms (but we
+      // still index the hightest-weight one).  We clear
+      // this when we see a new analyzed form, so it cannot
+      // grow unbounded (at most 256 entries):
+      Set<BytesRef> seenSurfaceForms = new HashSet<BytesRef>();
+
+      int dedup = 0;
+      while (reader.read(scratch)) {
+        input.reset(scratch.bytes, scratch.offset, scratch.length);
+        short analyzedLength = input.readShort();
+        analyzed.grow(analyzedLength+2);
+        input.readBytes(analyzed.bytes, 0, analyzedLength);
+        analyzed.length = analyzedLength;
+
+        long cost = input.readInt();
+
+        surface.bytes = scratch.bytes;
+        if (hasPayloads) {
+          surface.length = input.readShort();
+          surface.offset = input.getPosition();
+        } else {
+          surface.offset = input.getPosition();
+          surface.length = scratch.length - surface.offset;
+        }
+        
+        if (previousAnalyzed == null) {
+          previousAnalyzed = new BytesRef();
+          previousAnalyzed.copyBytes(analyzed);
+          seenSurfaceForms.add(BytesRef.deepCopyOf(surface));
+        } else if (analyzed.equals(previousAnalyzed)) {
+          dedup++;
+          if (dedup >= maxSurfaceFormsPerAnalyzedForm) {
+            // More than maxSurfaceFormsPerAnalyzedForm
+            // dups: skip the rest:
+            continue;
+          }
+          if (seenSurfaceForms.contains(surface)) {
+            continue;
+          }
+          seenSurfaceForms.add(BytesRef.deepCopyOf(surface));
+        } else {
+          dedup = 0;
+          previousAnalyzed.copyBytes(analyzed);
+          seenSurfaceForms.clear();
+          seenSurfaceForms.add(BytesRef.deepCopyOf(surface));
+        }
+
+        // TODO: I think we can avoid the extra 2 bytes when
+        // there is no dup (dedup==0), but we'd have to fix
+        // the exactFirst logic ... which would be sort of
+        // hairy because we'd need to special case the two
+        // (dup/not dup)...
+
+        // NOTE: must be byte 0 so we sort before whatever
+        // is next
+        analyzed.bytes[analyzed.offset+analyzed.length] = 0;
+        analyzed.bytes[analyzed.offset+analyzed.length+1] = (byte) dedup;
+        analyzed.length += 2;
+
+        Util.toIntsRef(analyzed, scratchInts);
+        //System.out.println(""ADD: "" + scratchInts + "" -> "" + cost + "": "" + surface.utf8ToString());
+        if (!hasPayloads) {
+          builder.add(scratchInts, outputs.newPair(cost, BytesRef.deepCopyOf(surface)));
+        } else {
+          int payloadOffset = input.getPosition() + surface.length;
+          int payloadLength = scratch.length - payloadOffset;
+          BytesRef br = new BytesRef(surface.length + 1 + payloadLength);
+          System.arraycopy(surface.bytes, surface.offset, br.bytes, 0, surface.length);
+          br.bytes[surface.length] = PAYLOAD_SEP;
+          System.arraycopy(scratch.bytes, payloadOffset, br.bytes, surface.length+1, payloadLength);
+          br.length = br.bytes.length;
+          builder.add(scratchInts, outputs.newPair(cost, br));
+        }
+      }
+      fst = builder.finish();
+
+      //Util.dotToFile(fst, ""/tmp/suggest.dot"");
+      
+      success = true;
+    } finally {
+      if (success) {
+        IOUtils.close(reader, writer);
+      } else {
+        IOUtils.closeWhileHandlingException(reader, writer);
+      }
+      
+      tempInput.delete();
+      tempSorted.delete();
+    }
+  }"
+22,2195,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.lucene.store,org.apache.lucene.store.NativeFSLockFactory,,clearLock,,"new File(lockDir, lockName).delete();",,117,117,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/store/NativeFSLockFactory.java#L117,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/store/NativeFSLockFactory.java,,unknown,"@Override
+  public void clearLock(String lockName) throws IOException {
+    // Note that this isn't strictly required anymore
+    // because the existence of these files does not mean
+    // they are locked, but, still do this in case people
+    // really want to see the files go away:
+    if (lockDir.exists()) {
+      
+      // Try to release the lock first - if it's held by another process, this
+      // method should not silently fail.
+      // NOTE: makeLock fixes the lock name by prefixing it w/ lockPrefix.
+      // Therefore it should be called before the code block next which prefixes
+      // the given name.
+      makeLock(lockName).release();
+
+      if (lockPrefix != null) {
+        lockName = lockPrefix + ""-"" + lockName;
+      }
+      
+      // As mentioned above, we don't care if the deletion of the file failed.
+      new File(lockDir, lockName).delete();
+    }
+  }"
+23,2664,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.solr.core,org.apache.solr.core.CorePropertiesLocator,,delete,,File,"File,PROPERTIES_FILENAME,instanceDir,propertiesFile,renameTo",101,101,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/core/CorePropertiesLocator.java#L101,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/core/CorePropertiesLocator.java,,unknown,"@Override
+  public void delete(CoreContainer cc, CoreDescriptor... coreDescriptors) {
+    if (coreDescriptors == null) {
+      return;
+    }
+    for (CoreDescriptor cd : coreDescriptors) {
+      if (cd == null) continue;
+      File instanceDir = new File(cd.getInstanceDir());
+      File propertiesFile = new File(instanceDir, PROPERTIES_FILENAME);
+      propertiesFile.renameTo(new File(instanceDir, PROPERTIES_FILENAME + "".unloaded""));
+      // This is a best-effort: the core.properties file may already have been
+      // deleted by the core unload, so we don't worry about checking if the
+      // rename has succeeded.
+    }
+  }"
+24,2688,lucene-solr,RV_RETURN_VALUE_IGNORED,C,last,,CORRECTNESS,org.apache.solr.cloud,org.apache.solr.cloud.AbstractFullDistribZkTestBase,,getRelativeSolrHomePath,,"base.replaceFirst(""\\."", new File(""."").getName());",,483,483,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/test-framework/src/java/org/apache/solr/cloud/AbstractFullDistribZkTestBase.java#L483,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/test-framework/src/java/org/apache/solr/cloud/AbstractFullDistribZkTestBase.java,,unknown,"private File getRelativeSolrHomePath(File solrHome) {
+    String path = SolrResourceLoader.normalizeDir(new File(""."").getAbsolutePath());
+    String base = new File(solrHome.getPath()).getAbsolutePath();
+    
+    if (base.startsWith("".""));
+    base.replaceFirst(""\\."", new File(""."").getName());
+    
+    if (path.endsWith(File.separator + ""."")) {
+      path = path.substring(0, path.length() - 2);
+    }
+    
+    int splits = path.split(""\\"" + File.separator).length;
+    
+    StringBuilder p = new StringBuilder();
+    for (int i = 0; i < splits - 2; i++) {
+      p.append("".."" + File.separator);
+    }   
+    
+    String prefix = FilenameUtils.getPrefix(path);
+    if (base.startsWith(prefix)) {
+      base = base.substring(prefix.length());
+    }
+
+    solrHome = new File(p.toString() + base);
+    return solrHome;
+  }"
+25,2723,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.solr.handler,org.apache.solr.handler.SnapShooter,,<init>,,dir,"dir,dir,exists,mkdirs",63,63,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/handler/SnapShooter.java#L63,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/SnapShooter.java,,unknown,
+26,2867,lucene-solr,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.solr.cloud,org.apache.solr.cloud.ZkController,,downloadFromZK,,dir,"dir,mkdirs",1302,1302,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/cloud/ZkController.java#L1302,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/cloud/ZkController.java,,unknown,"public static void downloadFromZK(SolrZkClient zkClient, String zkPath,
+      File dir) throws IOException, KeeperException, InterruptedException {
+    List<String> files = zkClient.getChildren(zkPath, null, true);
+    
+    for (String file : files) {
+      List<String> children = zkClient.getChildren(zkPath + ""/"" + file, null, true);
+      if (children.size() == 0) {
+        byte[] data = zkClient.getData(zkPath + ""/"" + file, null, null, true);
+        dir.mkdirs(); 
+        log.info(""Write file "" + new File(dir, file));
+        FileUtils.writeByteArrayToFile(new File(dir, file), data);
+      } else {
+        downloadFromZK(zkClient, zkPath + ""/"" + file, new File(dir, file));
+      }
+    }
+  }"
+27,9693,ant,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.tools.ant.types.selectors,org.apache.tools.ant.types.selectors.ModifiedSelectorTest,,_testScenario2,,File,"File,cachefile,delete",823,823,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/types/selectors/ModifiedSelectorTest.java#L823,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/types/selectors/ModifiedSelectorTest.java,,unknown,"public void _testScenario2() { // RuleBasedCollator not yet supported - see Selector:375 note
+        ExtendSelector s = new ExtendSelector();
+        BFT bft = new BFT();
+        String cachefile = System.getProperty(""java.io.tmpdir"")+""/mycache.txt"";
+        try {
+            makeBed();
+
+            s.setClassname(""org.apache.tools.ant.types.selectors.modifiedselector.ModifiedSelector"");
+
+            s.addParam(createParam(""cache.cachefile"", cachefile));
+            //s.addParam(createParam(""algorithm.provider"",""---"")); // i don't know any valid
+            s.addParam(createParam(""cache"",""propertyfile""));
+            s.addParam(createParam(""update"",""true""));
+            s.addParam(createParam(""comparator"",""rule""));
+            s.addParam(createParam(""algorithm.name"",""sha""));
+            s.addParam(createParam(""algorithm"",""digest""));
+
+            // first and second run
+            performTests(s, ""TTTTTTTTTTTT"");
+            performTests(s, ""TFFFFFFFFFFT"");
+            // make dirty
+            String f2name = ""tar/bz2/asf-logo-huge.tar.bz2"";
+            String f3name = ""asf-logo.gif.md5"";
+            String f4name = ""copy.filterset.filtered"";
+            bft.writeProperties(""f2name=""+f2name);
+            bft.writeProperties(""f3name=""+f3name);
+            bft.writeProperties(""f4name=""+f4name);
+            bft.doTarget(""modifiedselectortest-makeDirty"");
+            // third run
+            String results = selectionString(s);
+            StringBuffer expected = new StringBuffer();
+            for (int i=0; i<filenames.length; i++) {
+                String ch = ""F"";
+                if (files[i].isDirectory()) ch = ""T"";
+                if (filenames[i].equalsIgnoreCase(f3name)) ch = ""T"";
+                if (filenames[i].equalsIgnoreCase(f4name)) ch = ""T"";
+                expected.append(ch);
+            }
+            assertEquals(
+                ""Wrong files selected. Differing files: ""       // info text
+                + resolve(diff(expected.toString(), results)),  // list of files
+                expected.toString(),                            // expected result
+                results                                         // result
+            );
+        } finally {
+            // cleanup the environment
+            cleanupBed();
+            (new java.io.File(cachefile)).delete();
+            if (bft!=null) bft.deletePropertiesfile();
+        }
+    }"
+28,9844,ant,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional,org.apache.tools.ant.taskdefs.optional.PropertyFileTest,,destroyTempFiles,,tempFile,"tempFile,delete",196,196,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/optional/PropertyFileTest.java#L196,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/optional/PropertyFileTest.java,,unknown,"private void destroyTempFiles() {
+        File tempFile = new File(System.getProperty(""root""), testPropsFilePath);
+        tempFile.delete();
+        tempFile = null;
+
+        tempFile = new File(System.getProperty(""root""), buildPropsFilePath);
+        tempFile.delete();
+        tempFile = null;
+
+        tempFile = new File(System.getProperty(""root""), valueDoesNotGetOverwrittenPropsFilePath);
+        tempFile.delete();
+        tempFile = null;
+    }"
+29,9881,ant,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional,org.apache.tools.ant.taskdefs.optional.TraXLiaisonTest,,testXalan2Redirect,,out,"out,delete",88,88,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/optional/TraXLiaisonTest.java#L88,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/optional/TraXLiaisonTest.java,,unknown,"public void testXalan2Redirect() throws Exception {
+    	Class clazz = null;
+    	try {
+    		clazz = getClass().getClassLoader().loadClass(""org.apache.xalan.lib.Redirect"");
+    	} catch (Exception exc) {
+    		// ignore
+    	}
+    	if (clazz == null) {
+    		System.out.println(""xalan redirect is not on the classpath"");
+    		return;
+    	}
+        File xsl = getFile(""/taskdefs/optional/xalan-redirect-in.xsl"");
+        liaison.setStylesheet(xsl);
+        File out = new File(""xalan2-redirect-out-dummy.tmp"");
+        File in = getFile(""/taskdefs/optional/xsltliaison-in.xsl"");
+        ClassLoader orig = Thread.currentThread().getContextClassLoader();
+        try {
+            liaison.addParam(""xalan-version"", ""2"");
+            // Use the JRE's Xerces, not lib/optional/xerces.jar:
+            Thread.currentThread().setContextClassLoader(new ClassLoader(ClassLoader.getSystemClassLoader().getParent()) {
+                public InputStream getResourceAsStream(String name) {
+                    if (name.startsWith(""META-INF/services/"")) {
+                        // work around JAXP #6723276 in JDK 6
+                        return new ByteArrayInputStream(new byte[0]);
+                    }
+                    return super.getResourceAsStream(name);
+                }
+            });
+            // Tickle #52382:
+            System.setSecurityManager(new SecurityManager() {public void checkPermission(Permission perm) {}});
+            liaison.transform(in, out);
+        } finally {
+            out.delete();
+            Thread.currentThread().setContextClassLoader(orig);
+            System.setSecurityManager(null);
+        }
+    }"
+30,9914,ant,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs.optional.ejb,org.apache.tools.ant.taskdefs.optional.ejb.JonasDeploymentTool,,createTempDir,,tmpDir,"tmpDir,delete",780,780,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/taskdefs/optional/ejb/JonasDeploymentTool.java#L780,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/taskdefs/optional/ejb/JonasDeploymentTool.java,,unknown,"private File createTempDir() throws IOException {
+        File tmpDir = File.createTempFile(""genic"", null, null);
+        tmpDir.delete();
+        if (!tmpDir.mkdir()) {
+            throw new IOException(""Cannot create the temporary directory '"" + tmpDir + ""'."");
+        }
+        return tmpDir;
+    }"
+31,9946,ant,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,B,last,,BAD_PRACTICE,org.apache.tools.ant.taskdefs,org.apache.tools.ant.taskdefs.ZipExtraFieldTest,,testPreservesExtraFields,,f,"f,delete",44,44,close,https://github.com/apache/ant/tree/995856afcb7f8168e970e39849bdfc9264f98c84//src/tests/junit/org/apache/tools/ant/taskdefs/ZipExtraFieldTest.java#L44,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/ZipExtraFieldTest.java,,open,"public void testPreservesExtraFields() throws IOException {
+        File f = File.createTempFile(""ziptest"", "".zip"");
+        f.delete();
+        ZipFile zf = null;
+        try {
+            Zip testInstance = new Zip();
+            testInstance.setDestFile(f);
+            final ZipResource r = new ZipResource() {
+                    public String getName() {
+                        return ""x"";
+                    }
+                    public boolean isExists() {
+                        return true;
+                    }
+                    public boolean isDirectory() {
+                        return false;
+                    }
+                    public long getLastModified() {
+                        return 1;
+                    }
+                    public InputStream getInputStream() {
+                        return new ByteArrayInputStream(new byte[0]);
+                    }
+                    public ZipExtraField[] getExtraFields() {
+                        return new ZipExtraField[] {
+                            new JarMarker()
+                        };
+                    }
+                };
+            testInstance.add(new ResourceCollection() {
+                    public boolean isFilesystemOnly() { return false; }
+                    public int size() { return 1; }
+                    public Iterator<Resource> iterator() {
+                        return Collections.<Resource>singleton(r).iterator();
+                    }
+                });
+            testInstance.execute();
+
+            zf = new ZipFile(f);
+            ZipEntry ze = zf.getEntry(""x"");
+            assertNotNull(ze);
+            assertEquals(2, ze.getExtraFields().length);
+            assertTrue(ze.getExtraFields()[0] instanceof JarMarker);
+            assertTrue(ze.getExtraFields()[1]
+                       instanceof Zip64ExtendedInformationExtraField);
+        } finally {
+            ZipFile.closeQuietly(zf);
+            if (f.exists()) {
+                f.delete();
+            }
+        }
+    }"
+32,1079,tomcat,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,C,last,,STYLE,org.apache.catalina.connector,org.apache.catalina.connector.Response,,<clinit>,,URL.isSchemeChar('c');,,84,84,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/connector/Response.java#L84,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/connector/Response.java,,unknown,
+33,1156,tomcat,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,B,last,,BAD_PRACTICE,org.apache.catalina.loader,org.apache.catalina.loader.WebappClassLoader,,deleteDir,,file.delete();,,3196,3196,close,https://github.com/apache/tomcat/tree/ad9a49cb08bf004af97cad465bba45d21d112325//java/org/apache/catalina/loader/WebappClassLoader.java#L3196,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/loader/WebappClassLoader.java,,unknown,"protected static void deleteDir(File dir) {
+
+        String files[] = dir.list();
+        if (files == null) {
+            files = new String[0];
+        }
+        for (int i = 0; i < files.length; i++) {
+            File file = new File(dir, files[i]);
+            if (file.isDirectory()) {
+                deleteDir(file);
+            } else {
+                file.delete();
+            }
+        }
+        dir.delete();
+
+    }"
+34,1180,tomcat,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,B,last,,BAD_PRACTICE,org.apache.catalina.loader,org.apache.catalina.loader.WebappClassLoader,,findResourceInternal,,resourceFile.setLastModified(,,2837,2837,close,https://github.com/apache/tomcat/tree/ad9a49cb08bf004af97cad465bba45d21d112325//java/org/apache/catalina/loader/WebappClassLoader.java#L2837,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/loader/WebappClassLoader.java,,unknown,"protected ResourceEntry findResourceInternal(File file, String path){
+        ResourceEntry entry = new ResourceEntry();
+        try {
+            entry.source = getURI(new File(file, path));
+            entry.codeBase = entry.source;
+        } catch (MalformedURLException e) {
+            return null;
+        }
+        return entry;
+    }"
+35,1501,tomcat,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,B,last,,BAD_PRACTICE,org.apache.tomcat.util.http.fileupload.disk,org.apache.tomcat.util.http.fileupload.disk.DiskFileItem,,readObject,,dfosFile.delete();,,735,735,close,https://github.com/apache/tomcat/tree/ad9a49cb08bf004af97cad465bba45d21d112325//java/org/apache/tomcat/util/http/fileupload/disk/DiskFileItem.java#L735,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/tomcat/util/http/fileupload/disk/DiskFileItem.java,,unknown,"private void readObject(ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        // read values
+        in.defaultReadObject();
+
+        OutputStream output = getOutputStream();
+        if (cachedContent != null) {
+            output.write(cachedContent);
+        } else {
+            FileInputStream input = new FileInputStream(dfosFile);
+            IOUtils.copy(input, output);
+            dfosFile.delete();
+            dfosFile = null;
+        }
+        output.close();
+
+        cachedContent = null;
+    }"
+36,9496,jmeter,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,C,last,,STYLE,org.apache.jmeter.protocol.http.util.accesslog,org.apache.jmeter.protocol.http.util.accesslog.TCLogParser,,createUrl,,this.checkParamFormat,"checkParamFormat,line",328,328,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/protocol/http/org/apache/jmeter/protocol/http/util/accesslog/TCLogParser.java#L328,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/protocol/http/org/apache/jmeter/protocol/http/util/accesslog/TCLogParser.java,,open,"private void createUrl(String line, TestElement el) {
+        String paramString = null;
+        // check the URL for ""?"" symbol
+        paramString = this.stripFile(line, el);
+        if (paramString != null) {
+            this.checkParamFormat(line);
+            // now that we have stripped the file, we can parse the parameters
+            this.convertStringToJMRequest(paramString, el);
+        }
+    }"
+37,9508,jmeter,RV_RETURN_VALUE_IGNORED,C,last,,CORRECTNESS,org.apache.jmeter.protocol.jms.sampler,org.apache.jmeter.protocol.jms.sampler.FixedQueueExecutor,,sendAndReceive,,"countDownLatch.await(timeout, TimeUnit.MILLISECONDS);",,99,99,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/protocol/jms/org/apache/jmeter/protocol/jms/sampler/FixedQueueExecutor.java#L99,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/protocol/jms/org/apache/jmeter/protocol/jms/sampler/FixedQueueExecutor.java,,close,"@Override
+    public Message sendAndReceive(Message request) throws JMSException {
+        String id = request.getJMSCorrelationID();
+        if(id == null && !useReqMsgIdAsCorrelId){
+            throw new IllegalArgumentException(""Correlation id is null. Set the JMSCorrelationID header."");
+        }
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final MessageAdmin admin = MessageAdmin.getAdmin();
+        if(useReqMsgIdAsCorrelId) {// msgId not available until after send() is called
+            // Note: there is only one admin object which is shared between all threads
+            synchronized (admin) {// interlock with Receiver
+                producer.send(request);
+                id=request.getJMSMessageID();
+                admin.putRequest(id, request, countDownLatch);
+            }
+        } else {
+            admin.putRequest(id, request, countDownLatch);            
+            producer.send(request);
+        }
+
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug(Thread.currentThread().getName()+"" will wait for reply "" + id + "" started on "" + System.currentTimeMillis());
+            }
+            // This used to be request.wait(timeout_ms), where 0 means forever
+            // However 0 means return immediately for the latch
+            if (timeout == 0){
+                countDownLatch.await(); //
+            } else {
+                countDownLatch.await(timeout, TimeUnit.MILLISECONDS);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(Thread.currentThread().getName()+"" done waiting for "" + id + "" on ""+request+"" ended on "" + System.currentTimeMillis());
+            }
+
+        } catch (InterruptedException e) {
+            log.warn(""Interrupt exception caught"", e);
+        }
+        return admin.get(id);
+    }"
+38,9522,jmeter,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.jmeter.protocol.http.proxy,org.apache.jmeter.protocol.http.proxy.ProxyControl,,initJMeterKeyStore,,CERT_PATH.delete(); // safer to start afresh,,1343,1343,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/protocol/http/org/apache/jmeter/protocol/http/proxy/ProxyControl.java#L1343,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/protocol/http/org/apache/jmeter/protocol/http/proxy/ProxyControl.java,,close,"private void initJMeterKeyStore() throws IOException, GeneralSecurityException {
+        if (storePassword  != null) { // Assume we have already created the store
+            try {
+                keyStore = getKeyStore(storePassword.toCharArray());
+                X509Certificate  caCert = (X509Certificate) keyStore.getCertificate(JMETER_SERVER_ALIAS);
+                caCert.checkValidity(new Date(System.currentTimeMillis()+DateUtils.MILLIS_PER_DAY));
+            } catch (Exception e) { // store is faulty, we need to recreate it
+                keyStore = null; // if cert is not valid, flag up to recreate it
+                log.warn(""Could not open expected file or certificate is not valid "" + CERT_PATH_ABS  + "" "" + e.getMessage());
+            }
+        }
+        if (keyStore == null) { // no existing file or not valid
+            storePassword = RandomStringUtils.randomAlphanumeric(20); // Alphanum to avoid issues with command-line quoting
+            keyPassword = storePassword; // we use same password for both
+            setPassword(storePassword);
+            log.info(""Generating standard keypair in "" + CERT_PATH_ABS);
+            CERT_PATH.delete(); // safer to start afresh
+            KeyToolUtils.genkeypair(CERT_PATH, JMETER_SERVER_ALIAS, storePassword, CERT_VALIDITY, null, null);
+            keyStore = getKeyStore(storePassword.toCharArray()); // This should now work
+        }
+    }"
+39,9558,jmeter,RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT,C,last,,STYLE,org.apache.jmeter.util,org.apache.jmeter.util.PropertiesBasedPrefixResolver,,<clinit>,,properties.entrySet();,,62,62,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/util/PropertiesBasedPrefixResolver.java#L62,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/util/PropertiesBasedPrefixResolver.java,,open,
+40,9029,cassandra,RV_RETURN_VALUE_IGNORED_BAD_PRACTICE,C,last,,BAD_PRACTICE,org.apache.cassandra.db,org.apache.cassandra.db.ColumnFamilyStoreTest,,testSliceByNamesCommandOldMetatada,,File,"File,SSTable,ssTables,COMPONENT_STATS,delete,descriptor,filenameFor,iterator,next",941,941,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java#L941,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java,,unknown,"@Test
+    public void testSliceByNamesCommandOldMetatada() throws Throwable
+    {
+        String keyspaceName = ""Keyspace1"";
+        String cfName= ""Standard1"";
+        DecoratedKey key = Util.dk(""slice-name-old-metadata"");
+        ByteBuffer cname = ByteBufferUtil.bytes(""c1"");
+        Keyspace keyspace = Keyspace.open(keyspaceName);
+        ColumnFamilyStore cfs = keyspace.getColumnFamilyStore(cfName);
+        cfs.clearUnsafe();
+
+        // Create a column a 'high timestamp'
+        putColsStandard(cfs, key, new Column(cname, ByteBufferUtil.bytes(""a""), 2));
+        cfs.forceBlockingFlush();
+
+        // Nuke the metadata and reload that sstable
+        Collection<SSTableReader> ssTables = cfs.getSSTables();
+        assertEquals(1, ssTables.size());
+        cfs.clearUnsafe();
+        assertEquals(0, cfs.getSSTables().size());
+
+        new File(ssTables.iterator().next().descriptor.filenameFor(SSTable.COMPONENT_STATS)).delete();
+        cfs.loadNewSSTables();
+
+        // Add another column with a lower timestamp
+        putColsStandard(cfs, key, new Column(cname, ByteBufferUtil.bytes(""b""), 1));
+
+        // Test fetching the column by name returns the first column
+        SliceByNamesReadCommand cmd = new SliceByNamesReadCommand(keyspaceName, key.key, cfName, System.currentTimeMillis(), new NamesQueryFilter(cname));
+        ColumnFamily cf = cmd.getRow(keyspace).cf;
+        Column column = (Column) cf.getColumn(cname);
+        assert column.value().equals(ByteBufferUtil.bytes(""a"")) : ""expecting a, got "" + ByteBufferUtil.string(column.value());
+    }"
+41,1422,tomcat,RR_NOT_CHECKED,C,last,,BAD_PRACTICE,org.apache.tomcat.util.http.fileupload.disk,org.apache.tomcat.util.http.fileupload.disk.DiskFileItem,,get,,fileData,"fileData,fis,read",297,297,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/tomcat/util/http/fileupload/disk/DiskFileItem.java#L297,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/tomcat/util/http/fileupload/disk/DiskFileItem.java,,close,"@Override
+    public byte[] get() {
+        if (isInMemory()) {
+            if (cachedContent == null) {
+                cachedContent = dfos.getData();
+            }
+            return cachedContent;
+        }
+
+        byte[] fileData = new byte[(int) getSize()];
+        InputStream fis = null;
+
+        try {
+            fis = new BufferedInputStream(new FileInputStream(dfos.getFile()));
+            fis.read(fileData);
+        } catch (IOException e) {
+            fileData = null;
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+
+        return fileData;
+    }"

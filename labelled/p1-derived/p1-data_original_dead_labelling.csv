@@ -1,0 +1,3630 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,512,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.MethodCallNode,,throwNoMethodFound,,hasVarargs,hasVarargs,376,376,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/MethodCallNode.java#L376,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/MethodCallNode.java,,close,"void throwNoMethodFound(String receiverTypeName,
+									  String[] parmTypeNames,
+									  String[] primParmTypeNames)
+		throws StandardException
+	{
+		/* Put the parameter type names into a single string */
+		StringBuffer	parmTypes = new StringBuffer();
+        boolean hasVarargs = hasVarargs();
+        int     firstVarargIdx = getFirstVarargIdx();
+        int     paramCount = signature.length;
+		for (int i = 0; i < paramCount; i++)
+		{
+			if (i != 0) { parmTypes.append("", ""); }
+            boolean isVararg = isVararg( i );
+
+			/* RESOLVE - shouldn't be using hard coded strings for output */
+            String  parmType = parmTypeNames[ i ];
+            if ( parmTypeNames [i ].length() == 0 ) { parmType = ""UNTYPED""; }
+            else if ( isVararg ) { parmType = getVarargTypeName( parmType ); }
+
+            parmTypes.append( parmType );
+
+			if ((primParmTypeNames != null) &&
+				! primParmTypeNames[i].equals(parmTypeNames[i]))  // has primitive
+            {
+                String  primTypeName = primParmTypeNames[ i ];
+                if ( isVararg ) { primTypeName = getVarargTypeName( primTypeName ); }
+				parmTypes.append(""("" + primTypeName + "")"");
+            }
+		}
+
+		throw StandardException.newException(SQLState.LANG_NO_METHOD_FOUND, 
+												receiverTypeName,
+												methodName,
+											 	parmTypes);
+	}"
+1,514,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.jdbc,org.apache.derby.impl.jdbc.EmbedResultSet,,updateObject,,int origvaluelen = value.getLength();,,3068,3068,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/jdbc/EmbedResultSet.java#L3068,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/jdbc/EmbedResultSet.java,,open,"public void updateObject(int columnIndex, Object x, int scale)
+			throws SQLException {
+		updateObject(columnIndex, x);
+		/*
+		* If the parameter type is DECIMAL or NUMERIC, then
+		* we need to set them to the passed scale.
+		*/
+		int colType = getColumnType(columnIndex);
+		if ((colType == Types.DECIMAL) || (colType == Types.NUMERIC)) {
+			if (scale < 0)
+				throw newSQLException(SQLState.BAD_SCALE_VALUE, new Integer(scale));
+
+			try {
+				DataValueDescriptor value = updateRow.getColumn(columnIndex);
+
+				int origvaluelen = value.getLength();
+				((VariableSizeDataValue)
+						value).setWidth(VariableSizeDataValue.IGNORE_PRECISION,
+							scale,
+							false);
+
+			} catch (StandardException t) {
+				throw EmbedResultSet.noStateChangeException(t);
+			}
+		}
+	}"
+2,529,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.DMLModStatementNode,,parseGenerationClause,,getCompilerContext,getCompilerContext,533,533,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/DMLModStatementNode.java#L533,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/DMLModStatementNode.java,,close,"public	ValueNode	parseGenerationClause
+	(
+     String				clauseText,
+     TableDescriptor    td
+    )
+		throws StandardException
+	{
+		Parser						p;
+		ValueNode					clauseTree;
+		LanguageConnectionContext	lcc = getLanguageConnectionContext();
+		CompilerContext 			compilerContext = getCompilerContext();
+
+		/* Get a Statement to pass to the parser */
+
+		/* We're all set up to parse. We have to build a compilable SQL statement
+		 * before we can parse -  So, we goober up a VALUES defaultText.
+		 */
+		String select = ""SELECT "" + clauseText + "" FROM "" + td.getQualifiedName();
+		
+		/*
+		** Get a new compiler context, so the parsing of the select statement
+		** doesn't mess up anything in the current context (it could clobber
+		** the ParameterValueSet, for example).
+		*/
+		CompilerContext newCC = lcc.pushCompilerContext();
+
+		p = newCC.getParser();
+				
+		/* Finally, we can call the parser */
+		// Since this is always nested inside another SQL statement, so topLevel flag
+		// should be false
+		Visitable qt = p.parseStatement(select);
+		if (SanityManager.DEBUG)
+		{
+			if (! (qt instanceof CursorNode))
+			{
+				SanityManager.THROWASSERT(
+					""qt expected to be instanceof CursorNode, not "" +
+					qt.getClass().getName());
+			}
+			CursorNode cn = (CursorNode) qt;
+			if (! (cn.getResultSetNode() instanceof SelectNode))
+			{
+				SanityManager.THROWASSERT(
+					""cn.getResultSetNode() expected to be instanceof SelectNode, not "" +
+					cn.getResultSetNode().getClass().getName());
+			}
+		}
+
+		clauseTree = ((ResultColumn) 
+							((CursorNode) qt).getResultSetNode().getResultColumns().elementAt(0)).
+									getExpression();
+
+		lcc.popCompilerContext(newCC);
+
+		return	clauseTree;
+	}"
+3,597,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.client.net,org.apache.derby.client.net.NetConnectionReply,,parseSECCHKreply,,byte[] bytes = parseSECTKN(false);,,243,243,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/net/NetConnectionReply.java#L243,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/net/NetConnectionReply.java,,close,"private void parseSECCHKreply(NetConnection netConnection) throws DisconnectException {
+        if (peekCodePoint() != CodePoint.SECCHKRM) {
+            parseSecurityCheckError(netConnection);
+            return;
+        }
+
+        parseSECCHKRM(netConnection);
+        if (peekCodePoint() == CodePoint.SECTKN) {
+            // rpydta used only if the security mechanism returns
+            // a security token that must be sent back to the source system.
+            // this is only used for DCSSEC.  In the case of DCESEC,
+            // the sectkn must be returned as reply data if DCE is using
+            // mutual authentication.
+            // Need to double check what to map this to.  This is probably
+            // incorrect but consider it a conversation protocol error
+            // 0x03 - OBJDSS sent when not allowed.
+            //parseSECTKN (true);
+            boolean done = false;
+            byte[] bytes = parseSECTKN(false);
+        }
+    }"
+4,621,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.UpdateNode,,addGeneratedColumns,,int		                        columnCount = baseTable.getMaxColumnID();,,1232,1232,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/UpdateNode.java#L1232,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/UpdateNode.java,,close,"private void    addGeneratedColumns
+	(
+		TableDescriptor				baseTable,
+        ResultSetNode               updateSet,
+        ColumnDescriptorList    affectedGeneratedColumns,
+        ColumnDescriptorList    addedGeneratedColumns
+	)
+		throws StandardException
+	{
+        ResultColumnList        updateColumnList = updateSet.getResultColumns();
+        int                             count = updateColumnList.size();
+        ColumnDescriptorList    generatedColumns = baseTable.getGeneratedColumns();
+        int                                 generatedColumnCount = generatedColumns.size();
+		int		                        columnCount = baseTable.getMaxColumnID();
+        HashSet                     updatedColumns = new HashSet();
+        UUID                            tableID = baseTable.getObjectID();
+        
+		for (int ix = 0; ix < count; ix++)
+		{
+			String      name = ((ResultColumn)updateColumnList.elementAt( ix )).getName();
+
+            updatedColumns.add( name );
+		}
+
+        for ( int gcIdx = 0; gcIdx < generatedColumnCount; gcIdx++ )
+        {
+            ColumnDescriptor    gc = generatedColumns.elementAt( gcIdx );
+            DefaultInfo             defaultInfo = gc.getDefaultInfo();
+            String[]                       mentionedColumnNames = defaultInfo.getReferencedColumnNames();
+            int                         mentionedColumnCount = mentionedColumnNames.length;
+
+            // handle the case of setting a generated column to the DEFAULT
+            // literal
+            if ( updatedColumns.contains( gc.getColumnName() ) ) { affectedGeneratedColumns.add( tableID, gc ); }
+
+            // figure out if this generated column is affected by the
+            // update
+            for ( int mcIdx = 0; mcIdx < mentionedColumnCount; mcIdx++ )
+            {
+                String                      mentionedColumnName = mentionedColumnNames[ mcIdx ];
+
+                if ( updatedColumns.contains( mentionedColumnName ) )
+                {
+                    // Yes, we are updating one of the columns mentioned in
+                    // this generation clause.
+                    affectedGeneratedColumns.add( tableID, gc );
+                    
+                    // If the generated column isn't in the update list yet,
+                    // add it.
+                    if ( !updatedColumns.contains( gc.getColumnName() ) )
+                    {
+                        addedGeneratedColumns.add( tableID, gc );
+                        
+                        // we will fill in the real value later on in parseAndBindGenerationClauses();
+                        ValueNode       dummy = (ValueNode) getNodeFactory().getNode
+                            ( C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE, getContextManager());
+                       ResultColumn    newResultColumn = (ResultColumn) getNodeFactory().getNode
+                            ( C_NodeTypes.RESULT_COLUMN, gc.getType(), dummy, getContextManager());
+                        newResultColumn.setColumnDescriptor( baseTable, gc );
+                        newResultColumn.setName( gc.getColumnName() );
+
+                        updateColumnList.addResultColumn( newResultColumn );
+                    }
+                    
+                    break;
+                }
+            }   // done looping through mentioned columns
+
+        }   // done looping through generated columns
+    }"
+5,624,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.tools.ij,org.apache.derby.impl.tools.ij.URLCheck,,main,,URLCheck,"URLCheck,args",69,69,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/tools/org/apache/derby/impl/tools/ij/URLCheck.java#L69,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/tools/org/apache/derby/impl/tools/ij/URLCheck.java,,open,"public static void main(String[] args) {
+    if (args.length > 0) {
+      //Get the first argument passed in.
+      URLCheck aCheck = new URLCheck(args[0]);
+    }
+  }"
+6,637,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.SetSchemaNode,,activationKind,,getCompilerContext,"getCompilerContext,getParameterList",163,163,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/SetSchemaNode.java#L163,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/SetSchemaNode.java,,close,"int activationKind()
+	{
+		Vector parameterList = getCompilerContext().getParameterList();
+		/*
+		** We need parameters 
+		** only for those that have parameters.
+		*/
+		if (type == StatementType.SET_SCHEMA_DYNAMIC)
+		{
+			return StatementNode.NEED_PARAM_ACTIVATION;
+		}
+		else
+		{
+			return StatementNode.NEED_NOTHING_ACTIVATION;
+		}
+	}"
+7,643,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.iapi.sql.dictionary,org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor,,getColumnDescriptors,,DataDictionary dd = getDataDictionary();,,325,325,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/iapi/sql/dictionary/ConstraintDescriptor.java#L325,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/sql/dictionary/ConstraintDescriptor.java,,close,"public ColumnDescriptorList getColumnDescriptors()
+		throws StandardException
+	{
+		if (colDL == null)
+		{
+			DataDictionary dd = getDataDictionary();
+			colDL = new ColumnDescriptorList();
+	
+			int[]	refCols = getReferencedColumns();
+			for (int i = 0; i < refCols.length; i++)
+			{
+				colDL.add(table.getColumnDescriptor(refCols[i]));
+			}
+		}
+		return colDL;
+	}"
+8,661,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.CreateIndexNode,,bindStatement,,getCompilerContext,getCompilerContext,150,150,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/CreateIndexNode.java#L150,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/CreateIndexNode.java,,close,"public void bindStatement() throws StandardException
+	{
+		CompilerContext			cc = getCompilerContext();
+		SchemaDescriptor		sd;
+		int						columnCount;
+
+		sd = getSchemaDescriptor();
+
+		td = getTableDescriptor(tableName);
+
+		//throw an exception if user is attempting to create an index on a temporary table
+		if (td.getTableType() == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
+		{
+				throw StandardException.newException(SQLState.LANG_NOT_ALLOWED_FOR_DECLARED_GLOBAL_TEMP_TABLE);
+		}
+
+		//If total number of indexes on the table so far is more than 32767, then we need to throw an exception
+		if (td.getTotalNumberOfIndexes() > Limits.DB2_MAX_INDEXES_ON_TABLE)
+		{
+			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEXES_ON_TABLE,
+				String.valueOf(td.getTotalNumberOfIndexes()),
+				tableName,
+				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
+		}
+
+		/* Validate the column name list */
+		verifyAndGetUniqueNames();
+
+		columnCount = columnNames.length;
+		boundColumnIDs = new int[ columnCount ];
+
+		// Verify that the columns exist
+		for (int i = 0; i < columnCount; i++)
+		{
+			ColumnDescriptor			columnDescriptor;
+
+			columnDescriptor = td.getColumnDescriptor(columnNames[i]);
+			if (columnDescriptor == null)
+			{
+				throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE,
+															columnNames[i],
+															tableName);
+			}
+			boundColumnIDs[ i ] = columnDescriptor.getPosition();
+
+			// Don't allow a column to be created on a non-orderable type
+			if ( ! columnDescriptor.getType().getTypeId().
+												orderable(getClassFactory()))
+			{
+				throw StandardException.newException(SQLState.LANG_COLUMN_NOT_ORDERABLE_DURING_EXECUTION,
+					columnDescriptor.getType().getTypeId().getSQLTypeName());
+			}
+		}
+
+		/* Check for number of key columns to be less than 16 to match DB2 */
+		if (columnCount > 16)
+			throw StandardException.newException(SQLState.LANG_TOO_MANY_INDEX_KEY_COLS);
+
+		/* See if the index already exists in this schema.
+		 * NOTE: We still need to check at execution time
+		 * since the index name is only unique to the schema,
+		 * not the table.
+		 */
+//  		if (dd.getConglomerateDescriptor(indexName.getTableName(), sd, false) != null)
+//  		{
+//  			throw StandardException.newException(SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT,
+//  												 ""Index"",
+//  												 indexName.getTableName(),
+//  												 ""schema"",
+//  												 sd.getSchemaName());
+//  		}
+
+		/* Statement is dependent on the TableDescriptor */
+		getCompilerContext().createDependency(td);
+
+	}"
+9,670,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.execute,org.apache.derby.impl.sql.execute.ConstraintConstantAction,,validateConstraint,,row,"row,getRowArray",301,301,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/execute/ConstraintConstantAction.java#L301,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/execute/ConstraintConstantAction.java,,close,"static boolean validateConstraint
+	(
+		String							constraintName,
+		String							constraintText,
+		TableDescriptor					td,
+		LanguageConnectionContext		lcc,
+		boolean							isCheckConstraint
+	)
+		throws StandardException
+	{
+		StringBuffer checkStmt = new StringBuffer();
+		/* should not use select sum(not(<check-predicate>) ? 1: 0) because
+		 * that would generate much more complicated code and may exceed Java
+		 * limits if we have a large number of check constraints, beetle 4347
+		 */
+		checkStmt.append(""SELECT COUNT(*) FROM "");
+		checkStmt.append(td.getQualifiedName());
+		checkStmt.append("" WHERE NOT("");
+		checkStmt.append(constraintText);
+		checkStmt.append("")"");
+	
+		ResultSet rs = null;
+		try
+		{
+			PreparedStatement ps = lcc.prepareInternalStatement(checkStmt.toString());
+
+            // This is a substatement; for now, we do not set any timeout
+            // for it. We might change this behaviour later, by linking
+            // timeout to its parent statement's timeout settings.
+			rs = ps.executeSubStatement(lcc, false, 0L);
+			ExecRow row = rs.getNextRow();
+			if (SanityManager.DEBUG)
+			{
+				if (row == null)
+				{
+					SanityManager.THROWASSERT(""did not get any rows back from query: ""+checkStmt.toString());
+				}
+			}
+
+			DataValueDescriptor[] rowArray = row.getRowArray();
+			Number value = ((Number)((NumberDataValue)row.getRowArray()[0]).getObject());
+			/*
+			** Value may be null if there are no rows in the
+			** table.
+			*/
+			if ((value != null) && (value.longValue() != 0))
+			{	
+				//check constraint violated
+				if (isCheckConstraint)
+					throw StandardException.newException(SQLState.LANG_ADD_CHECK_CONSTRAINT_FAILED, 
+						constraintName, td.getQualifiedName(), value.toString());
+				/*
+				 * for not null constraint violations exception will be thrown in caller
+				 * check constraint will not get here since exception is thrown
+				 * above
+				 */
+				return false;
+			}
+		}
+		finally
+		{
+			if (rs != null)
+			{
+				rs.close();
+			}
+		}
+		return true;
+	}"
+10,676,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.NumericTypeCompiler,,getScale,,rightType,"rightType,getPrecision",488,488,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/NumericTypeCompiler.java#L488,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/NumericTypeCompiler.java,,close,"private int getScale(String operator,
+							DataTypeDescriptor leftType,
+							DataTypeDescriptor rightType)
+	{
+		// Only meaningful for decimal
+		if (getStoredFormatIdFromTypeId() != StoredFormatIds.DECIMAL_TYPE_ID)
+		{
+			return leftType.getScale();
+		}
+
+		long val;
+
+		long lscale = (long)leftType.getScale();
+		long rscale = (long)rightType.getScale();
+		long lprec = (long)leftType.getPrecision();
+		long rprec = (long)rightType.getPrecision();
+
+		/*
+		** Retain greatest scale, take sum of left
+		** of decimal
+		*/
+		if (TypeCompiler.TIMES_OP.equals(operator))
+		{	
+			val = lscale + rscale;
+		}
+		else if (TypeCompiler.DIVIDE_OP.equals(operator))
+		{
+			/*
+			** Take max left scale + right precision - right scale + 1, 
+			** or 4, whichever is biggest 
+			*/
+			LanguageConnectionContext lcc = (LanguageConnectionContext)
+				(ContextService.getContext(LanguageConnectionContext.CONTEXT_ID)); 
+
+			// Scale: 31 - left precision + left scale - right scale
+				val = Math.max(NumberDataValue.MAX_DECIMAL_PRECISION_SCALE - lprec + lscale - rscale, 0);
+
+		}
+		else if (TypeCompiler.AVG_OP.equals(operator))
+		{
+			val = Math.max(Math.max(lscale, rscale),
+						NumberDataValue.MIN_DECIMAL_DIVIDE_SCALE);
+		}
+		/*
+		** SUM, -, + all take max(lscale,rscale)
+		*/
+		else
+		{
+			val = Math.max(lscale, rscale);
+		}
+
+		if (val > Integer.MAX_VALUE)
+		{
+			val = Integer.MAX_VALUE;
+		}
+		val = Math.min(NumberDataValue.MAX_DECIMAL_PRECISION_SCALE, val);
+		return (int)val;
+	}"
+11,683,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.CreateSequenceNode,,bindStatement,,getCompilerContext,getCompilerContext,135,135,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/CreateSequenceNode.java#L135,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/CreateSequenceNode.java,,close,"public void bindStatement() throws StandardException {
+        CompilerContext cc = getCompilerContext();
+
+        // implicitly create the schema if it does not exist.
+        // this method also compiles permissions checks
+        SchemaDescriptor sd = getSchemaDescriptor();
+
+        // set the default schema name if the user did not explicitly specify a schema
+        if (_sequenceName.getSchemaName() == null) {
+            _sequenceName.setSchemaName(sd.getSchemaName());
+        }
+
+        if (_dataType.getTypeId().equals(TypeId.SMALLINT_ID)) {
+            if (_minValue.longValue() < Short.MIN_VALUE || _minValue.longValue() >= Short.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        ""MINVALUE"",
+                        ""SMALLINT"",
+                        Short.MIN_VALUE + """",
+                        Short.MAX_VALUE + """");
+            }
+            if (_maxValue.longValue() <= Short.MIN_VALUE || _maxValue.longValue() > Short.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        ""MAXVALUE"",
+                        ""SMALLINT"",
+                        Short.MIN_VALUE + """",
+                        Short.MAX_VALUE + """");
+            }
+        } else if (_dataType.getTypeId().equals(TypeId.INTEGER_ID)) {
+            if (_minValue.longValue() < Integer.MIN_VALUE || _minValue.longValue() >= Integer.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        ""MINVALUE"",
+                        ""INTEGER"",
+                        Integer.MIN_VALUE + """",
+                        Integer.MAX_VALUE + """");
+            }
+            if (_maxValue.longValue() <= Integer.MIN_VALUE || _maxValue.longValue() > Integer.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        ""MAXVALUE"",
+                        ""INTEGER"",
+                        Integer.MIN_VALUE + """",
+                        Integer.MAX_VALUE + """");
+            }
+        } else {
+            // BIGINT
+            if (_minValue.longValue() < Long.MIN_VALUE || _minValue.longValue() >= Long.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        ""MINVALUE"",
+                        ""BIGINT"",
+                        Long.MIN_VALUE + """",
+                        Long.MAX_VALUE + """");
+            }
+            if (_maxValue.longValue() <= Long.MIN_VALUE || _maxValue.longValue() > Long.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        ""MAXVALUE"",
+                        ""BIGINT"",
+                        Long.MIN_VALUE + """",
+                        Long.MAX_VALUE + """");
+            }
+        }
+
+        if (_minValue.longValue() >= _maxValue.longValue()) {
+            throw StandardException.newException(
+                    SQLState.LANG_SEQ_MIN_EXCEEDS_MAX,
+                    _minValue.toString(),
+                    _maxValue.toString());
+        }
+
+        if (_initialValue.longValue() < _minValue.longValue() || _initialValue.longValue() > _maxValue.longValue()) {
+             throw StandardException.newException(
+                     SQLState.LANG_SEQ_INVALID_START,
+                     _initialValue.toString(),
+                     _minValue.toString(),
+                     _maxValue.toString());
+        }       
+
+        if (_stepValue.longValue() == 0L) {
+            throw StandardException.newException(
+                    SQLState.LANG_SEQ_INCREMENT_ZERO);
+        }
+
+    }"
+12,702,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.GroupByNode,,optimizeIt,,childResult,"childResult,optimizeIt",810,810,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/GroupByNode.java#L810,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/GroupByNode.java,,close,"public CostEstimate optimizeIt(
+							Optimizer optimizer,
+							OptimizablePredicateList predList,
+							CostEstimate outerCost,
+							RowOrdering rowOrdering)
+			throws StandardException
+	{
+		// RESOLVE: NEED TO FACTOR IN THE COST OF GROUPING (SORTING) HERE
+		CostEstimate childCost = ((Optimizable) childResult).optimizeIt(
+													optimizer,
+													predList,
+													outerCost,
+													rowOrdering);
+
+		CostEstimate retval = super.optimizeIt(
+												optimizer,
+												predList,
+												outerCost,
+												rowOrdering
+											  );
+
+		return retval;
+	}"
+13,711,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.QueryTreeNode,,bindRowMultiSet,,originalMultiSet,"originalMultiSet,getColumnNames",1681,1681,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/QueryTreeNode.java#L1681,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/QueryTreeNode.java,,close,"public DataTypeDescriptor bindRowMultiSet( DataTypeDescriptor originalDTD ) throws StandardException
+    {
+        if ( !originalDTD.getCatalogType().isRowMultiSet() ) { return originalDTD; }
+
+        RowMultiSetImpl originalMultiSet = (RowMultiSetImpl) originalDTD.getTypeId().getBaseTypeId();
+        String[] columnNames = originalMultiSet.getColumnNames();
+        TypeDescriptor[] columnTypes = originalMultiSet.getTypes();
+        int columnCount = columnTypes.length;
+
+        for ( int i = 0; i < columnCount; i++ )
+        {
+            columnTypes[ i ] = bindUserCatalogType( columnTypes[ i ] );
+        }
+
+        return originalDTD;
+    }"
+14,716,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.WindowResultSetNode,,addNewColumns,,LanguageFactory lf =,,280,280,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/WindowResultSetNode.java#L280,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/WindowResultSetNode.java,,close,"private void addNewColumns() throws StandardException {
+        /*
+         * Now process all of the window function calls.  Replace every
+         * call with an RC.  We toss out the list of RCs, we need to get
+         * each RC as we process its corresponding window function.
+         */
+        LanguageFactory lf =
+            getLanguageConnectionContext().getLanguageFactory();
+
+        ResultColumnList bottomRCL  = childResult.getResultColumns();
+        ResultColumnList windowingRCL = resultColumns;
+
+        ReplaceWindowFuncCallsWithCRVisitor replaceCallsVisitor =
+            new ReplaceWindowFuncCallsWithCRVisitor(
+                (ResultColumnList) getNodeFactory().getNode(
+                    C_NodeTypes.RESULT_COLUMN_LIST,
+                    getContextManager()),
+                ((FromTable) childResult).getTableNumber(),
+                ResultSetNode.class);
+        parent.getResultColumns().accept(replaceCallsVisitor);
+
+        for (int i=0; i < windowFuncCalls.size(); i++) {
+            WindowFunctionNode winFunc =
+                (WindowFunctionNode)windowFuncCalls.elementAt(i);
+
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(
+                    !(winFunc.getWindow() instanceof WindowReferenceNode),
+                    ""unresolved window-reference: "" +
+                    winFunc.getWindow().getName());
+            }
+
+            WindowDefinitionNode funcWindow =
+                (WindowDefinitionNode)winFunc.getWindow();
+
+            if (funcWindow == wdn) {
+                ResultColumn newRC = (ResultColumn) getNodeFactory().getNode(
+                    C_NodeTypes.RESULT_COLUMN,
+                    ""##winFuncResult"",
+                    winFunc.getNewNullResultExpression(),
+                    getContextManager());
+
+                newRC.markGenerated();
+                newRC.bindResultColumnToExpression();
+                bottomRCL.addElement(newRC);
+                newRC.setVirtualColumnId(bottomRCL.size());
+                int winFuncResultVColId = newRC.getVirtualColumnId();
+
+                /*
+                ** Set the WindowResultSetNode result column to point to this.
+                ** The Windowing Node result was created when we called
+                ** ReplaceWindowFuncCallsWithCRVisitor.
+                */
+                ColumnReference newColumnRef =
+                    (ColumnReference) getNodeFactory().getNode(
+                        C_NodeTypes.COLUMN_REFERENCE,
+                        newRC.getName(),
+                        null,
+                        getContextManager());
+
+                newColumnRef.setSource(newRC);
+                newColumnRef.setNestingLevel(this.getLevel());
+                newColumnRef.setSourceLevel(this.getLevel());
+                newColumnRef.markGeneratedToReplaceWindowFunctionCall();
+
+                ResultColumn tmpRC = (ResultColumn) getNodeFactory().getNode(
+                    C_NodeTypes.RESULT_COLUMN,
+                    newRC.getColumnName(),
+                    newColumnRef,
+                    getContextManager());
+
+                tmpRC.markGenerated();
+                tmpRC.bindResultColumnToExpression();
+                windowingRCL.addElement(tmpRC);
+                tmpRC.setVirtualColumnId(windowingRCL.size());
+
+                /*
+                ** Set the column reference to point to
+                ** this.
+                */
+                newColumnRef = winFunc.getGeneratedRef();
+
+                if (newColumnRef != null) {
+                    newColumnRef.setSource(tmpRC);
+                } // Not generated, meaning it's no longer in use
+            }
+        }
+    }"
+15,729,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.client.net,org.apache.derby.client.net.NetXAConnectionReply,,parseIndoubtList,,numXid,"numXid,parseXIDCNT",303,303,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/net/NetXAConnectionReply.java#L303,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/net/NetXAConnectionReply.java,,close,"protected java.util.Hashtable parseIndoubtList() throws DisconnectException {
+        boolean found = false;
+        int port = 0;
+        int numXid = 0;
+        String sIpAddr = null;
+        int peekCP = peekCodePoint();
+        parseLengthAndMatchCodePoint(CodePoint.PRPHRCLST);
+        peekCP = peekCodePoint();
+        if (peekCP == CodePoint.XIDCNT) {
+            found = true;
+            numXid = parseXIDCNT();
+            peekCP = peekCodePoint();
+        }
+
+        java.util.Hashtable<Xid, NetIndoubtTransaction> indoubtTransactions =
+                new java.util.Hashtable<Xid, NetIndoubtTransaction>();
+        while (peekCP == CodePoint.XID) {
+            Xid xid = parseXID();
+            indoubtTransactions.put(xid, new NetIndoubtTransaction(xid, null, null, null, sIpAddr, port));
+            peekCP = peekCodePoint();
+        }
+
+        return indoubtTransactions;
+    }"
+16,757,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.BinaryOperatorNode,,bindXMLQuery,,leftOperand,"leftOperand,getTypeId",332,332,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/BinaryOperatorNode.java#L332,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/BinaryOperatorNode.java,,close,"public ValueNode bindXMLQuery()
+        throws StandardException
+    {
+        // Check operand types.
+        TypeId leftOperandType = leftOperand.getTypeId();
+        TypeId rightOperandType = rightOperand.getTypeId();
+
+        // Left operand is query expression and must be a string
+        // literal.  SQL/XML spec doesn't allow params nor expressions
+        // 6.17: <XQuery expression> ::= <character string literal> 
+        if (!(leftOperand instanceof CharConstantNode))
+        {
+            throw StandardException.newException(
+                SQLState.LANG_INVALID_XML_QUERY_EXPRESSION);
+        }
+        else {
+            xmlQuery = ((CharConstantNode)leftOperand).getString();
+        }
+
+        // Right operand must be an XML data value.  NOTE: This
+        // is a Derby-specific restriction, not an SQL/XML one.
+        // We have this restriction because the query engine
+        // that we use (currently Xalan) cannot handle non-XML
+        // context items.
+        if ((rightOperandType != null) &&
+            !rightOperandType.isXMLTypeId())
+        {
+            throw StandardException.newException(
+                SQLState.LANG_INVALID_CONTEXT_ITEM_TYPE,
+                rightOperandType.getSQLTypeName());
+        }
+
+        // Is there a ? parameter on the right?
+        if (rightOperand.requiresTypeFromContext())
+        {
+            // For now, since JDBC has no type defined for XML, we
+            // don't allow binding to an XML parameter.
+            throw StandardException.newException(
+                SQLState.LANG_ATTEMPT_TO_BIND_XML);
+        }
+
+        // Set the result type of this operator.
+        if (operatorType == XMLEXISTS_OP) {
+        // For XMLEXISTS, the result type is always SQLBoolean.
+        // The ""true"" in the next line says that the result
+        // can be nullable--which it can be if evaluation of
+        // the expression returns a null (this is per SQL/XML
+        // spec, 8.4)
+            setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, true));
+        }
+        else {
+        // The result of an XMLQUERY operator is always another
+        // XML data value, per SQL/XML spec 6.17: ""...yielding a value
+        // X1 of an XML type.""
+            setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    JDBC40Translation.SQLXML));
+        }
+
+        return genSQLJavaSQLTree();
+    }"
+17,836,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.TableElementList,,setCollationTypesOnCharacterStringColumns,,int collationType = sd.getCollationType();,,105,105,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/TableElementList.java#L105,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/TableElementList.java,,close,"void setCollationTypesOnCharacterStringColumns(SchemaDescriptor sd)
+        throws StandardException
+    {
+		int			size = size();
+		int collationType = sd.getCollationType();
+		for (int index = 0; index < size; index++)
+		{
+			TableElementNode tableElement = (TableElementNode) elementAt(index);
+
+			if (tableElement instanceof ColumnDefinitionNode)
+			{
+				ColumnDefinitionNode cdn = (ColumnDefinitionNode) elementAt(index);
+
+                setCollationTypeOnCharacterStringColumn( sd, cdn );
+			}
+		}
+	}"
+18,933,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.DMLModStatementNode,,parseCheckConstraint,,getCompilerContext,getCompilerContext,1369,1369,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/DMLModStatementNode.java#L1369,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/DMLModStatementNode.java,,close,"public	ValueNode	parseCheckConstraint
+	(
+		String				checkConstraintText,
+		TableDescriptor		td
+    )
+		throws StandardException
+	{
+		Parser						p;
+		ValueNode					checkTree;
+		LanguageConnectionContext	lcc = getLanguageConnectionContext();
+		CompilerContext 			compilerContext = getCompilerContext();
+
+		/* Get a Statement to pass to the parser */
+
+		/* We're all set up to parse. We have to build a compile SQL statement
+		 * before we can parse - we just have a WHERE clause right now.
+		 * So, we goober up a SELECT * FROM table WHERE checkDefs.
+		 */
+		String select = ""SELECT * FROM "" +
+			            td.getQualifiedName() +
+			            "" WHERE "" +
+			            checkConstraintText;
+		
+		/*
+		** Get a new compiler context, so the parsing of the select statement
+		** doesn't mess up anything in the current context (it could clobber
+		** the ParameterValueSet, for example).
+		*/
+		CompilerContext newCC = lcc.pushCompilerContext();
+
+		p = newCC.getParser();
+				
+		/* Finally, we can call the parser */
+		// Since this is always nested inside another SQL statement, so topLevel flag
+		// should be false
+		Visitable qt = p.parseStatement(select);
+		if (SanityManager.DEBUG)
+		{
+			if (! (qt instanceof CursorNode))
+			{
+				SanityManager.THROWASSERT(
+					""qt expected to be instanceof CursorNode, not "" +
+					qt.getClass().getName());
+			}
+			CursorNode cn = (CursorNode) qt;
+			if (! (cn.getResultSetNode() instanceof SelectNode))
+			{
+				SanityManager.THROWASSERT(
+					""cn.getResultSetNode() expected to be instanceof SelectNode, not "" +
+					cn.getResultSetNode().getClass().getName());
+			}
+		}
+
+		checkTree = ((SelectNode) ((CursorNode) qt).getResultSetNode()).getWhereClause();
+
+		lcc.popCompilerContext(newCC);
+
+		return	checkTree;
+	}"
+19,934,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.store.access.btree.index,org.apache.derby.impl.store.access.btree.index.B2IRowLocking3,,_lockScanRow,,btree,btree,549,549,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/store/access/btree/index/B2IRowLocking3.java#L549,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/btree/index/B2IRowLocking3.java,,close,"protected boolean _lockScanRow(
+    OpenBTree               open_btree,
+    BTree                   btree,
+    BTreeRowPosition        pos,
+    boolean                 request_row_lock,
+    FetchDescriptor         lock_fetch_desc,
+    DataValueDescriptor[]   lock_template,
+    RowLocation             lock_row_loc,
+    boolean                 previous_key_lock,
+    boolean                 forUpdate,
+    int                     lock_operation)
+		throws StandardException
+    {
+        boolean latch_released = false;
+        B2I     b2i            = (B2I) btree;
+
+        if (request_row_lock)
+        {
+            // In order to implement a serialized scan based on previous
+            // key locking, this method acquires a row lock on
+            // the base table's row from the index row at [startpage/startslot].
+            // This will be the 'previous key'.
+
+            if (pos.current_slot == 0)
+            {
+                // this call will take care of searching left in the btree
+                // to find the previous row to lock, 0 is the control row and
+                // not a valid thing to lock as a previous key.
+
+                // it is ok to call the non-scan as this is just a special
+                // case of a previous key lock call.  The only scan code that
+                // will call this routine with slot == 0 will retry if this
+                // routine returns that a latch was released.
+
+                latch_released = 
+                    !lockNonScanPreviousRow(
+                        btree,
+                        pos.current_leaf,
+                        1 /* lock row previous to row at slot 1 */, 
+                        lock_fetch_desc,
+                        lock_template,
+                        lock_row_loc,
+                        open_btree, 
+                        lock_operation,
+                        TransactionManager.LOCK_COMMIT_DURATION);
+
+                // special test to see if latch release code works
+                if (SanityManager.DEBUG)
+                {
+                    latch_released = 
+                        OpenBTree.test_errors(
+                            open_btree,
+                            ""B2iRowLocking3_1_lockScanRow"",
+                            null, // Don't save position since the operation
+                                  // will be retried if the latch was released.
+                                  // See also comment above call to
+                                  // lockNonScanPreviousRow().
+                            this, pos.current_leaf, latch_released);
+                }
+            }
+            else
+            {
+                // Just lock the row at ""slot""
+
+                latch_released = 
+                    !lockRowOnPage(
+                        btree,
+                        pos.current_leaf, 
+                        (LeafControlRow) null /* no other latch currently */,
+                        pos.current_slot, 
+                        pos,
+                        lock_fetch_desc,
+                        lock_template,
+                        lock_row_loc,
+                        lock_operation,
+                        TransactionManager.LOCK_COMMIT_DURATION);
+
+                // special test to see if latch release code works
+                if (SanityManager.DEBUG)
+                {
+                    latch_released = 
+                        OpenBTree.test_errors(
+                            open_btree,
+                            ""B2iRowLocking3_2_lockScanRow"", pos,
+                            this, pos.current_leaf, latch_released);
+                }
+            }
+        }
+
+        return(!latch_released);
+    }"
+20,940,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.execute,org.apache.derby.impl.sql.execute.DDLConstantAction,,storeConstraintDependenciesOnPrivileges,,dd,"dd,getAuthorizationDatabaseOwner",331,331,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/execute/DDLConstantAction.java#L331,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/execute/DDLConstantAction.java,,close,"protected void storeConstraintDependenciesOnPrivileges(
+		Activation activation,
+		Dependent dependent,
+		UUID refTableUUID,
+		ProviderInfo[] providers)
+			throws StandardException
+	{
+		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
+		DataDictionary dd = lcc.getDataDictionary();
+		DependencyManager dm = dd.getDependencyManager();
+		String dbo = dd.getAuthorizationDatabaseOwner();
+        String currentUser = lcc.getCurrentUserId(activation);
+		SettableBoolean roleDepAdded = new SettableBoolean();
+
+		//If the Database Owner is creating this constraint, then no need to 
+		//collect any privilege dependencies because the Database Owner can   
+		//access any objects without any restrictions
+        if (! currentUser.equals( dd.getAuthorizationDatabaseOwner()) )
+		{
+			PermissionsDescriptor permDesc;
+			// Now, it is time to add into dependency system the FOREIGN
+			// constraint's dependency on REFERENCES privilege, or, if it is a
+			// CHECK constraint, any EXECUTE or USAGE privileges. If the REFERENCES is
+			// revoked from the constraint owner, the constraint will get
+			// dropped automatically.
+			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
+
+			if (requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
+			{
+				for(Iterator iter = requiredPermissionsList.iterator();iter.hasNext();)
+				{
+					StatementPermission statPerm = (StatementPermission) iter.next();
+					//First check if we are dealing with a Table or 
+					//Column level privilege. All the other privileges
+					//are not required for a foreign key constraint.
+					if (statPerm instanceof StatementTablePermission)
+					{//It is a table/column level privilege
+						StatementTablePermission statementTablePermission = 
+							(StatementTablePermission) statPerm;
+						//Check if we are dealing with REFERENCES privilege.
+						//If not, move on to the next privilege in the
+						//required privileges list
+						if (statementTablePermission.getPrivType() != Authorizer.REFERENCES_PRIV)
+							continue;
+						//Next check is this REFERENCES privilege is 
+						//on the same table as referenced by the foreign
+						//key constraint? If not, move on to the next
+						//privilege in the required privileges list
+						if (!statementTablePermission.getTableUUID().equals(refTableUUID))
+							continue;
+					} else if (statPerm instanceof StatementSchemaPermission
+						    || statPerm instanceof StatementRolePermission
+                               || statPerm instanceof StatementGenericPermission ) {
+						continue;
+					} else {
+						if (SanityManager.DEBUG) {
+							SanityManager.ASSERT(
+								statPerm instanceof StatementRoutinePermission,
+								""only StatementRoutinePermission expected"");
+						}
+
+						// skip if this permission concerns a function not
+						// referenced by this constraint
+						StatementRoutinePermission rp =
+							(StatementRoutinePermission)statPerm;
+						if (!inProviderSet(providers, rp.getRoutineUUID())) {
+							continue;
+						}
+					}
+
+
+					// We know that we are working with a REFERENCES, EXECUTE, or USAGE
+					// privilege. Find all the PermissionDescriptors for this
+					// privilege and make constraint depend on it through
+					// dependency manager.  The REFERENCES privilege could be
+					// defined at the table level or it could be defined at
+					// individual column levels. In addition, individual column
+					// REFERENCES privilege could be available at the user
+					// level, PUBLIC or role level.  EXECUTE and USAGE privileges could be
+					// available at the user level, PUBLIC or role level.
+                    permDesc = statPerm.getPermissionDescriptor(
+                        currentUser, dd);
+
+					if (permDesc == null) 
+					{
+						// No privilege exists for given user. The privilege
+						// has to exist at at PUBLIC level....
+
+						permDesc = statPerm.getPermissionDescriptor(Authorizer.PUBLIC_AUTHORIZATION_ID, dd);
+						// .... or at the role level. Additionally, for column
+						// level privileges, even if *some* were available at
+						// the PUBLIC level others may be still be missing,
+						// hence the call in the test below to
+						// allColumnsCoveredByUserOrPUBLIC.
+						boolean roleUsed = false;
+
+						if (permDesc == null ||
+							((permDesc instanceof ColPermsDescriptor) &&
+                                 ! ((StatementColumnPermission)statPerm).
+                                   allColumnsCoveredByUserOrPUBLIC(
+                                       currentUser, dd))) {
+							roleUsed = true;
+							permDesc = findRoleUsage(activation, statPerm);
+						}
+
+						// If the user accessing the object is the owner of
+						// that object, then no privilege tracking is needed
+						// for the owner.
+                        if (! permDesc.checkOwner(currentUser) ) {
+
+                            dm.addDependency(dependent, permDesc,
+											 lcc.getContextManager());
+
+							if (roleUsed) {
+								// We had to rely on role, so track that
+								// dependency, too.
+								trackRoleDependency
+									(activation, dependent, roleDepAdded);
+							}
+						}
+					} else
+						//if the object on which permission is required is owned by the
+						//same user as the current user, then no need to keep that
+						//object's privilege dependency in the dependency system
+                    if (! permDesc.checkOwner(currentUser))
+					{
+						dm.addDependency(dependent, permDesc, lcc.getContextManager());
+						if (permDesc instanceof ColPermsDescriptor)
+						{
+							// The if statement above means we found a
+							// REFERENCES privilege at column level for the
+							// given authorizer. If this privilege doesn't
+							// cover all the column , then there has to exisit
+							// REFERENCES for the remaining columns at PUBLIC
+							// level or at role level.  Get that permission
+							// descriptor and save it in dependency system
+							StatementColumnPermission
+								statementColumnPermission = (
+									StatementColumnPermission)statPerm;
+							permDesc = statementColumnPermission.
+                                getPUBLIClevelColPermsDescriptor(
+                                    currentUser, dd);
+							//Following if checks if some column level privileges
+							//exist only at public level. If so, then the public
+							//level column privilege dependency is added
+							//into the dependency system
+							if (permDesc != null &&
+									permDesc.getObjectID() != null) {
+								// User did not have all required column
+								// permissions and at least one column is
+								// covered by PUBLIC.
+								dm.addDependency(dependent, permDesc,
+												 lcc.getContextManager());
+							}
+							// Possibly, the current role has also been relied
+							// upon.
+							if (!statementColumnPermission.
+                                    allColumnsCoveredByUserOrPUBLIC(
+                                        currentUser, dd)) {
+								// Role has been relied upon, so register a
+								// dependency.
+								trackRoleDependency
+									(activation, dependent, roleDepAdded);
+							}
+						}
+					}
+
+					if (!(statPerm instanceof StatementRoutinePermission)) {
+						//We have found the REFERENCES privilege for all the
+						//columns in foreign key constraint and we don't
+						//need to go through the rest of the privileges
+						//for this sql statement.
+						break;
+					} else {
+						// For EXECUTE privilege there may be several functions
+						// referenced in the constraint, so continue looking.
+					}
+				}
+			}
+		}
+		
+	}"
+21,954,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.client.am,org.apache.derby.client.am.ResultSet,,getRef,,java.sql.Ref result = isNull(column) ? null : cursor_.getRef(column);,,1324,1324,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/am/ResultSet.java#L1324,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/am/ResultSet.java,,unknown,"public java.sql.Ref getRef(int column) throws SQLException {
+        try
+        {
+            closeOpenStreams();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, ""getRef"", column);
+            }
+            checkGetterPreconditions(column, ""getRef"");
+            java.sql.Ref result = isNull(column) ? null : cursor_.getRef(column);
+            if (true) {
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, ""getRef"", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }"
+22,955,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.WindowResultSetNode,,addNewPRNode,,parent,"parent,getResultColumns",174,174,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/WindowResultSetNode.java#L174,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/WindowResultSetNode.java,,close,"private void addNewPRNode()
+        throws StandardException
+    {
+        /*
+        ** Get the new PR, put above the WindowResultSetNode.
+        */
+        ResultColumnList rclNew = (ResultColumnList)getNodeFactory().
+            getNode(C_NodeTypes.RESULT_COLUMN_LIST,
+                    getContextManager());
+
+        int sz = resultColumns.size();
+        for (int i = 0; i < sz; i++)
+        {
+            ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+            if (!rc.isGenerated()) {
+                rclNew.addElement(rc);
+            }
+        }
+
+        // if any columns in the source RCL were generated for an order by
+        // remember it in the new RCL as well. After the sort is done it will
+        // have to be projected out upstream.
+        rclNew.copyOrderBySelect(resultColumns);
+
+        parent = (FromTable) getNodeFactory().getNode(
+                                        C_NodeTypes.PROJECT_RESTRICT_NODE,
+                                        this, // child
+                                        rclNew,
+                                        null, // havingClause,
+                                        null, // restriction list
+                                        null, // project subqueries
+                                        null, // havingSubquerys,
+                                        null, // tableProperties,
+                                        getContextManager());
+
+
+        /*
+         * Reset the bottom RCL to be empty.
+         */
+        childResult.setResultColumns((ResultColumnList)
+                                            getNodeFactory().getNode(
+                                                C_NodeTypes.RESULT_COLUMN_LIST,
+                                                getContextManager()));
+
+        /*
+         * Set the Windowing RCL to be empty
+         */
+        resultColumns = (ResultColumnList) getNodeFactory().getNode(
+                                            C_NodeTypes.RESULT_COLUMN_LIST,
+                                            getContextManager());
+
+
+        // Add all referenced columns in select list to windowing node's RCL
+        // and substitute references in original node to point to the Windowing
+        // result set. (modelled on GroupByNode's action for addUnAggColumns)
+        CollectNodesVisitor getCRVisitor =
+            new CollectNodesVisitor(ColumnReference.class);
+
+        ResultColumnList prcl = parent.getResultColumns();
+
+        parent.getResultColumns().accept(getCRVisitor);
+
+        Vector colRefs = getCRVisitor.getList();
+
+        // Find all unique columns referenced and add those to windowing result
+        // set.
+        Vector uniqueCols = new Vector();
+        for (int i= 0; i< colRefs.size(); i++) {
+            ColumnReference cr = (ColumnReference)colRefs.elementAt(i);
+            if (!colRefAlreadySeen(uniqueCols, cr)) {
+                uniqueCols.add(cr);
+            }
+        }
+
+        // Add all virtual column select list to windowing node's RCL and
+        // substitute references in original node to point to the Windowing
+        // result set. Happens for example when we have a window over a group
+        // by.
+        CollectNodesVisitor getVCVisitor =
+            new CollectNodesVisitor(VirtualColumnNode.class);
+
+        parent.getResultColumns().accept(getVCVisitor);
+        Vector vcs = getVCVisitor.getList();
+
+        // Add any virtual columns to windowing result.
+        for (int i= 0; i< vcs.size(); i++) {
+            uniqueCols.add(vcs.elementAt(i));
+        }
+
+        ResultColumnList bottomRCL  = childResult.getResultColumns();
+        ResultColumnList windowingRCL = resultColumns;
+
+        for (int i= 0; i< uniqueCols.size(); i++) {
+            ValueNode crOrVcn = (ValueNode)uniqueCols.elementAt(i);
+
+            ResultColumn newRC = (ResultColumn) getNodeFactory().getNode(
+                    C_NodeTypes.RESULT_COLUMN,
+                    ""##UnWindowingColumn"",
+                    crOrVcn,
+                    getContextManager());
+
+            // add this result column to the bottom rcl
+            bottomRCL.addElement(newRC);
+            newRC.markGenerated();
+            newRC.bindResultColumnToExpression();
+            newRC.setVirtualColumnId(bottomRCL.size());
+
+            // now add this column to the windowing result column list
+            ResultColumn wRC = (ResultColumn) getNodeFactory().getNode(
+                    C_NodeTypes.RESULT_COLUMN,
+                    ""##UnWindowingColumn"",
+                    crOrVcn,
+                    getContextManager());
+            windowingRCL.addElement(wRC);
+            wRC.markGenerated();
+            wRC.bindResultColumnToExpression();
+            wRC.setVirtualColumnId(windowingRCL.size());
+
+            /*
+             ** Reset the original node to point to the
+             ** Windowing result set.
+             */
+            VirtualColumnNode vc = (VirtualColumnNode) getNodeFactory().getNode(
+                    C_NodeTypes.VIRTUAL_COLUMN_NODE,
+                    this, // source result set.
+                    wRC,
+                    new Integer(windowingRCL.size()),
+                    getContextManager());
+
+            SubstituteExpressionVisitor seVis =
+                new SubstituteExpressionVisitor(crOrVcn, vc, null);
+            parent.getResultColumns().accept(seVis);
+        }
+    }"
+23,1,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.DataDictionaryImpl,,initSystemIndexVariables,,CatalogRowFactory	rf = ti.getCatalogRowFactory();,,8790,8790,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java#L8790,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java,,close,"public void initSystemIndexVariables(DataDescriptorGenerator ddg,
+										   TabInfoImpl ti,
+										   int indexNumber)
+		throws StandardException
+	{
+		int					numCols = ti.getIndexColumnCount(indexNumber);
+		int[]				baseColumnPositions = new int[numCols];
+		CatalogRowFactory	rf = ti.getCatalogRowFactory();
+
+		for (int colCtr = 0; colCtr < numCols; colCtr++)
+		{
+			baseColumnPositions[colCtr] = 
+				ti.getBaseColumnPosition(indexNumber, colCtr);
+		}
+
+		boolean[] isAscending = new boolean[baseColumnPositions.length];
+		for (int i = 0; i < baseColumnPositions.length; i++)
+			isAscending[i]        = true;
+
+        IndexRowGenerator irg = null;
+
+        if (softwareVersion.checkVersion(
+                DataDictionary.DD_VERSION_DERBY_10_4,null)) 
+        {
+            irg = new IndexRowGenerator(
+                ""BTREE"", ti.isIndexUnique(indexNumber),
+                false,
+                baseColumnPositions,
+                isAscending,
+                baseColumnPositions.length);
+        }
+        else 
+        {
+            //older version of Data Disctionary
+            //use old constructor
+            irg = new IndexRowGenerator (
+                ""BTREE"", ti.isIndexUnique(indexNumber),
+                baseColumnPositions,
+                isAscending,
+                baseColumnPositions.length);
+        }
+
+		// For now, assume that all index columns are ordered columns
+		ti.setIndexRowGenerator(indexNumber, irg);
+	}"
+24,9,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.JoinNode,,LOJgetReferencedTables,,JBitSet,"JBitSet,numTables",2028,2028,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/compile/JoinNode.java#L2028,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/JoinNode.java,,close,"public JBitSet LOJgetReferencedTables(int numTables)
+				throws StandardException
+	{
+		JBitSet map = new JBitSet(numTables);
+
+		map = (JBitSet) leftResultSet.LOJgetReferencedTables(numTables);
+		if (map == null) return null;
+		else map.or((JBitSet) rightResultSet.LOJgetReferencedTables(numTables));
+
+		return map;
+	}"
+25,170,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.DDMReader,,toDebugString,,buflen = buffer.length;,,1986,1986,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/DDMReader.java#L1986,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/DDMReader.java,,unknown,"protected String toDebugString(String indent)
+	{
+		String s = indent + ""***** DDMReader toDebugString ******\n"";
+		int buflen = 0;
+		if (buffer != null)
+			buflen = buffer.length;
+	   s += indent + ""Reader buffer length = "" + buffer.length + ""\n"";
+	   return s;
+	}"
+26,195,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.iapi.sql.dictionary,org.apache.derby.iapi.sql.dictionary.TableDescriptor,,getHeapConglomerateId,,getDataDictionary,getDataDictionary,339,339,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/iapi/sql/dictionary/TableDescriptor.java#L339,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/sql/dictionary/TableDescriptor.java,,close,"public long getHeapConglomerateId()
+			throws StandardException
+	{
+		DataDictionary dd = getDataDictionary();
+
+		ConglomerateDescriptor cd = null;
+
+		/* If we've already cached the heap conglomerate number, then
+		 * simply return it.
+		 */
+		if (heapConglomNumber != -1)
+		{
+			return heapConglomNumber;
+		}
+
+		ConglomerateDescriptor[] cds = getConglomerateDescriptors();
+
+		for (int index = 0; index < cds.length; index++)
+		{
+			cd = cds[index];
+			if ( ! cd.isIndex())
+				break;
+		}
+
+		if (SanityManager.DEBUG)
+		{
+			if (cd == null)
+			{
+				SanityManager.THROWASSERT(
+					""cd is expected to be non-null for "" + tableName);
+			}
+
+			if (cd.isIndex())
+			{
+				SanityManager.THROWASSERT(
+					""Did not find heap conglomerate for "" + tableName);
+			}
+		}
+
+		heapConglomNumber = cd.getConglomerateNumber();
+
+		return heapConglomNumber;
+	}"
+27,220,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.drda,org.apache.derby.drda.NetServlet,,doGet,,escapeSingleQuotes,"escapeSingleQuotes,langUtil,setParamMessage2,getTextMessage",183,183,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/drda/NetServlet.java#L183,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/drda/NetServlet.java,,close,"public void doGet (HttpServletRequest request, HttpServletResponse response)
+	        throws ServletException, IOException
+	{
+		String logOnMessage;
+		String logOffMessage;
+		String traceOnMessage;
+		String traceOffMessage;
+		String traceOnOffMessage;
+		String startMessage;
+		String stopMessage;
+		String returnMessage;
+		String traceSessionMessage;
+		String traceDirMessage;
+		String contMessage;
+		String setParamMessage;
+		String setParamMessage2;
+		String netParamMessage;
+        String formHeader = null;
+
+		LocalizedResource langUtil;
+        String locale[] = new String[ 1 ];
+		
+		langUtil = getCurrentAppUI(request, locale);
+		response.setContentType(""text/html; charset=UTF-8"");
+		
+		//prevent caching of the servlet since contents can change - beetle 4649
+		response.setHeader(""Cache-Control"", ""no-cache,no-store"");
+
+		formHeader = ""<form enctype='multipart/form-data; charset=UTF-8' action='"" +
+			request.getRequestURI() +"" '>"";
+
+        PrintWriter out = new PrintWriter
+            ( new OutputStreamWriter(response.getOutputStream(), ""UTF8""),true );
+		
+		//inialize messages
+		logOnMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_LogOn""));
+		logOffMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_LogOff""));
+		traceOnMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_TraceOn""));
+		traceOffMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_TraceOff""));
+		startMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_Start""));
+		stopMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_Stop""));
+		traceSessionMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_TraceSessButton""));
+		traceOnOffMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_TraceOnOff""));
+		returnMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_Return""));
+		traceDirMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_TraceDir""));
+		contMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_Continue""));
+		setParamMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_SetParam""));
+		setParamMessage2 = escapeSingleQuotes(langUtil.getTextMessage(""SRV_SetParam2""));
+		netParamMessage = escapeSingleQuotes(langUtil.getTextMessage(""SRV_NetParam""));
+
+		printBanner(langUtil, out);
+		// set up a server we can use
+		if (server == null) {
+			try {
+				server = new NetworkServerControl();
+			}catch (Exception e) {
+				printErrorForm(langUtil, request, e, returnMessage, out);
+				return;
+			}
+		}
+		server.setClientLocale( locale[ 0 ] );
+		String form = getForm(request);
+		String doAction = getDoAction(request);
+		// if doAction is set, use it to determine form
+		if (doAction != null )
+		{
+			if (doAction.equals(traceOnOffMessage))
+				form = traceSessionMessage;
+			else
+				form = doAction;
+		}
+		// if no form, determine form based on server status
+		boolean serverStatus = getServerStatus();
+		if (form == null)
+		{
+			if (serverStatus)
+				form = startMessage;
+			else
+				form = stopMessage;
+		}
+		else if (form.equals(startMessage))
+		{
+			if (!serverStatus)  {
+				runServer(langUtil, request, returnMessage, out);
+			}
+		}
+		else if (form.equals(stopMessage))
+		{
+			if (serverStatus)   {
+				shutdownServer(langUtil, request, returnMessage, out);
+			}
+			setDefaults();
+					
+		}
+		else if (form.equals(returnMessage) || form.equals(returnMessage))
+		{
+			// check if server is still running and use that to determine which form
+			if (serverStatus)
+			{
+				form = startMessage;
+			}
+			else
+			{
+				form = stopMessage;
+			}
+		}
+
+		out.println( formHeader);
+		// display forms
+
+		form = escapeSingleQuotes(form);
+		doAction = escapeSingleQuotes(doAction);
+	  	if (form.equals(startMessage))
+		{
+			String logButton = getLogging(request);
+			String traceButton = getTrace(request);
+			if (logButton !=  null && logButton.equals(logOnMessage))
+			{
+				if (logging(langUtil, true, request, returnMessage, out))
+					logStatus = true;
+			}
+			if (logButton !=  null && logButton.equals(logOffMessage))
+			{
+				if (logging(langUtil, false, request, returnMessage, out))
+					logStatus = false;
+			}
+			if (traceButton !=  null && traceButton.equals(traceOnMessage))
+			{
+				if (traceAll(langUtil, true, request, returnMessage, out))
+					traceStatus = true;
+			}
+			if (traceButton !=  null && traceButton.equals(traceOffMessage))
+			{
+				if (traceAll(langUtil, false, request, returnMessage, out))
+					traceStatus = false;
+			}
+			displayCurrentStatus(request, langUtil, returnMessage, out);
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_StopButton"")+""</h4>"" );
+			out.println( ""<INPUT type=submit name=form value='""+ stopMessage + ""'>"" );
+
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_LogButton2"")+""</h4>"" );
+
+			if (logStatus)
+			{
+				out.println( ""<INPUT type=submit name=logform value='""+logOffMessage + ""'>"" );
+			}
+			else
+			{
+				out.println( ""<INPUT type=submit name=logform value='""+logOnMessage + ""'>"" );
+			}
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_TraceButton2"")+""</h4>"" );
+			if (traceStatus)
+			{
+				out.println( ""<INPUT type=submit name=traceform value='""+traceOffMessage+ ""'>"" );
+			}
+			else
+			{
+				out.println( ""<INPUT type=submit name=traceform value='""+traceOnMessage + ""'>"" );
+			}
+
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_TraceSession"")+""</h4>"" );
+			out.println( ""<INPUT type=submit name=form value='""+ traceSessionMessage + ""'>"" );
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_TraceDirButton"")+""</h4>"" );
+			out.println( ""<INPUT type=submit name=form value='""+ traceDirMessage + ""'>"" );
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_ThreadButton"")+""</h4>"" );
+			out.println( ""<INPUT type=submit name=form value='""+ netParamMessage+ ""'>"" );
+		}
+		else if (form.equals(stopMessage))
+		{
+
+			printAsContentHeader(langUtil.getTextMessage(""SRV_NotStarted""), out);
+			String logButton = getLogging(request);
+			String traceButton =  getTrace(request);
+			if (logButton !=  null && logButton.equals(logOnMessage))
+				logStatus = true;
+			if (logButton !=  null && logButton.equals(logOffMessage))
+				logStatus = false;
+			if (traceButton !=  null && traceButton.equals(traceOnMessage))
+				traceStatus = true;
+			if (traceButton !=  null && traceButton.equals(traceOffMessage))
+				traceStatus = false;
+			if (logStatus)
+			{
+				out.println( ""<h4>""+langUtil.getTextMessage(""SRV_LogOffButton"")+""</h4>"" );
+				out.println( ""<INPUT type=submit name=logform value='""+logOffMessage + ""'>"" );
+			}
+			else
+			{
+				out.println( ""<h4>""+langUtil.getTextMessage(""SRV_LogOnButton"")+""</h4>"" );
+				out.println( ""<INPUT type=submit name=logform value='""+logOnMessage + ""'>"" );
+			}
+			if (traceStatus)
+			{
+				out.println( ""<h4>""+langUtil.getTextMessage(""SRV_TraceOffButton"")+""</h4>"" );
+				out.println( ""<INPUT type=submit name=traceform value='""+traceOffMessage + ""'>"" );
+			}
+			else
+			{
+				out.println( ""<h4>""+langUtil.getTextMessage(""SRV_TraceOnButton"")+""</h4>"" );
+				out.println( ""<INPUT type=submit name=traceform value='""+traceOnMessage + ""'>"" );
+			}
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_StartButton"")+""</h4>"" );
+			out.println( ""<INPUT type=submit name=form value='""+startMessage+ ""'>"" );
+		}
+		else if (form.equals(traceSessionMessage))
+		{
+			if (doAction != null)
+			{
+				if (doAction.equals(traceOnOffMessage))
+				{
+					String sessionid = request.getParameter(""sessionid"");
+					int session = 0;
+					try {
+					 	session = (new Integer(sessionid)).intValue();
+					} catch (Exception e) {
+						printErrorForm(langUtil, request,
+							langUtil.getTextMessage(""SRV_InvalidVal"",
+							sessionid, langUtil.getTextMessage(""SRV_SessionID"")),
+                                       returnMessage, out);
+						return;
+					}
+					Properties p = null;
+					try {
+						p = server.getCurrentProperties();
+					} catch (Exception e) {
+						printErrorForm(langUtil, request, e, returnMessage, out);
+						return;
+					}
+					// if it's on, turn it off, if its off, turn it on
+					boolean val;
+					if (p.getProperty(Property.DRDA_PROP_TRACE+sessionid) != null)
+						val = false;
+					else
+						val = true;
+					if (traceSession(langUtil, val, session, request, returnMessage, out))
+					{
+						if (val)
+							out.println( ""<h4>""+langUtil.getTextMessage(""SRV_StatusTraceNoOn"", sessionid)+""</h4>"");
+						else
+							out.println( ""<h4>""+langUtil.getTextMessage(""SRV_StatusTraceNoOff"", sessionid)+""</h4>"");
+					}
+					else
+						return;
+						
+				}
+			}
+			printAsContentHeader(langUtil.getTextMessage(""SRV_TraceSessButton""), out);
+			out.println( ""<h4>"" + getHtmlLabelledMessageInstance(langUtil,
+				""SRV_SessionID"", ""sessionId"") + ""</h4>"");
+			out.println( ""<INPUT type=text name=sessionid size=10 maxlength=10 "" +
+				""id='sessionId' value=''>"");
+			out.println( ""<h4> </h4>"");
+			out.println( ""<INPUT type=submit name=doaction value='""+traceOnOffMessage+ ""'>"" );
+			out.println( ""<INPUT type=submit name=form value='""+returnMessage+ ""'>"" );
+		}
+		else if (form.equals(traceDirMessage))
+		{
+			boolean set = false;
+			String traceDirectory = null;
+			printAsContentHeader(traceDirMessage, out);
+			if (doAction != null)
+			{
+				if (doAction.equals(traceDirMessage))
+				{
+					traceDirectory = getParam(request, ""tracedirectory"");
+					if (traceDirectory(langUtil, traceDirectory, request,
+                                       returnMessage, out) )
+						set = true;
+					else
+						return;
+					
+				}
+			}
+			if (set)
+			{
+				out.println( ""<h2>""+langUtil.getTextMessage(""SRV_TraceDirDone"", traceDirectory)+""</h2>"");
+				out.println( ""<INPUT type=submit name=form value='""+returnMessage+""'>"" );
+			}
+			else
+			{
+				out.println( ""<h4>"" + getHtmlLabelledMessageInstance(langUtil,
+					""SRV_TraceDir"", ""tracedir"") + ""</h4>"");
+				out.println( ""<INPUT type=text name=tracedirectory size=60 maxlength=256 "" +
+					""id='tracedir' value='""+tracingDirectory+""'>"");
+				out.println( ""<h4> </h4>"");
+				out.println( ""<INPUT type=submit name=doaction value='""+traceDirMessage+ ""'>"" );
+				out.println( ""<INPUT type=submit name=form value='""+returnMessage+ ""'>"" );
+			}
+		}
+		else if (form.equals(netParamMessage))
+		{
+			int maxThreads = 0;
+			int timeSlice = 0;
+			String maxName = langUtil.getTextMessage(""SRV_NewMaxThreads"");
+			String sliceName = langUtil.getTextMessage(""SRV_NewTimeSlice"");
+			try {
+				Properties p = server.getCurrentProperties();
+				String val = p.getProperty(Property.DRDA_PROP_MAXTHREADS);
+				maxThreads= (new Integer(val)).intValue();
+				val = p.getProperty(Property.DRDA_PROP_TIMESLICE);
+				timeSlice= (new Integer(val)).intValue();
+			} catch (Exception e) {
+				printErrorForm(langUtil, request, e, returnMessage, out);
+				return;
+			}
+			if (doAction != null && doAction.equals(netParamMessage))
+			{
+				int newMaxThreads = getIntParameter(request, ""newmaxthreads"", 
+					""SRV_NewMaxThreads"", langUtil, returnMessage, out);
+				int newTimeSlice = (newMaxThreads == INVALID) ? NOT_GIVEN :
+					getIntParameter(request, ""newtimeslice"", ""SRV_NewTimeSlice"", langUtil, 
+						returnMessage, out);
+				if ((newMaxThreads == INVALID) || (newTimeSlice == INVALID))
+					return;
+				else if (!(newMaxThreads == NOT_GIVEN && newTimeSlice == NOT_GIVEN))
+				{
+					if (newMaxThreads != NOT_GIVEN)
+						maxThreads = newMaxThreads;
+					if (newTimeSlice != NOT_GIVEN)
+						timeSlice = newTimeSlice;
+					if (!setNetParam(langUtil, maxThreads, timeSlice, request,
+							returnMessage, out))
+						return;
+				}
+			}
+			
+			out.println(formHeader);
+			printAsContentHeader(netParamMessage, out);
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_MaxThreads"", new Integer(maxThreads).toString()) +""</h4>"");
+			out.println( ""<h4>""+langUtil.getTextMessage(""SRV_TimeSlice"", new Integer(timeSlice).toString()) +""</h4>"");
+			out.println( ""<h4> </h4>"");
+			out.println( ""<h4> <label for='newmaxthreads'>""+maxName+""</label> </h4>"");
+			out.println( ""<INPUT type=text name=newmaxthreads size=10 maxlength=10 "" +
+				""id='newmaxthreads' value=''>"" );
+			out.println( ""<h4> <label for='newslice'>""+sliceName+""</label> </h4>"");
+			out.println( ""<INPUT type=text name=newtimeslice size=10 maxlength=10 "" +
+				""id='newslice' value=''>"" );
+			out.println( ""<h4> </h4>"");
+			out.println( ""<INPUT type=submit name=doaction value='""+netParamMessage+ ""'>"" );
+			out.println( ""<INPUT type=submit name=form value='""+returnMessage+ ""'>"" );
+		}
+		else
+		{
+			System.out.println(""Internal Error: Unknown form, ""+ form);
+			out.println(""Internal Error: Unknown form, ""+ form);
+
+
+		}
+
+		out.println( ""</html>"" ); 
+		out.println( ""</body>"" ); 	
+
+	}"
+28,330,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.DataDictionaryImpl,,create_10_1_system_procedures,,routine_uuid = createSystemProcedureOrFunction(,,12046,12046,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java#L12046,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java,,close,"void create_10_1_system_procedures(
+    TransactionController   tc,
+    HashSet               newlyCreatedRoutines,
+    UUID                    sysUtilUUID)
+		throws StandardException
+    { 
+		UUID routine_uuid = null;
+
+        // void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
+        //     IN SCHEMANAME        VARCHAR(128), 
+        //     IN TABLENAME         VARCHAR(128),
+        //     IN PURGE_ROWS        SMALLINT,
+        //     IN DEFRAGMENT_ROWS   SMALLINT,
+        //     IN TRUNCATE_END      SMALLINT
+        //     )
+        {
+            // procedure argument names
+            String[] arg_names = {
+                ""SCHEMANAME"", 
+                ""TABLENAME"", 
+                ""PURGE_ROWS"", 
+                ""DEFRAGMENT_ROWS"", 
+                ""TRUNCATE_END""};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                TypeDescriptor.SMALLINT,
+                TypeDescriptor.SMALLINT,
+                TypeDescriptor.SMALLINT
+            };
+
+            routine_uuid = createSystemProcedureOrFunction(
+                ""SYSCS_INPLACE_COMPRESS_TABLE"",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+				0,
+				0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
+                (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+    }"
+29,356,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.SQLParser,,xqVariable,,passingMech = xmlPassingMechanism();,,6970,6970,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java#L6970,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java,,unknown,
+30,494,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.SQLParser,,alterTableAction,,long[]                          autoIncrementInfo = new long[4];,,13546,13546,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java#L13546,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java,,unknown,
+31,504,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.FromVTI,,genResultColList,,makeTableName,"makeTableName,td,getSchemaName",1812,1812,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/compile/FromVTI.java#L1812,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/FromVTI.java,,close,"private ResultColumnList genResultColList(TableDescriptor td)
+			throws StandardException
+	{
+		ResultColumnList 			rcList = null;
+		ResultColumn	 			resultColumn;
+		ValueNode		 			valueNode;
+		ColumnDescriptor 			colDesc = null;
+
+
+		TableName tableName = makeTableName(td.getSchemaName(), 
+											td.getName());
+
+		/* Add all of the columns in the table */
+		rcList = (ResultColumnList) getNodeFactory().getNode(
+										C_NodeTypes.RESULT_COLUMN_LIST,
+										getContextManager());
+		ColumnDescriptorList cdl = td.getColumnDescriptorList();
+		int					 cdlSize = cdl.size();
+
+		for (int index = 0; index < cdlSize; index++)
+		{
+			/* Build a ResultColumn/BaseColumnNode pair for the column */
+			colDesc = (ColumnDescriptor) cdl.elementAt(index);
+
+			valueNode = (ValueNode) getNodeFactory().getNode(
+											C_NodeTypes.BASE_COLUMN_NODE,
+											colDesc.getColumnName(),
+									  		exposedName,
+											colDesc.getType(),
+											getContextManager());
+			resultColumn = (ResultColumn) getNodeFactory().getNode(
+											C_NodeTypes.RESULT_COLUMN,
+											colDesc,
+											valueNode,
+											getContextManager());
+
+			/* Build the ResultColumnList to return */
+			rcList.addResultColumn(resultColumn);
+		}
+
+		return rcList;
+	}"
+32,510,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.SQLParser,,additiveOperator,,tok = jj_consume_token(PLUS_SIGN);,,5224,5224,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java#L5224,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java,,unknown,
+33,515,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.DRDAConnThread,,verifyUserIdPassword,,"realName = realName.substring(0, endOfName);",,1422,1422,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/DRDAConnThread.java#L1422,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/DRDAConnThread.java,,close,"private int verifyUserIdPassword() throws DRDAProtocolException
+	{
+		databaseAccessException = null;
+		int retSecChkCode = 0;
+
+		String realName = database.getDatabaseName(); //first strip off properties
+		int endOfName = realName.indexOf(';');
+		if (endOfName != -1)
+			realName = realName.substring(0, endOfName);
+		retSecChkCode = getConnFromDatabaseName();
+		return retSecChkCode;
+	}"
+34,543,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.execute,org.apache.derby.impl.sql.execute.AlterTableConstantAction,,columnDroppedAndTriggerDependencies,,visitor,"visitor,getList",1791,1791,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/execute/AlterTableConstantAction.java#L1791,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/execute/AlterTableConstantAction.java,,close,"private void columnDroppedAndTriggerDependencies(TriggerDescriptor trd,
+			boolean cascade, String columnName)
+	throws StandardException {
+		dd.dropTriggerDescriptor(trd, tc);
+
+		// Here we get the trigger action sql and use the parser to build
+		// the parse tree for it.
+		SchemaDescriptor compSchema;
+		compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
+		CompilerContext newCC = lcc.pushCompilerContext(compSchema);
+		Parser	pa = newCC.getParser();
+		StatementNode stmtnode = (StatementNode)pa.parseStatement(trd.getTriggerDefinition());
+		lcc.popCompilerContext(newCC);
+		// Do not delete following. We use this in finally clause to 
+		// determine if the CompilerContext needs to be popped.
+		newCC = null;
+		
+		try {
+			// We are interested in ColumnReference classes in the parse tree
+			CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
+			stmtnode.accept(visitor);
+			Vector refs = visitor.getList();
+			
+			// Regenerate the internal representation for the trigger action 
+			// sql using the ColumnReference classes in the parse tree. It
+			// will catch dropped column getting used in trigger action sql
+			// through the REFERENCING clause(this can happen only for the
+			// the triggers created prior to 10.7. Trigger created with
+			// 10.7 and higher keep track of trigger action column used
+			// through the REFERENCING clause in system table and hence
+			// use of dropped column will be detected earlier in this 
+			// method for such triggers).
+			//
+			// We might catch errors like following during this step.
+			// Say that following pre-10.7 trigger exists in the system and
+			// user is dropping column c11. During the regeneration of the
+			// internal trigger action sql format, we will catch that 
+			// column oldt.c11 does not exist anymore
+			// CREATE TRIGGER DERBY4998_SOFT_UPGRADE_RESTRICT_tr1 
+			//    AFTER UPDATE OF c12 
+			//    ON DERBY4998_SOFT_UPGRADE_RESTRICT REFERENCING OLD AS oldt
+			//    FOR EACH ROW 
+			//    SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_RESTRICT
+
+			SPSDescriptor triggerActionSPSD = trd.getActionSPS(lcc);
+			int[] referencedColsInTriggerAction = new int[td.getNumberOfColumns()];
+			java.util.Arrays.fill(referencedColsInTriggerAction, -1);
+			triggerActionSPSD.setText(dd.getTriggerActionString(stmtnode, 
+				trd.getOldReferencingName(),
+				trd.getNewReferencingName(),
+				trd.getTriggerDefinition(),
+				trd.getReferencedCols(),
+				referencedColsInTriggerAction,
+				0,
+				trd.getTableDescriptor(),
+				trd.getTriggerEventMask(),
+				true
+				));
+			
+			// Now that we have the internal format of the trigger action sql, 
+			// bind that sql to make sure that we are not using colunm being
+			// dropped in the trigger action sql directly (ie not through
+			// REFERENCING clause.
+			// eg
+			// create table atdc_12 (a integer, b integer);
+			// create trigger atdc_12_trigger_1 after update of a 
+			//     on atdc_12 for each row select a,b from atdc_12
+			// Drop one of the columns used in the trigger action
+			//   alter table atdc_12 drop column b
+			// Following rebinding of the trigger action sql will catch the use
+			// of column b in trigger atdc_12_trigger_1
+			compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
+			newCC = lcc.pushCompilerContext(compSchema);
+		    newCC.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
+			pa = newCC.getParser();
+			stmtnode = (StatementNode)pa.parseStatement(triggerActionSPSD.getText());
+			// need a current dependent for bind
+			newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
+			stmtnode.bindStatement();
+		} catch (StandardException se)
+		{
+			//Need to catch for few different kinds of sql states depending
+			// on what kind of trigger action sql is using the column being 
+			// dropped. Following are examples for different sql states
+			//
+			//SQLState.LANG_COLUMN_NOT_FOUND is thrown for following usage in
+			// trigger action sql of column being dropped atdc_12.b
+			//        create trigger atdc_12_trigger_1 after update 
+			//           of a on atdc_12 
+			//           for each row 
+			//           select a,b from atdc_12
+			//
+			//SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE is thrown for following
+			// usage in trigger action sql of column being dropped  
+			// atdc_14_tab2a2 with restrict clause
+			//        create trigger atdc_14_trigger_1 after update 
+			//           on atdc_14_tab1 REFERENCING NEW AS newt 
+			//           for each row 
+			//           update atdc_14_tab2 set a2 = newt.a1
+			//
+			// SQLState.LANG_DB2_INVALID_COLS_SPECIFIED is thrown for following
+			//  usage in trigger action sql of column being dropped  
+			//  ATDC_13_TAB1_BACKUP.c11 with restrict clause
+			//         create trigger ATDC_13_TAB1_trigger_1 after update
+			//           on ATDC_13_TAB1 for each row
+			//           INSERT INTO ATDC_13_TAB1_BACKUP
+			//           SELECT C31, C32 from ATDC_13_TAB3
+			//
+			//SQLState.LANG_TABLE_NOT_FOUND is thrown for following scenario
+			//   create view ATDC_13_VIEW2 as select c12 from ATDC_13_TAB3 where c12>0
+			//Has following trigger defined
+			//         create trigger ATDC_13_TAB1_trigger_3 after update
+			//           on ATDC_13_TAB1 for each row
+			//           SELECT * from ATDC_13_VIEW2
+			// Ane drop column ATDC_13_TAB3.c12 is issued
+			if (se.getMessageId().equals(SQLState.LANG_COLUMN_NOT_FOUND)||
+					(se.getMessageId().equals(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE) ||
+					(se.getMessageId().equals(SQLState.LANG_DB2_INVALID_COLS_SPECIFIED) ||
+					(se.getMessageId().equals(SQLState.LANG_TABLE_NOT_FOUND)))))
+			{
+				if (cascade)
+				{
+                    trd.drop(lcc);
+					activation.addWarning(
+						StandardException.newWarning(
+                            SQLState.LANG_TRIGGER_DROPPED, 
+                            trd.getName(), td.getName()));
+					return;
+				}
+				else
+				{	// we'd better give an error if don't drop it,
+					throw StandardException.newException(
+                        SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+                        dm.getActionString(DependencyManager.DROP_COLUMN),
+                        columnName, ""TRIGGER"",
+                        trd.getName() );
+				}
+			} else
+				throw se;
+		}
+		finally
+		{
+			if (newCC != null)
+				lcc.popCompilerContext(newCC);
+		}
+		
+		// If we are here, then it means that the column being dropped
+		// is not getting used in the trigger action. 
+		//
+		// We have recreated the trigger action SPS and recollected the 
+		// column positions for trigger columns and trigger action columns
+		// getting accessed through REFERENCING clause because
+		// drop column can affect the column positioning of existing
+		// columns in the table. We will save that in the system table.
+		dd.addDescriptor(trd, sd,
+				 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
+				 false, tc);
+    }"
+35,546,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.SQLParser,,characterValueFunction,,lowerTok = jj_consume_token(LOWER);,,6066,6066,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java#L6066,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//generated/java/org/apache/derby/impl/sql/compile/SQLParser.java,,unknown,
+36,607,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.DataDictionaryImpl,,getSubCheckConstraint,,SYSCHECKSRowFactory			rf = (SYSCHECKSRowFactory) ti.getCatalogRowFactory();,,6765,6765,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java#L6765,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java,,close,"private SubCheckConstraintDescriptor getSubCheckConstraint(UUID constraintId)
+		throws StandardException
+	{
+		DataValueDescriptor			constraintIDOrderable = null;
+		TabInfoImpl						ti = getNonCoreTI(SYSCHECKS_CATALOG_NUM);
+		SYSCHECKSRowFactory			rf = (SYSCHECKSRowFactory) ti.getCatalogRowFactory();
+
+		/* Use constraintIDOrderable in both start and stop positions for scan */
+		constraintIDOrderable = getIDValueAsCHAR(constraintId);
+
+		/* Set up the start/stop position for the scan */
+		ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
+		keyRow.setColumn(1, constraintIDOrderable);
+
+		return (SubCheckConstraintDescriptor)
+					getDescriptorViaIndex(
+						SYSCHECKSRowFactory.SYSCHECKS_INDEX1_ID,
+						keyRow,
+						(ScanQualifier [][]) null,
+						ti,
+						(TupleDescriptor) null,
+						(List) null,
+						false);
+	}"
+37,748,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.DataDictionaryImpl,,create_10_5_system_procedures,,UUID routine_uuid = createSystemProcedureOrFunction(,,12641,12641,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java#L12641,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java,,close,"void create_10_5_system_procedures(TransactionController tc, HashSet newlyCreatedRoutines )
+    throws StandardException
+    {
+        // Create the procedures in the SYSCS_UTIL schema.
+        UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+
+        // void SYSCS_UTIL.SYSCS_UPDATE_STATISTICS(varchar(128), varchar(128), varchar(128))
+        {
+            // procedure argument names
+            String[] arg_names = {""SCHEMANAME"", ""TABLENAME"", ""INDEXNAME""};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
+
+            };
+
+            UUID routine_uuid = createSystemProcedureOrFunction(
+                ""SYSCS_UPDATE_STATISTICS"",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
+                (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+    }"
+38,810,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.FromTable,,rememberAsBest,,bestPath,"bestPath,getConglomerateDescriptor",641,641,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/compile/FromTable.java#L641,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/FromTable.java,,close,"public void rememberAsBest(int planType, Optimizer optimizer)
+		throws StandardException
+	{
+		AccessPath bestPath = null;
+
+		switch (planType)
+		{
+		  case Optimizer.NORMAL_PLAN:
+			bestPath = getBestAccessPath();
+			break;
+
+		  case Optimizer.SORT_AVOIDANCE_PLAN:
+			bestPath = getBestSortAvoidancePath();
+			break;
+
+		  default:
+			if (SanityManager.DEBUG)
+			{
+				SanityManager.THROWASSERT(
+					""Invalid plan type "" + planType);
+			}
+		}
+
+		getTrulyTheBestAccessPath().copy(bestPath);
+
+		// Since we just set trulyTheBestAccessPath for the current
+		// join order of the received optimizer, take note of what
+		// that path is, in case we need to ""revert"" back to this
+		// path later.  See Optimizable.updateBestPlanMap().
+		// Note: Since this call descends all the way down to base
+		// tables, it can be relatively expensive when we have deeply
+		// nested subqueries.  So in an attempt to save some work, we
+		// skip the call if this node is a ProjectRestrictNode whose
+		// child is an Optimizable--in that case the ProjectRestrictNode
+		// will in turn call ""rememberAsBest"" on its child and so
+		// the required call to updateBestPlanMap() will be
+		// made at that time.  If we did it here, too, then we would
+		// just end up duplicating the work.
+		if (!(this instanceof ProjectRestrictNode))
+			updateBestPlanMap(ADD_PLAN, optimizer);
+		else
+		{
+			ProjectRestrictNode prn = (ProjectRestrictNode)this;
+			if (!(prn.getChildResult() instanceof Optimizable))
+				updateBestPlanMap(ADD_PLAN, optimizer);
+		}
+		 
+		/* also store the name of the access path; i.e index name/constraint
+		 * name if we're using an index to access the base table.
+		 */
+		ConglomerateDescriptor cd =	bestPath.getConglomerateDescriptor();
+
+		if (isBaseTable())
+		{
+			DataDictionary dd = getDataDictionary();
+			TableDescriptor td = getTableDescriptor();
+			getTrulyTheBestAccessPath().initializeAccessPathName(dd, td);
+		}
+
+		setCostEstimate(bestPath.getCostEstimate());
+
+		bestPath.getOptimizer().trace(Optimizer.REMEMBERING_BEST_ACCESS_PATH,
+							tableNumber, planType, 0.0, bestPath);
+	}"
+39,900,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.DataDictionaryImpl,,getAliasDescriptor,,SYSALIASESRowFactory	  rf = (SYSALIASESRowFactory) ti.getCatalogRowFactory();,,7657,7657,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java#L7657,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java,,close,"public AliasDescriptor getAliasDescriptor(UUID uuid)
+				throws StandardException
+	{
+		DataValueDescriptor		UUIDStringOrderable;
+		SYSALIASESRowFactory	rf;
+		TabInfoImpl					ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
+
+		rf = (SYSALIASESRowFactory) ti.getCatalogRowFactory();
+
+		/* Use UUIDStringOrderable in both start and stop positions for scan */
+		UUIDStringOrderable = getIDValueAsCHAR(uuid);
+
+		/* Set up the start/stop position for the scan */
+		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
+		keyRow.setColumn(1, UUIDStringOrderable);
+
+		return (AliasDescriptor)
+					getDescriptorViaIndex(
+						SYSALIASESRowFactory.SYSALIASES_INDEX2_ID,
+						keyRow,
+						(ScanQualifier [][]) null,
+						ti,
+						(TupleDescriptor) null,
+						(List) null,
+						false);
+	}"
+40,931,derby,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.DataDictionaryImpl,,addConstraintDescriptor,,SYSCONSTRAINTSRowFactory  rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();,,6330,6330,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java#L6330,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java,,close,"public void	addConstraintDescriptor(
+			ConstraintDescriptor descriptor,
+			TransactionController tc)
+		throws StandardException
+	{
+		ExecRow        			row = null;
+		int						type = descriptor.getConstraintType();
+		TabInfoImpl					  ti = getNonCoreTI(SYSCONSTRAINTS_CATALOG_NUM);
+		SYSCONSTRAINTSRowFactory  rf = (SYSCONSTRAINTSRowFactory) ti.getCatalogRowFactory();
+		int						insertRetCode;
+
+		if (SanityManager.DEBUG)
+		{
+			if (!(type == DataDictionary.PRIMARYKEY_CONSTRAINT ||
+								 type == DataDictionary.FOREIGNKEY_CONSTRAINT ||
+								 type == DataDictionary.UNIQUE_CONSTRAINT ||
+								 type == DataDictionary.CHECK_CONSTRAINT))
+			{
+				SanityManager.THROWASSERT(""constraint type ("" + type +
+					"") is unexpected value"");
+			}
+		}
+
+		addDescriptor(descriptor, descriptor.getSchemaDescriptor(),
+					  SYSCONSTRAINTS_CATALOG_NUM, false,
+					  tc);
+
+		switch (type)
+		{
+			case DataDictionary.PRIMARYKEY_CONSTRAINT:
+			case DataDictionary.FOREIGNKEY_CONSTRAINT:
+			case DataDictionary.UNIQUE_CONSTRAINT:
+				if (SanityManager.DEBUG)
+				{
+					if (!(descriptor instanceof KeyConstraintDescriptor))
+					{
+						SanityManager.THROWASSERT(
+							""descriptor expected to be instanceof KeyConstraintDescriptor, "" +
+							""not, "" + descriptor.getClass().getName());
+					}
+				}
+
+				addSubKeyConstraint((KeyConstraintDescriptor) descriptor, tc);
+				break;
+
+			case DataDictionary.CHECK_CONSTRAINT:
+				if (SanityManager.DEBUG)
+				{
+					if (!(descriptor instanceof CheckConstraintDescriptor))
+					{
+						SanityManager.THROWASSERT(""descriptor expected ""+
+							""to be instanceof CheckConstraintDescriptorImpl, "" +
+							""not, "" + descriptor.getClass().getName());
+					}
+				}
+
+				addDescriptor(descriptor, null, SYSCHECKS_CATALOG_NUM, true, tc);
+				break;
+		}
+	}"
+41,792,derby,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.MatchingClauseNode,,bindDeleteThenColumns,,selectList,"selectList,size",713,713,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/impl/sql/compile/MatchingClauseNode.java#L713,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/MatchingClauseNode.java,,unknown,"void    bindDeleteThenColumns( ResultColumnList selectList )
+        throws StandardException
+    {
+        int     bufferedCount = _thenColumns.size();
+        int     selectCount = selectList.size();
+        
+        _deleteColumnOffsets = new int[ bufferedCount ];
+
+        for ( int bidx = 0; bidx < bufferedCount; bidx++ )
+        {
+            ResultColumn    bufferedRC = _thenColumns.elementAt( bidx );
+            ValueNode       bufferedExpression = bufferedRC.getExpression();
+
+            _deleteColumnOffsets[ bidx ] = getSelectListOffset( selectList, bufferedExpression );
+        }
+    }"
+42,875,derby,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.derby.impl.sql.conn,org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext,,compareConstraintModes,,DataDictionary dd = getDataDictionary();,,3794,3794,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/impl/sql/conn/GenericLanguageConnectionContext.java#L3794,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/conn/GenericLanguageConnectionContext.java,,close,"private void compareConstraintModes(
+            SQLSessionContext nested,
+            SQLSessionContext caller) throws StandardException {
+
+        if (deferredHashTables == null) {
+            // Nothing to do
+            return;
+        }
+
+        DataDictionary dd = getDataDictionary();
+
+        // Check all constraints that were deferred inside the routine
+        // but whose constraint mode is immediate on the outside. If
+        // any of these violate the constraints, roll back.
+        Set<Map.Entry<Long, BackingStoreHashtable>> es =
+                deferredHashTables.entrySet();
+
+        for (Map.Entry<Long, BackingStoreHashtable> e : es) {
+            final long indexCID = e.getKey().longValue();
+
+            boolean effectivelyDeferred = effectivelyDeferred(caller, indexCID);
+
+            if (effectivelyDeferred ) {
+                // the constraint is also deferred in the calling context
+                continue;
+            }
+            // The constraint must have been deferred inside the routine
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(effectivelyDeferred(nested, indexCID));
+            }
+
+            doValidateConstraint(e.getKey().longValue(), e.getValue(), true);
+        }
+    }"
+43,1775,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.lucene.util,org.apache.lucene.util.TestAttributeSource,,testCaptureState,,CharTermAttribute,"CharTermAttribute,src3,termAtt,addAttribute,class",70,70,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/util/TestAttributeSource.java#L70,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/util/TestAttributeSource.java,,unknown,"public void testCaptureState() {
+    // init a first instance
+    AttributeSource src = new AttributeSource();
+    CharTermAttribute termAtt = src.addAttribute(CharTermAttribute.class);
+    TypeAttribute typeAtt = src.addAttribute(TypeAttribute.class);
+    termAtt.append(""TestTerm"");
+    typeAtt.setType(""TestType"");
+    final int hashCode = src.hashCode();
+    
+    AttributeSource.State state = src.captureState();
+    
+    // modify the attributes
+    termAtt.setEmpty().append(""AnotherTestTerm"");
+    typeAtt.setType(""AnotherTestType"");
+    assertTrue(""Hash code should be different"", hashCode != src.hashCode());
+    
+    src.restoreState(state);
+    assertEquals(""TestTerm"", termAtt.toString());
+    assertEquals(""TestType"", typeAtt.type());
+    assertEquals(""Hash code should be equal after restore"", hashCode, src.hashCode());
+
+    // restore into an exact configured copy
+    AttributeSource copy = new AttributeSource();
+    copy.addAttribute(CharTermAttribute.class);
+    copy.addAttribute(TypeAttribute.class);
+    copy.restoreState(state);
+    assertEquals(""Both AttributeSources should have same hashCode after restore"", src.hashCode(), copy.hashCode());
+    assertEquals(""Both AttributeSources should be equal after restore"", src, copy);
+    
+    // init a second instance (with attributes in different order and one additional attribute)
+    AttributeSource src2 = new AttributeSource();
+    typeAtt = src2.addAttribute(TypeAttribute.class);
+    FlagsAttribute flagsAtt = src2.addAttribute(FlagsAttribute.class);
+    termAtt = src2.addAttribute(CharTermAttribute.class);
+    flagsAtt.setFlags(12345);
+
+    src2.restoreState(state);
+    assertEquals(""TestTerm"", termAtt.toString());
+    assertEquals(""TestType"", typeAtt.type());
+    assertEquals(""FlagsAttribute should not be touched"", 12345, flagsAtt.getFlags());
+
+    // init a third instance missing one Attribute
+    AttributeSource src3 = new AttributeSource();
+    termAtt = src3.addAttribute(CharTermAttribute.class);
+    try {
+      src3.restoreState(state);
+      fail(""The third instance is missing the TypeAttribute, so restoreState() should throw IllegalArgumentException"");
+    } catch (IllegalArgumentException iae) {
+      // pass
+    }
+  }"
+44,1788,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.lucene.store,org.apache.lucene.store.TestLockFactory,,testDefaultRAMDirectory,,IndexWriter,"IndexWriter,IndexWriterConfig,MockAnalyzer,OpenMode,TEST_VERSION_CURRENT,dir,random,writer2,APPEND,setOpenMode",116,116,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/store/TestLockFactory.java#L116,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/store/TestLockFactory.java,,unknown,"public void testDefaultRAMDirectory() throws IOException {
+        Directory dir = new RAMDirectory();
+
+        assertTrue(""RAMDirectory did not use correct LockFactory: got "" + dir.getLockFactory(),
+                   SingleInstanceLockFactory.class.isInstance(dir.getLockFactory()));
+
+        IndexWriter writer = new IndexWriter(dir, new IndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)));
+
+        // Create a 2nd IndexWriter.  This should fail:
+        IndexWriter writer2 = null;
+        try {
+            writer2 = new IndexWriter(dir, new IndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random)).setOpenMode(OpenMode.APPEND));
+            fail(""Should have hit an IOException with two IndexWriters on default SingleInstanceLockFactory"");
+        } catch (IOException e) {
+        }
+
+        writer.close();
+        if (writer2 != null) {
+            writer2.close();
+        }
+    }"
+45,2474,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.lucene.analysis.fr,org.apache.lucene.analysis.fr.FrenchStemmer,,step4,,R2,"R2,RV,String,deleteFromIfPrecededIn,found",283,283,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/analysis/common/src/java/org/apache/lucene/analysis/fr/FrenchStemmer.java#L283,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/analysis/common/src/java/org/apache/lucene/analysis/fr/FrenchStemmer.java,,unknown,"private void step4() {
+		if (sb.length() > 1)
+		{
+			char ch = sb.charAt( sb.length()-1 );
+			if (ch == 's')
+			{
+				char b = sb.charAt( sb.length()-2 );
+				if (b != 'a' && b != 'i' && b != 'o' && b != 'u' && b != 'è' && b != 's')
+				{
+					sb.delete( sb.length() - 1, sb.length());
+					setStrings();
+				}
+			}
+		}
+		boolean found = deleteFromIfPrecededIn( R2, new String[] { ""ion"" }, RV, ""s"" );
+		if (!found)
+		found = deleteFromIfPrecededIn( R2, new String[] { ""ion"" }, RV, ""t"" );
+
+		replaceFrom( RV, new String[] { ""Ière"", ""ière"", ""Ier"", ""ier"" }, ""i"" );
+		deleteFrom( RV, new String[] { ""e"" } );
+		deleteFromIfPrecededIn( RV, new String[] { ""ë"" }, R0, ""gu"" );
+	}"
+46,2843,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.lucene.codecs.perfield,org.apache.lucene.codecs.perfield.TestPerFieldPostingsFormat,,testChangeCodecAndMerge,,codec,"codec,iwconf,getCodec",159,159,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java#L159,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/codecs/perfield/TestPerFieldPostingsFormat.java,,unknown,"@Test
+  public void testChangeCodecAndMerge() throws IOException {
+    Directory dir = newDirectory();
+    if (VERBOSE) {
+      System.out.println(""TEST: make new index"");
+    }
+    IndexWriterConfig iwconf = newIndexWriterConfig(TEST_VERSION_CURRENT,
+             new MockAnalyzer(random)).setOpenMode(OpenMode.CREATE).setCodec(new MockCodec());
+    iwconf.setMaxBufferedDocs(IndexWriterConfig.DISABLE_AUTO_FLUSH);
+    //((LogMergePolicy) iwconf.getMergePolicy()).setMergeFactor(10);
+    IndexWriter writer = newWriter(dir, iwconf);
+
+    addDocs(writer, 10);
+    writer.commit();
+    assertQuery(new Term(""content"", ""aaa""), dir, 10);
+    if (VERBOSE) {
+      System.out.println(""TEST: addDocs3"");
+    }
+    addDocs3(writer, 10);
+    writer.commit();
+    writer.close();
+
+    assertQuery(new Term(""content"", ""ccc""), dir, 10);
+    assertQuery(new Term(""content"", ""aaa""), dir, 10);
+    Lucene40Codec codec = (Lucene40Codec)iwconf.getCodec();
+
+    iwconf = newIndexWriterConfig(TEST_VERSION_CURRENT, new MockAnalyzer(random))
+        .setOpenMode(OpenMode.APPEND).setCodec(codec);
+    //((LogMergePolicy) iwconf.getMergePolicy()).setUseCompoundFile(false);
+    //((LogMergePolicy) iwconf.getMergePolicy()).setMergeFactor(10);
+    iwconf.setMaxBufferedDocs(IndexWriterConfig.DISABLE_AUTO_FLUSH);
+
+    iwconf.setCodec(new MockCodec2()); // uses standard for field content
+    writer = newWriter(dir, iwconf);
+    // swap in new codec for currently written segments
+    if (VERBOSE) {
+      System.out.println(""TEST: add docs w/ Standard codec for content field"");
+    }
+    addDocs2(writer, 10);
+    writer.commit();
+    codec = (Lucene40Codec)iwconf.getCodec();
+    assertEquals(30, writer.maxDoc());
+    assertQuery(new Term(""content"", ""bbb""), dir, 10);
+    assertQuery(new Term(""content"", ""ccc""), dir, 10);   ////
+    assertQuery(new Term(""content"", ""aaa""), dir, 10);
+
+    if (VERBOSE) {
+      System.out.println(""TEST: add more docs w/ new codec"");
+    }
+    addDocs2(writer, 10);
+    writer.commit();
+    assertQuery(new Term(""content"", ""ccc""), dir, 10);
+    assertQuery(new Term(""content"", ""bbb""), dir, 20);
+    assertQuery(new Term(""content"", ""aaa""), dir, 10);
+    assertEquals(40, writer.maxDoc());
+
+    if (VERBOSE) {
+      System.out.println(""TEST: now optimize"");
+    }
+    writer.forceMerge(1);
+    assertEquals(40, writer.maxDoc());
+    writer.close();
+    assertQuery(new Term(""content"", ""ccc""), dir, 10);
+    assertQuery(new Term(""content"", ""bbb""), dir, 20);
+    assertQuery(new Term(""content"", ""aaa""), dir, 10);
+
+    dir.close();
+  }"
+47,2850,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.solr.search,org.apache.solr.search.DocSlice,,clone,,super,"super,clone",160,160,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/core/src/java/org/apache/solr/search/DocSlice.java#L160,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/search/DocSlice.java,,close,"@Override
+  protected DocSlice clone() {
+    try {
+      // DocSlice is not currently mutable
+      DocSlice slice = (DocSlice) super.clone();
+    } catch (CloneNotSupportedException e) {}
+    return null;
+  }"
+48,2887,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.lucene.util.fst,org.apache.lucene.util.fst.TestFSTs,,testRandomWords,,IntsRef,IntsRef,970,970,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/util/fst/TestFSTs.java#L970,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/util/fst/TestFSTs.java,,unknown,"public void testRandomWords() throws IOException {
+    testRandomWords(1000, atLeast(2));
+    //testRandomWords(20, 100);
+  }"
+49,2958,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.lucene.benchmark.quality.trec,org.apache.lucene.benchmark.quality.trec.TrecTopicsReader,,read,,newline,"newline,sep",126,126,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/benchmark/src/java/org/apache/lucene/benchmark/quality/trec/TrecTopicsReader.java#L126,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/benchmark/src/java/org/apache/lucene/benchmark/quality/trec/TrecTopicsReader.java,,unknown,"private StringBuilder read (BufferedReader reader, String prefix, StringBuilder sb, boolean collectMatchLine, boolean collectAll) throws IOException {
+    sb = (sb==null ? new StringBuilder() : sb);
+    String sep = """";
+    while (true) {
+      String line = reader.readLine();
+      if (line==null) {
+        return null;
+      }
+      if (line.startsWith(prefix)) {
+        if (collectMatchLine) {
+          sb.append(sep+line);
+          sep = newline;
+        }
+        break;
+      }
+      if (collectAll) {
+        sb.append(sep+line);
+        sep = newline;
+      }
+    }
+    //System.out.println(""read: ""+sb);
+    return sb;
+  }"
+50,2974,lucene-solr,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.lucene.benchmark.byTask.feeds,org.apache.lucene.benchmark.byTask.feeds.TrecContentSource,,read,,sep = NEW_LINE;,,169,169,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/benchmark/src/java/org/apache/lucene/benchmark/byTask/feeds/TrecContentSource.java#L169,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/benchmark/src/java/org/apache/lucene/benchmark/byTask/feeds/TrecContentSource.java,,unknown,"private void read(StringBuilder buf, String lineStart, 
+       boolean collectMatchLine, boolean collectAll) throws IOException, NoMoreDataException {
+    String sep = """";
+    while (true) {
+      String line = reader.readLine();
+
+      if (line == null) {
+        openNextFile();
+        continue;
+      }
+
+      rawDocSize += line.length();
+
+      if (lineStart!=null && line.startsWith(lineStart)) {
+        if (collectMatchLine) {
+          buf.append(sep).append(line);
+          sep = NEW_LINE;
+        }
+        return;
+      }
+
+      if (collectAll) {
+        buf.append(sep).append(line);
+        sep = NEW_LINE;
+      }
+    }
+  }"
+51,2827,lucene-solr,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.solr.update.processor,org.apache.solr.update.processor.CloneFieldUpdateProcessorFactory,,inform,,core,"core,getSchema",203,203,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//solr/core/src/java/org/apache/solr/update/processor/CloneFieldUpdateProcessorFactory.java#L203,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/update/processor/CloneFieldUpdateProcessorFactory.java,,close,"@Override
+  public void inform(final SolrCore core) {
+    
+    final IndexSchema schema = core.getSchema();
+
+    srcSelector = 
+      FieldMutatingUpdateProcessor.createFieldNameSelector
+      (core.getResourceLoader(),
+       core.getSchema(),
+       srcInclusions.fieldName,
+       srcInclusions.typeName,
+       srcInclusions.typeClass,
+       srcInclusions.fieldRegex,
+       FieldMutatingUpdateProcessor.SELECT_NO_FIELDS);
+
+    for (SelectorParams exc : srcExclusions) {
+      srcSelector = FieldMutatingUpdateProcessor.wrap
+        (srcSelector,
+         FieldMutatingUpdateProcessor.createFieldNameSelector
+         (core.getResourceLoader(),
+          core.getSchema(),
+          exc.fieldName,
+          exc.typeName,
+          exc.typeClass,
+          exc.fieldRegex,
+          FieldMutatingUpdateProcessor.SELECT_NO_FIELDS));
+    }
+  }"
+52,2919,lucene-solr,DLS_DEAD_LOCAL_STORE_IN_RETURN,B,last,,STYLE,org.apache.solr.core,org.apache.solr.core.SolrResourceLoader,,findClass,,return clazz = CharFilterFactory.lookupClass(name).asSubclass(expectedType);,,407,407,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//solr/core/src/java/org/apache/solr/core/SolrResourceLoader.java#L407,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/core/SolrResourceLoader.java,,close,"public <T> Class<? extends T> findClass(String cname, Class<T> expectedType, String... subpackages) {
+    if (subpackages == null || subpackages.length == 0 || subpackages == packages) {
+      subpackages = packages;
+      String  c = classNameCache.get(cname);
+      if(c != null) {
+        try {
+          return Class.forName(c, true, classLoader).asSubclass(expectedType);
+        } catch (ClassNotFoundException e) {
+          //this is unlikely
+          log.error(""Unable to load cached class-name :  ""+ c +"" for shortname : ""+cname + e);
+        }
+
+      }
+    }
+    Class<? extends T> clazz = null;
+    
+    // first try legacy analysis patterns, now replaced by Lucene's Analysis package:
+    final Matcher m = legacyAnalysisPattern.matcher(cname);
+    if (m.matches()) {
+      final String name = m.group(4);
+      log.trace(""Trying to load class from analysis SPI using name='{}'"", name);
+      try {
+        if (CharFilterFactory.class.isAssignableFrom(expectedType)) {
+          return clazz = CharFilterFactory.lookupClass(name).asSubclass(expectedType);
+        } else if (TokenizerFactory.class.isAssignableFrom(expectedType)) {
+          return clazz = TokenizerFactory.lookupClass(name).asSubclass(expectedType);
+        } else if (TokenFilterFactory.class.isAssignableFrom(expectedType)) {
+          return clazz = TokenFilterFactory.lookupClass(name).asSubclass(expectedType);
+        } else {
+          log.warn(""'{}' looks like an analysis factory, but caller requested different class type: {}"", cname, expectedType.getName());
+        }
+      } catch (IllegalArgumentException ex) { 
+        // ok, we fall back to legacy loading
+      }
+    }
+    
+    // first try cname == full name
+    try {
+      return Class.forName(cname, true, classLoader).asSubclass(expectedType);
+    } catch (ClassNotFoundException e) {
+      String newName=cname;
+      if (newName.startsWith(project)) {
+        newName = cname.substring(project.length()+1);
+      }
+      for (String subpackage : subpackages) {
+        try {
+          String name = base + '.' + subpackage + newName;
+          log.trace(""Trying class name "" + name);
+          return clazz = Class.forName(name,true,classLoader).asSubclass(expectedType);
+        } catch (ClassNotFoundException e1) {
+          // ignore... assume first exception is best.
+        }
+      }
+  
+      throw new SolrException( SolrException.ErrorCode.SERVER_ERROR, ""Error loading class '"" + cname + ""'"", e);
+    }finally{
+      //cache the shortname vs FQN if it is loaded by the webapp classloader  and it is loaded
+      // using a shortname
+      if ( clazz != null &&
+              clazz.getClassLoader() == SolrResourceLoader.class.getClassLoader() &&
+              !cname.equals(clazz.getName()) &&
+              (subpackages.length == 0 || subpackages == packages)) {
+        //store in the cache
+        classNameCache.put(cname, clazz.getName());
+      }
+    }
+  }"
+53,1778,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.solr.update,org.apache.solr.update.AddUpdateCommand$1,,<init>,,SchemaField uniq = req.getSchema().getUniqueKeyField();,,166,166,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/update/AddUpdateCommand.java#L166,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/update/AddUpdateCommand.java,,close,
+54,1868,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.solr.schema,org.apache.solr.schema.GeoHashField,,createSpatialQuery,,double,double,63,63,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/schema/GeoHashField.java#L63,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/schema/GeoHashField.java,,close,"@Override
+  public Query createSpatialQuery(QParser parser, SpatialOptions options) {
+    double [] point = new double[0];
+    try {
+      point = ParseUtils.parsePointDouble(null, options.pointStr, 2);
+    } catch (InvalidShapeException e) {
+      throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
+    }
+    String geohash = GeohashUtils.encodeLatLon(point[0], point[1]);
+    //TODO: optimize this
+    return new SolrConstantScoreQuery(new ValueSourceRangeFilter(new GeohashHaversineFunction(getValueSource(options.field, parser),
+            new LiteralValueSource(geohash), options.radius), ""0"", String.valueOf(options.distance), true, true));
+  }"
+55,2054,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.lucene.expressions.js,org.apache.lucene.expressions.js.JavascriptParser,,primary,,AT_RPAREN,"AT_RPAREN,AT_RPAREN53,FOLLOW_AT_RPAREN_in_primary1219,input,match",1719,1719,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java#L1719,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java,,unknown,"public final JavascriptParser.primary_return primary() throws RecognitionException {
+    JavascriptParser.primary_return retval = new JavascriptParser.primary_return();
+    retval.start = input.LT(1);
+
+    CommonTree root_0 = null;
+
+    Token NAMESPACE_ID49=null;
+    Token AT_LPAREN51=null;
+    Token AT_RPAREN53=null;
+    ParserRuleReturnScope numeric50 =null;
+    ParserRuleReturnScope conditional52 =null;
+
+    CommonTree NAMESPACE_ID49_tree=null;
+    CommonTree AT_LPAREN51_tree=null;
+    CommonTree AT_RPAREN53_tree=null;
+
+    try {
+      // src/java/org/apache/lucene/expressions/js/Javascript.g:316:5: ( NAMESPACE_ID | numeric | AT_LPAREN ! conditional AT_RPAREN !)
+      int alt15=3;
+      switch ( input.LA(1) ) {
+      case NAMESPACE_ID:
+        {
+        alt15=1;
+        }
+        break;
+      case DECIMAL:
+      case HEX:
+      case OCTAL:
+        {
+        alt15=2;
+        }
+        break;
+      case AT_LPAREN:
+        {
+        alt15=3;
+        }
+        break;
+      default:
+        NoViableAltException nvae =
+          new NoViableAltException("""", 15, 0, input);
+        throw nvae;
+      }
+      switch (alt15) {
+        case 1 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:316:7: NAMESPACE_ID
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          NAMESPACE_ID49=(Token)match(input,NAMESPACE_ID,FOLLOW_NAMESPACE_ID_in_primary1198); 
+          NAMESPACE_ID49_tree = (CommonTree)adaptor.create(NAMESPACE_ID49);
+          adaptor.addChild(root_0, NAMESPACE_ID49_tree);
+
+          }
+          break;
+        case 2 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:317:7: numeric
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          pushFollow(FOLLOW_numeric_in_primary1206);
+          numeric50=numeric();
+          state._fsp--;
+
+          adaptor.addChild(root_0, numeric50.getTree());
+
+          }
+          break;
+        case 3 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:318:7: AT_LPAREN ! conditional AT_RPAREN !
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          AT_LPAREN51=(Token)match(input,AT_LPAREN,FOLLOW_AT_LPAREN_in_primary1214); 
+          pushFollow(FOLLOW_conditional_in_primary1217);
+          conditional52=conditional();
+          state._fsp--;
+
+          adaptor.addChild(root_0, conditional52.getTree());
+
+          AT_RPAREN53=(Token)match(input,AT_RPAREN,FOLLOW_AT_RPAREN_in_primary1219); 
+          }
+          break;
+
+      }
+      retval.stop = input.LT(-1);
+
+      retval.tree = (CommonTree)adaptor.rulePostProcessing(root_0);
+      adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
+
+    }
+    catch (RecognitionException re) {
+      reportError(re);
+      recover(input,re);
+      retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+    }
+    finally {
+      // do for sure before leaving
+    }
+    return retval;
+  }"
+56,2073,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.solr.cloud,org.apache.solr.cloud.Overseer$ClusterStateUpdater,,addRoutingRule,,"String targetShard = message.getStr(""targetShard"");",,313,313,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/cloud/Overseer.java#L313,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/cloud/Overseer.java,,unknown,"private ClusterState addRoutingRule(ClusterState clusterState, ZkNodeProps message) {
+      String collection = message.getStr(ZkStateReader.COLLECTION_PROP);
+      String shard = message.getStr(ZkStateReader.SHARD_ID_PROP);
+      String routeKey = message.getStr(""routeKey"");
+      String range = message.getStr(""range"");
+      String targetCollection = message.getStr(""targetCollection"");
+      String targetShard = message.getStr(""targetShard"");
+      String expireAt = message.getStr(""expireAt"");
+
+      Slice slice = clusterState.getSlice(collection, shard);
+      if (slice == null)  {
+        throw new RuntimeException(""Overseer.addRoutingRule unknown collection: "" + collection + "" slice:"" + shard);
+      }
+
+      Map<String, RoutingRule> routingRules = slice.getRoutingRules();
+      if (routingRules == null)
+        routingRules = new HashMap<String, RoutingRule>();
+      RoutingRule r = routingRules.get(routeKey);
+      if (r == null) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(""routeRanges"", range);
+        map.put(""targetCollection"", targetCollection);
+        map.put(""expireAt"", expireAt);
+        RoutingRule rule = new RoutingRule(routeKey, map);
+        routingRules.put(routeKey, rule);
+      } else  {
+        // add this range
+        Map<String, Object> map = r.shallowCopy();
+        map.put(""routeRanges"", map.get(""routeRanges"") + "","" + range);
+        map.put(""expireAt"", expireAt);
+        routingRules.put(routeKey, new RoutingRule(routeKey, map));
+      }
+
+      Map<String, Object> props = slice.shallowCopy();
+      props.put(""routingRules"", routingRules);
+
+      Slice newSlice = new Slice(slice.getName(), slice.getReplicasCopy(), props);
+      clusterState = updateSlice(clusterState, collection, newSlice);
+      return clusterState;
+    }"
+57,2090,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.lucene.analysis.standard,org.apache.lucene.analysis.standard.UAX29URLEmailTokenizerImpl,,zzUnpackTrans,,ZZ_TRANS_PACKED_1,"ZZ_TRANS_PACKED_1,offset,offset,result,zzUnpackTrans",5479,5479,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/analysis/common/src/java/org/apache/lucene/analysis/standard/UAX29URLEmailTokenizerImpl.java#L5479,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/analysis/common/src/java/org/apache/lucene/analysis/standard/UAX29URLEmailTokenizerImpl.java,,open,"private static int [] zzUnpackTrans() {
+    int [] result = new int[421400];
+    int offset = 0;
+    offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
+    offset = zzUnpackTrans(ZZ_TRANS_PACKED_1, offset, result);
+    return result;
+  }"
+58,2207,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.lucene.expressions.js,org.apache.lucene.expressions.js.JavascriptParser,,unary_operator,,RewriteRuleSubtreeStream,"RewriteRuleSubtreeStream,adaptor,null,null,retval,retval,getTree",1430,1430,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java#L1430,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java,,unknown,"public final JavascriptParser.unary_operator_return unary_operator() throws RecognitionException {
+    JavascriptParser.unary_operator_return retval = new JavascriptParser.unary_operator_return();
+    retval.start = input.LT(1);
+
+    CommonTree root_0 = null;
+
+    Token AT_SUBTRACT43=null;
+    Token AT_BIT_NOT44=null;
+    Token AT_BOOL_NOT45=null;
+
+    CommonTree AT_SUBTRACT43_tree=null;
+    CommonTree AT_BIT_NOT44_tree=null;
+    CommonTree AT_BOOL_NOT45_tree=null;
+    RewriteRuleTokenStream stream_AT_SUBTRACT=new RewriteRuleTokenStream(adaptor,""token AT_SUBTRACT"");
+
+    try {
+      // src/java/org/apache/lucene/expressions/js/Javascript.g:305:5: ( AT_SUBTRACT -> AT_NEGATE | AT_BIT_NOT | AT_BOOL_NOT )
+      int alt13=3;
+      switch ( input.LA(1) ) {
+      case AT_SUBTRACT:
+        {
+        alt13=1;
+        }
+        break;
+      case AT_BIT_NOT:
+        {
+        alt13=2;
+        }
+        break;
+      case AT_BOOL_NOT:
+        {
+        alt13=3;
+        }
+        break;
+      default:
+        NoViableAltException nvae =
+          new NoViableAltException("""", 13, 0, input);
+        throw nvae;
+      }
+      switch (alt13) {
+        case 1 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:305:7: AT_SUBTRACT
+          {
+          AT_SUBTRACT43=(Token)match(input,AT_SUBTRACT,FOLLOW_AT_SUBTRACT_in_unary_operator1123);  
+          stream_AT_SUBTRACT.add(AT_SUBTRACT43);
+
+          // AST REWRITE
+          // elements: 
+          // token labels: 
+          // rule labels: retval
+          // token list labels: 
+          // rule list labels: 
+          // wildcard labels: 
+          retval.tree = root_0;
+          RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,""rule retval"",retval!=null?retval.getTree():null);
+
+          root_0 = (CommonTree)adaptor.nil();
+          // 305:19: -> AT_NEGATE
+          {
+            adaptor.addChild(root_0, (CommonTree)adaptor.create(AT_NEGATE, ""AT_NEGATE""));
+          }
+
+
+          retval.tree = root_0;
+
+          }
+          break;
+        case 2 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:306:7: AT_BIT_NOT
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          AT_BIT_NOT44=(Token)match(input,AT_BIT_NOT,FOLLOW_AT_BIT_NOT_in_unary_operator1135); 
+          AT_BIT_NOT44_tree = (CommonTree)adaptor.create(AT_BIT_NOT44);
+          adaptor.addChild(root_0, AT_BIT_NOT44_tree);
+
+          }
+          break;
+        case 3 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:307:7: AT_BOOL_NOT
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          AT_BOOL_NOT45=(Token)match(input,AT_BOOL_NOT,FOLLOW_AT_BOOL_NOT_in_unary_operator1143); 
+          AT_BOOL_NOT45_tree = (CommonTree)adaptor.create(AT_BOOL_NOT45);
+          adaptor.addChild(root_0, AT_BOOL_NOT45_tree);
+
+          }
+          break;
+
+      }
+      retval.stop = input.LT(-1);
+
+      retval.tree = (CommonTree)adaptor.rulePostProcessing(root_0);
+      adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
+
+    }
+    catch (RecognitionException re) {
+      reportError(re);
+      recover(input,re);
+      retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+    }
+    finally {
+      // do for sure before leaving
+    }
+    return retval;
+  }"
+59,2466,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.lucene.expressions.js,org.apache.lucene.expressions.js.JavascriptParser,,conditional,,AT_COLON,"AT_COLON,AT_COLON6,FOLLOW_AT_COLON_in_conditional765,input,match",316,316,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java#L316,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java,,unknown,"public final JavascriptParser.conditional_return conditional() throws RecognitionException {
+    JavascriptParser.conditional_return retval = new JavascriptParser.conditional_return();
+    retval.start = input.LT(1);
+
+    CommonTree root_0 = null;
+
+    Token AT_COND_QUE4=null;
+    Token AT_COLON6=null;
+    ParserRuleReturnScope logical_or3 =null;
+    ParserRuleReturnScope conditional5 =null;
+    ParserRuleReturnScope conditional7 =null;
+
+    CommonTree AT_COND_QUE4_tree=null;
+    CommonTree AT_COLON6_tree=null;
+
+    try {
+      // src/java/org/apache/lucene/expressions/js/Javascript.g:255:5: ( logical_or ( AT_COND_QUE ^ conditional AT_COLON ! conditional )? )
+      // src/java/org/apache/lucene/expressions/js/Javascript.g:255:7: logical_or ( AT_COND_QUE ^ conditional AT_COLON ! conditional )?
+      {
+      root_0 = (CommonTree)adaptor.nil();
+
+
+      pushFollow(FOLLOW_logical_or_in_conditional757);
+      logical_or3=logical_or();
+      state._fsp--;
+
+      adaptor.addChild(root_0, logical_or3.getTree());
+
+      // src/java/org/apache/lucene/expressions/js/Javascript.g:255:18: ( AT_COND_QUE ^ conditional AT_COLON ! conditional )?
+      int alt1=2;
+      int LA1_0 = input.LA(1);
+      if ( (LA1_0==AT_COND_QUE) ) {
+        alt1=1;
+      }
+      switch (alt1) {
+        case 1 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:255:19: AT_COND_QUE ^ conditional AT_COLON ! conditional
+          {
+          AT_COND_QUE4=(Token)match(input,AT_COND_QUE,FOLLOW_AT_COND_QUE_in_conditional760); 
+          AT_COND_QUE4_tree = (CommonTree)adaptor.create(AT_COND_QUE4);
+          root_0 = (CommonTree)adaptor.becomeRoot(AT_COND_QUE4_tree, root_0);
+
+          pushFollow(FOLLOW_conditional_in_conditional763);
+          conditional5=conditional();
+          state._fsp--;
+
+          adaptor.addChild(root_0, conditional5.getTree());
+
+          AT_COLON6=(Token)match(input,AT_COLON,FOLLOW_AT_COLON_in_conditional765); 
+          pushFollow(FOLLOW_conditional_in_conditional768);
+          conditional7=conditional();
+          state._fsp--;
+
+          adaptor.addChild(root_0, conditional7.getTree());
+
+          }
+          break;
+
+      }
+
+      }
+
+      retval.stop = input.LT(-1);
+
+      retval.tree = (CommonTree)adaptor.rulePostProcessing(root_0);
+      adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
+
+    }
+    catch (RecognitionException re) {
+      reportError(re);
+      recover(input,re);
+      retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+    }
+    finally {
+      // do for sure before leaving
+    }
+    return retval;
+  }"
+60,2525,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.lucene.expressions.js,org.apache.lucene.expressions.js.JavascriptParser,,unary,,AT_ADD,"AT_ADD,AT_ADD39,FOLLOW_AT_ADD_in_unary1092,input,match",1318,1318,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java#L1318,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java,,unknown,"public final JavascriptParser.unary_return unary() throws RecognitionException {
+    JavascriptParser.unary_return retval = new JavascriptParser.unary_return();
+    retval.start = input.LT(1);
+
+    CommonTree root_0 = null;
+
+    Token AT_ADD39=null;
+    ParserRuleReturnScope postfix38 =null;
+    ParserRuleReturnScope unary40 =null;
+    ParserRuleReturnScope unary_operator41 =null;
+    ParserRuleReturnScope unary42 =null;
+
+    CommonTree AT_ADD39_tree=null;
+
+    try {
+      // src/java/org/apache/lucene/expressions/js/Javascript.g:299:5: ( postfix | AT_ADD ! unary | unary_operator ^ unary )
+      int alt12=3;
+      switch ( input.LA(1) ) {
+      case AT_LPAREN:
+      case DECIMAL:
+      case HEX:
+      case NAMESPACE_ID:
+      case OCTAL:
+        {
+        alt12=1;
+        }
+        break;
+      case AT_ADD:
+        {
+        alt12=2;
+        }
+        break;
+      case AT_BIT_NOT:
+      case AT_BOOL_NOT:
+      case AT_SUBTRACT:
+        {
+        alt12=3;
+        }
+        break;
+      default:
+        NoViableAltException nvae =
+          new NoViableAltException("""", 12, 0, input);
+        throw nvae;
+      }
+      switch (alt12) {
+        case 1 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:299:7: postfix
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          pushFollow(FOLLOW_postfix_in_unary1084);
+          postfix38=postfix();
+          state._fsp--;
+
+          adaptor.addChild(root_0, postfix38.getTree());
+
+          }
+          break;
+        case 2 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:300:7: AT_ADD ! unary
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          AT_ADD39=(Token)match(input,AT_ADD,FOLLOW_AT_ADD_in_unary1092); 
+          pushFollow(FOLLOW_unary_in_unary1095);
+          unary40=unary();
+          state._fsp--;
+
+          adaptor.addChild(root_0, unary40.getTree());
+
+          }
+          break;
+        case 3 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:301:7: unary_operator ^ unary
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          pushFollow(FOLLOW_unary_operator_in_unary1103);
+          unary_operator41=unary_operator();
+          state._fsp--;
+
+          root_0 = (CommonTree)adaptor.becomeRoot(unary_operator41.getTree(), root_0);
+          pushFollow(FOLLOW_unary_in_unary1106);
+          unary42=unary();
+          state._fsp--;
+
+          adaptor.addChild(root_0, unary42.getTree());
+
+          }
+          break;
+
+      }
+      retval.stop = input.LT(-1);
+
+      retval.tree = (CommonTree)adaptor.rulePostProcessing(root_0);
+      adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
+
+    }
+    catch (RecognitionException re) {
+      reportError(re);
+      recover(input,re);
+      retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+    }
+    finally {
+      // do for sure before leaving
+    }
+    return retval;
+  }"
+61,2546,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.lucene.expressions.js,org.apache.lucene.expressions.js.JavascriptParser,,postfix,,RewriteRuleSubtreeStream,"RewriteRuleSubtreeStream,adaptor,null,null,retval,retval,getTree",1581,1581,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java#L1581,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/expressions/src/java/org/apache/lucene/expressions/js/JavascriptParser.java,,unknown,"public final JavascriptParser.postfix_return postfix() throws RecognitionException {
+    JavascriptParser.postfix_return retval = new JavascriptParser.postfix_return();
+    retval.start = input.LT(1);
+
+    CommonTree root_0 = null;
+
+    Token NAMESPACE_ID47=null;
+    ParserRuleReturnScope primary46 =null;
+    ParserRuleReturnScope arguments48 =null;
+
+    CommonTree NAMESPACE_ID47_tree=null;
+    RewriteRuleTokenStream stream_NAMESPACE_ID=new RewriteRuleTokenStream(adaptor,""token NAMESPACE_ID"");
+    RewriteRuleSubtreeStream stream_arguments=new RewriteRuleSubtreeStream(adaptor,""rule arguments"");
+
+    try {
+      // src/java/org/apache/lucene/expressions/js/Javascript.g:311:5: ( primary | NAMESPACE_ID arguments -> ^( AT_CALL NAMESPACE_ID ( arguments )? ) )
+      int alt14=2;
+      int LA14_0 = input.LA(1);
+      if ( (LA14_0==NAMESPACE_ID) ) {
+        int LA14_1 = input.LA(2);
+        if ( (LA14_1==EOF||(LA14_1 >= AT_ADD && LA14_1 <= AT_BIT_AND)||(LA14_1 >= AT_BIT_OR && LA14_1 <= AT_BOOL_AND)||LA14_1==AT_BOOL_OR||(LA14_1 >= AT_COLON && LA14_1 <= AT_DIVIDE)||(LA14_1 >= AT_MODULO && LA14_1 <= AT_MULTIPLY)||(LA14_1 >= AT_RPAREN && LA14_1 <= AT_SUBTRACT)) ) {
+          alt14=1;
+        }
+        else if ( (LA14_1==AT_LPAREN) ) {
+          alt14=2;
+        }
+
+        else {
+          int nvaeMark = input.mark();
+          try {
+            input.consume();
+            NoViableAltException nvae =
+              new NoViableAltException("""", 14, 1, input);
+            throw nvae;
+          } finally {
+            input.rewind(nvaeMark);
+          }
+        }
+
+      }
+      else if ( (LA14_0==AT_LPAREN||LA14_0==DECIMAL||LA14_0==HEX||LA14_0==OCTAL) ) {
+        alt14=1;
+      }
+
+      else {
+        NoViableAltException nvae =
+          new NoViableAltException("""", 14, 0, input);
+        throw nvae;
+      }
+
+      switch (alt14) {
+        case 1 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:311:7: primary
+          {
+          root_0 = (CommonTree)adaptor.nil();
+
+
+          pushFollow(FOLLOW_primary_in_postfix1160);
+          primary46=primary();
+          state._fsp--;
+
+          adaptor.addChild(root_0, primary46.getTree());
+
+          }
+          break;
+        case 2 :
+          // src/java/org/apache/lucene/expressions/js/Javascript.g:312:7: NAMESPACE_ID arguments
+          {
+          NAMESPACE_ID47=(Token)match(input,NAMESPACE_ID,FOLLOW_NAMESPACE_ID_in_postfix1168);  
+          stream_NAMESPACE_ID.add(NAMESPACE_ID47);
+
+          pushFollow(FOLLOW_arguments_in_postfix1170);
+          arguments48=arguments();
+          state._fsp--;
+
+          stream_arguments.add(arguments48.getTree());
+          // AST REWRITE
+          // elements: NAMESPACE_ID, arguments
+          // token labels: 
+          // rule labels: retval
+          // token list labels: 
+          // rule list labels: 
+          // wildcard labels: 
+          retval.tree = root_0;
+          RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,""rule retval"",retval!=null?retval.getTree():null);
+
+          root_0 = (CommonTree)adaptor.nil();
+          // 312:30: -> ^( AT_CALL NAMESPACE_ID ( arguments )? )
+          {
+            // src/java/org/apache/lucene/expressions/js/Javascript.g:312:33: ^( AT_CALL NAMESPACE_ID ( arguments )? )
+            {
+            CommonTree root_1 = (CommonTree)adaptor.nil();
+            root_1 = (CommonTree)adaptor.becomeRoot((CommonTree)adaptor.create(AT_CALL, ""AT_CALL""), root_1);
+            adaptor.addChild(root_1, stream_NAMESPACE_ID.nextNode());
+            // src/java/org/apache/lucene/expressions/js/Javascript.g:312:56: ( arguments )?
+            if ( stream_arguments.hasNext() ) {
+              adaptor.addChild(root_1, stream_arguments.nextTree());
+            }
+            stream_arguments.reset();
+
+            adaptor.addChild(root_0, root_1);
+            }
+
+          }
+
+
+          retval.tree = root_0;
+
+          }
+          break;
+
+      }
+      retval.stop = input.LT(-1);
+
+      retval.tree = (CommonTree)adaptor.rulePostProcessing(root_0);
+      adaptor.setTokenBoundaries(retval.tree, retval.start, retval.stop);
+
+    }
+    catch (RecognitionException re) {
+      reportError(re);
+      recover(input,re);
+      retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+    }
+    finally {
+      // do for sure before leaving
+    }
+    return retval;
+  }"
+62,2590,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.solr.schema,org.apache.solr.schema.GeoHashField,,toInternal,,double,double,93,93,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/schema/GeoHashField.java#L93,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/schema/GeoHashField.java,,unknown,"@Override
+  public String toInternal(String val) {
+    // validate that the string is of the form
+    // latitude, longitude
+    double[] latLon = new double[0];
+    try {
+      latLon = ParseUtils.parseLatitudeLongitude(null, val);
+    } catch (InvalidShapeException e) {
+      throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
+    }
+    return GeohashUtils.encodeLatLon(latLon[0], latLon[1]);
+  }"
+63,2606,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.solr.handler.admin,org.apache.solr.handler.admin.CoreAdminHandler,,handleAliasAction,,coreContainer,"coreContainer,doPersist,isPersistent",573,573,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java#L573,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java,,unknown,"@Deprecated
+  protected void handleAliasAction(SolrQueryRequest req, SolrQueryResponse rsp) {
+    SolrParams params = req.getParams();
+
+    String name = params.get(CoreAdminParams.OTHER);
+    String cname = params.get(CoreAdminParams.CORE);
+    boolean doPersist = false;
+    if (cname.equals(name)) return;
+
+    SolrCore core = coreContainer.getCore(cname);
+    if (core != null) {
+      doPersist = coreContainer.isPersistent();
+      coreContainer.register(name, core, false);
+      // no core.close() since each entry in the cores map should increase the ref
+    }
+    return;
+  }"
+64,2855,lucene-solr,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.solr.schema,org.apache.solr.schema.PointType,,getFieldQuery,,String,String,157,157,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/schema/PointType.java#L157,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/schema/PointType.java,,close,"@Override
+  public Query getFieldQuery(QParser parser, SchemaField field, String externalVal) {
+    String[] p1 = new String[0];
+    try {
+      p1 = ParseUtils.parsePoint(null, externalVal, dimension);
+    } catch (InvalidShapeException e) {
+      throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e);
+    }
+    //TODO: should we assert that p1.length == dimension?
+    BooleanQuery bq = new BooleanQuery(true);
+    for (int i = 0; i < dimension; i++) {
+      SchemaField sf = subField(field, i, schema);
+      Query tq = sf.getType().getFieldQuery(parser, sf, p1[i]);
+      bq.add(tq, BooleanClause.Occur.MUST);
+    }
+    return bq;
+  }"
+65,9721,ant,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.tools.ant,org.apache.tools.ant.ProjectTest,,testDuplicateTargets,,,BFT,232,232,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/ProjectTest.java#L232,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/ProjectTest.java,,unknown,"public void testDuplicateTargets() {
+        // fail, because buildfile contains two targets with the same name
+        try {
+            BFT bft = new BFT("""", ""core/duplicate-target.xml"");
+        } catch (BuildException ex) {
+            assertEquals(""specific message"",
+                         ""Duplicate target 'twice'"",
+                         ex.getMessage());
+            return;
+        }
+        fail(""Should throw BuildException about duplicate target"");
+    }"
+66,9798,ant,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.tools.ant.taskdefs,org.apache.tools.ant.taskdefs.TouchTest,,testSeconds,,getTargetTime,getTargetTime,70,70,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/TouchTest.java#L70,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/TouchTest.java,,close,"public void testSeconds() {
+        executeTarget(""seconds"");
+        long time=getTargetTime();
+    }"
+67,9807,ant,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.tools.bzip2,org.apache.tools.bzip2.CBZip2StreamTest,,testNullPointer,,ByteArrayInputStream,"ByteArrayInputStream,CBZip2InputStream,byte",30,30,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/bzip2/CBZip2StreamTest.java#L30,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/bzip2/CBZip2StreamTest.java,,close,"public void testNullPointer() throws IOException {
+        try {
+            CBZip2InputStream cb = new CBZip2InputStream(new ByteArrayInputStream(new byte[0]));
+            fail(""expected an exception"");
+        } catch (IOException e) {
+            // expected
+        }
+    }"
+68,9864,ant,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.tools.ant.taskdefs,org.apache.tools.ant.taskdefs.TouchTest,,testNoSeconds,,getTargetTime,getTargetTime,61,61,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/TouchTest.java#L61,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/TouchTest.java,,close,"public void testNoSeconds() {
+        executeTarget(""noSeconds"");
+        long time = getTargetTime();
+    }"
+69,9879,ant,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.tools.ant.types,org.apache.tools.ant.types.CommandlineJavaTest,,testGetCommandline,,c,"c,clone",76,76,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/types/CommandlineJavaTest.java#L76,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/types/CommandlineJavaTest.java,,close,"public void testGetCommandline() throws Exception {
+        CommandlineJava c = new CommandlineJava();
+        c.createArgument().setValue(""org.apache.tools.ant.CommandlineJavaTest"");
+        c.setClassname(""junit.textui.TestRunner"");
+        c.createVmArgument().setValue(""-Djava.compiler=NONE"");
+        String[] s = c.getCommandline();
+        assertEquals(""no classpath"", 4, s.length);
+        /*
+         * After changing CommandlineJava to search for the java
+         * executable, I don't know, how to tests the value returned
+         * here without using the same logic as applied in the class
+         * itself.
+         *
+         * assertTrue(""no classpath"", ""java"", s[0]);
+         */
+        assertEquals(""no classpath"", ""-Djava.compiler=NONE"", s[1]);
+        assertEquals(""no classpath"", ""junit.textui.TestRunner"", s[2]);
+        assertEquals(""no classpath"",
+                     ""org.apache.tools.ant.CommandlineJavaTest"", s[3]);
+        try {
+            CommandlineJava c2 = (CommandlineJava) c.clone();
+        } catch (NullPointerException ex) {
+            fail(""cloning should work without classpath specified"");
+        }
+
+        c.createClasspath(project).setLocation(project.resolveFile(""build.xml""));
+        c.createClasspath(project).setLocation(project.resolveFile(
+            System.getProperty(MagicNames.ANT_HOME)+""/lib/ant.jar""));
+        s = c.getCommandline();
+        assertEquals(""with classpath"", 6, s.length);
+        //        assertEquals(""with classpath"", ""java"", s[0]);
+        assertEquals(""with classpath"", ""-Djava.compiler=NONE"", s[1]);
+        assertEquals(""with classpath"", ""-classpath"", s[2]);
+        assertTrue(""build.xml contained"",
+               s[3].indexOf(""build.xml""+java.io.File.pathSeparator) >= 0);
+        assertTrue(""ant.jar contained"", s[3].endsWith(""ant.jar""));
+        assertEquals(""with classpath"", ""junit.textui.TestRunner"", s[4]);
+        assertEquals(""with classpath"",
+                     ""org.apache.tools.ant.CommandlineJavaTest"", s[5]);
+    }"
+70,9951,ant,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.tools.ant,org.apache.tools.ant.DefaultDefinitions,,componentDef,,ProjectHelper,"ProjectHelper,name,ns,genComponentName",69,69,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/main/org/apache/tools/ant/DefaultDefinitions.java#L69,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/main/org/apache/tools/ant/DefaultDefinitions.java,,close,"private void componentDef(String ns, String name, String classname) {
+        AntTypeDefinition def = new AntTypeDefinition();
+        String n = ProjectHelper.genComponentName(ns, name);
+        def.setName(ProjectHelper.genComponentName(ns, name));
+        def.setClassName(classname);
+        def.setClassLoader(getClass().getClassLoader());
+        def.setRestrict(true);
+        componentHelper.addDataTypeDefinition(def);
+    }"
+71,9961,maven,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.maven.project,org.apache.maven.project.PomConstructionTest,,testDependencyScope,,buildPom,buildPom,1493,1493,close,https://github.com/apache/maven/tree/879d07b1d747653bc3c0e381ae763a49e6d885d0//maven-core/src/test/java/org/apache/maven/project/PomConstructionTest.java#L1493,https://github.com/apache/maven/tree/a7dddcb87626fec256f1b8ccbe957f94cdf401e4//maven-core/src/test/java/org/apache/maven/project/PomConstructionTest.java,,close,"public void testDependencyScope()
+	    throws Exception
+	{
+	    PomTestWrapper pom = buildPom( ""dependency-scope/sub"" );
+	}"
+72,9970,maven,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.maven.project,org.apache.maven.project.PomConstructionTest,,testDependencyManagementWithInterpolation,,buildPom,buildPom,1500,1500,close,https://github.com/apache/maven/tree/879d07b1d747653bc3c0e381ae763a49e6d885d0//maven-core/src/test/java/org/apache/maven/project/PomConstructionTest.java#L1500,https://github.com/apache/maven/tree/a7dddcb87626fec256f1b8ccbe957f94cdf401e4//maven-core/src/test/java/org/apache/maven/project/PomConstructionTest.java,,close,"public void testDependencyManagementWithInterpolation()
+	    throws Exception
+	{
+	    PomTestWrapper pom = buildPom( ""dependency-management-with-interpolation/sub"" );
+	}"
+73,9983,maven,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.maven.project,org.apache.maven.project.PomConstructionTest,,testConsecutiveEmptyElements,,buildPom,buildPom,399,399,close,https://github.com/apache/maven/tree/879d07b1d747653bc3c0e381ae763a49e6d885d0//maven-core/src/test/java/org/apache/maven/project/PomConstructionTest.java#L399,https://github.com/apache/maven/tree/a7dddcb87626fec256f1b8ccbe957f94cdf401e4//maven-core/src/test/java/org/apache/maven/project/PomConstructionTest.java,,close,"public void testConsecutiveEmptyElements()
+        throws Exception
+    {
+        PomTestWrapper pom = buildPom( ""consecutive_empty_elements"" );
+    }"
+74,9994,maven,DLS_DEAD_LOCAL_STORE,A,last,,STYLE,org.apache.maven.project,org.apache.maven.project.ProjectBuilderTest,,testSystemScopeDependencyIsPresentInTheCompileClasspathElements,,project,"project,getCompileClasspathElements",51,51,close,https://github.com/apache/maven/tree/879d07b1d747653bc3c0e381ae763a49e6d885d0//maven-core/src/test/java/org/apache/maven/project/ProjectBuilderTest.java#L51,https://github.com/apache/maven/tree/a7dddcb87626fec256f1b8ccbe957f94cdf401e4//maven-core/src/test/java/org/apache/maven/project/ProjectBuilderTest.java,,close,"public void testSystemScopeDependencyIsPresentInTheCompileClasspathElements()
+        throws Exception
+    {
+        File pom = getProject( ""it0063"" );
+        
+        Properties eps = new Properties();
+        eps.setProperty( ""jre.home"", new File( pom.getParentFile(), ""jdk/jre"" ).getPath() );        
+        
+        MavenSession session = createMavenSession( pom, eps );
+        MavenProject project = session.getCurrentProject();
+        
+        // Here we will actually not have any artifacts because the ProjectDependenciesResolver is not involved here. So
+        // right now it's not valid to ask for artifacts unless plugins require the artifacts.
+        
+        List<String> elements = project.getCompileClasspathElements();
+    }"
+75,1591,tomcat,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.tomcat.websocket,org.apache.tomcat.websocket.WsWebSocketContainer,,connectToServer,,"WsFrameClient wsFrameClient = new WsFrameClient(response, channel,",,369,369,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/tomcat/websocket/WsWebSocketContainer.java#L369,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/tomcat/websocket/WsWebSocketContainer.java,,close,"@Override
+    public Session connectToServer(Object pojo, URI path)
+            throws DeploymentException {
+
+        ClientEndpoint annotation =
+                pojo.getClass().getAnnotation(ClientEndpoint.class);
+        if (annotation == null) {
+            throw new DeploymentException(
+                    sm.getString(""wsWebSocketContainer.missingAnnotation"",
+                            pojo.getClass().getName()));
+        }
+
+        Endpoint ep = new PojoEndpointClient(pojo, annotation.decoders());
+
+        Class<? extends ClientEndpointConfig.Configurator> configuratorClazz =
+                pojo.getClass().getAnnotation(
+                        ClientEndpoint.class).configurator();
+
+        ClientEndpointConfig.Configurator configurator = null;
+        if (!ClientEndpointConfig.Configurator.class.equals(
+                configuratorClazz)) {
+            try {
+                configurator = configuratorClazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new DeploymentException(sm.getString(
+                        ""wsWebSocketContainer.defaultConfiguratorFail""), e);
+            }
+        }
+
+        ClientEndpointConfig config = ClientEndpointConfig.Builder.create().
+                configurator(configurator).
+                decoders(Arrays.asList(annotation.decoders())).
+                encoders(Arrays.asList(annotation.encoders())).
+                build();
+        return connectToServer(ep, config, path);
+    }"
+76,9495,jmeter,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,woolfel,woolfel.DummyTestCase,,testException,,0,,91,91,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/junit/woolfel/DummyTestCase.java#L91,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/junit/woolfel/DummyTestCase.java,,open,"public void testException() {
+        @SuppressWarnings(""unused"")
+        int i = 27 / 0; // will generate Divide by zero error
+    }"
+77,9533,jmeter,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,test,test.DummyAnnotatedTest,,divideByZero,,0,,99,99,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/junit/test/DummyAnnotatedTest.java#L99,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/junit/test/DummyAnnotatedTest.java,,open,"@Test
+    // Generate a test error
+    public void divideByZero() {
+        @SuppressWarnings(""unused"")
+        int i = 27 / 0; // will generate Divide by zero error
+    }"
+78,5855,cassandra,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.cassandra.db,org.apache.cassandra.db.ColumnFamilyStoreTest,,testLargeScan,,StorageService,"StorageService,getPartitioner",274,274,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java#L274,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java,,unknown,"@Test
+    public void testLargeScan() throws IOException
+    {
+        RowMutation rm;
+        for (int i = 0; i < 100; i++)
+        {
+            rm = new RowMutation(""Keyspace1"", ByteBufferUtil.bytes(""key"" + i));
+            rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(34L), 0);
+            rm.add(""Indexed1"", ByteBufferUtil.bytes(""notbirthdate""), ByteBufferUtil.bytes((long) (i % 2)), 0);
+            rm.applyUnsafe();
+        }
+
+        IndexExpression expr = new IndexExpression(ByteBufferUtil.bytes(""birthdate""), IndexOperator.EQ, ByteBufferUtil.bytes(34L));
+        IndexExpression expr2 = new IndexExpression(ByteBufferUtil.bytes(""notbirthdate""), IndexOperator.EQ, ByteBufferUtil.bytes(1L));
+        List<IndexExpression> clause = Arrays.asList(expr, expr2);
+        IDiskAtomFilter filter = new IdentityQueryFilter();
+        IPartitioner p = StorageService.getPartitioner();
+        Range<RowPosition> range = Util.range("""", """");
+        List<Row> rows = Keyspace.open(""Keyspace1"").getColumnFamilyStore(""Indexed1"").search(range, clause, filter, 100);
+
+        assert rows != null;
+        assert rows.size() == 50 : rows.size();
+        Set<DecoratedKey> keys = new HashSet<DecoratedKey>();
+        // extra check that there are no duplicate results -- see https://issues.apache.org/jira/browse/CASSANDRA-2406
+        for (Row row : rows)
+            keys.add(row.key);
+        assert rows.size() == keys.size();
+    }"
+79,6173,cassandra,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.cassandra.db,org.apache.cassandra.db.CleanupTest,,testCleanupWithIndexes,,StorageService,"StorageService,getPartitioner",116,116,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//test/unit/org/apache/cassandra/db/CleanupTest.java#L116,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/db/CleanupTest.java,,unknown,"@Test
+    public void testCleanupWithIndexes() throws IOException, ExecutionException, InterruptedException
+    {
+        Keyspace keyspace = Keyspace.open(KEYSPACE1);
+        ColumnFamilyStore cfs = keyspace.getColumnFamilyStore(CF1);
+
+        List<Row> rows;
+
+        // insert data and verify we get it back w/ range query
+        fillCF(cfs, LOOPS);
+        rows = Util.getRangeSlice(cfs);
+        assertEquals(LOOPS, rows.size());
+
+        SecondaryIndex index = cfs.indexManager.getIndexForColumn(COLUMN);
+        long start = System.nanoTime();
+        while (!index.isIndexBuilt(COLUMN) && System.nanoTime() - start < TimeUnit.SECONDS.toNanos(10))
+            Thread.sleep(10);
+
+        // verify we get it back w/ index query too
+        IndexExpression expr = new IndexExpression(COLUMN, IndexOperator.EQ, VALUE);
+        List<IndexExpression> clause = Arrays.asList(expr);
+        IDiskAtomFilter filter = new IdentityQueryFilter();
+        IPartitioner p = StorageService.getPartitioner();
+        Range<RowPosition> range = Util.range("""", """");
+        rows = keyspace.getColumnFamilyStore(CF1).search(range, clause, filter, Integer.MAX_VALUE);
+        assertEquals(LOOPS, rows.size());
+
+        // we don't allow cleanup when the local host has no range to avoid wipping up all data when a node has not join the ring.
+        // So to make sure cleanup erase everything here, we give the localhost the tiniest possible range.
+        TokenMetadata tmd = StorageService.instance.getTokenMetadata();
+        byte[] tk1 = new byte[1], tk2 = new byte[1];
+        tk1[0] = 2;
+        tk2[0] = 1;
+        tmd.updateNormalToken(new BytesToken(tk1), InetAddress.getByName(""127.0.0.1""));
+        tmd.updateNormalToken(new BytesToken(tk2), InetAddress.getByName(""127.0.0.2""));
+
+        CompactionManager.instance.performCleanup(cfs, new CounterId.OneShotRenewer());
+
+        // row data should be gone
+        rows = Util.getRangeSlice(cfs);
+        assertEquals(0, rows.size());
+
+        // not only should it be gone but there should be no data on disk, not even tombstones
+        assert cfs.getSSTables().isEmpty();
+
+        // 2ary indexes should result in no results, too (although tombstones won't be gone until compacted)
+        rows = cfs.search(range, clause, filter, Integer.MAX_VALUE);
+        assertEquals(0, rows.size());
+    }"
+80,6355,cassandra,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.cassandra.dht,org.apache.cassandra.dht.Murmur3Partitioner$1,,validate,,Long i = Long.valueOf(token);,,173,173,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/dht/Murmur3Partitioner.java#L173,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/dht/Murmur3Partitioner.java,,close,"public void validate(String token) throws ConfigurationException
+        {
+            try
+            {
+                Long i = Long.valueOf(token);
+            }
+            catch (NumberFormatException e)
+            {
+                throw new ConfigurationException(e.getMessage());
+            }
+        }"
+81,7926,cassandra,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.cassandra.db,org.apache.cassandra.db.ColumnFamilyStoreTest,,testIndexScanWithLimitOne,,StorageService,"StorageService,getPartitioner",637,637,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java#L637,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java,,unknown,"@Test
+    public void testIndexScanWithLimitOne() throws IOException
+    {
+        RowMutation rm;
+
+        rm = new RowMutation(""Keyspace1"", ByteBufferUtil.bytes(""kk1""));
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""notbirthdate""), ByteBufferUtil.bytes(1L), 0);
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(1L), 0);
+        rm.apply();
+
+        rm = new RowMutation(""Keyspace1"", ByteBufferUtil.bytes(""kk2""));
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""notbirthdate""), ByteBufferUtil.bytes(2L), 0);
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(1L), 0);
+        rm.apply();
+
+        rm = new RowMutation(""Keyspace1"", ByteBufferUtil.bytes(""kk3""));
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""notbirthdate""), ByteBufferUtil.bytes(2L), 0);
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(1L), 0);
+        rm.apply();
+
+        rm = new RowMutation(""Keyspace1"", ByteBufferUtil.bytes(""kk4""));
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""notbirthdate""), ByteBufferUtil.bytes(2L), 0);
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(1L), 0);
+        rm.apply();
+
+        // basic single-expression query
+        IndexExpression expr1 = new IndexExpression(ByteBufferUtil.bytes(""birthdate""), IndexOperator.EQ, ByteBufferUtil.bytes(1L));
+        IndexExpression expr2 = new IndexExpression(ByteBufferUtil.bytes(""notbirthdate""), IndexOperator.GT, ByteBufferUtil.bytes(1L));
+        List<IndexExpression> clause = Arrays.asList(new IndexExpression[]{ expr1, expr2 });
+        IDiskAtomFilter filter = new IdentityQueryFilter();
+        IPartitioner p = StorageService.getPartitioner();
+        Range<RowPosition> range = Util.range("""", """");
+        List<Row> rows = Keyspace.open(""Keyspace1"").getColumnFamilyStore(""Indexed1"").search(range, clause, filter, 1);
+
+        assert rows != null;
+        assert rows.size() == 1 : StringUtils.join(rows, "","");
+    }"
+82,8134,cassandra,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.cassandra.db,org.apache.cassandra.db.ColumnFamilyStoreTest,,testIndexUpdate,,StorageService,"StorageService,getPartitioner",399,399,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java#L399,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java,,unknown,"@Test
+    public void testIndexUpdate() throws IOException
+    {
+        Keyspace keyspace = Keyspace.open(""Keyspace2"");
+
+        // create a row and update the birthdate value, test that the index query fetches the new version
+        RowMutation rm;
+        rm = new RowMutation(""Keyspace2"", ByteBufferUtil.bytes(""k1""));
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(1L), 1);
+        rm.apply();
+        rm = new RowMutation(""Keyspace2"", ByteBufferUtil.bytes(""k1""));
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(2L), 2);
+        rm.apply();
+
+        IndexExpression expr = new IndexExpression(ByteBufferUtil.bytes(""birthdate""), IndexOperator.EQ, ByteBufferUtil.bytes(1L));
+        List<IndexExpression> clause = Arrays.asList(expr);
+        IDiskAtomFilter filter = new IdentityQueryFilter();
+        IPartitioner p = StorageService.getPartitioner();
+        Range<RowPosition> range = Util.range("""", """");
+        List<Row> rows = keyspace.getColumnFamilyStore(""Indexed1"").search(range, clause, filter, 100);
+        assert rows.size() == 0;
+
+        expr = new IndexExpression(ByteBufferUtil.bytes(""birthdate""), IndexOperator.EQ, ByteBufferUtil.bytes(2L));
+        clause = Arrays.asList(expr);
+        rows = keyspace.getColumnFamilyStore(""Indexed1"").search(range, clause, filter, 100);
+        String key = ByteBufferUtil.string(rows.get(0).key.key);
+        assert ""k1"".equals( key );
+
+        // update the birthdate value with an OLDER timestamp, and test that the index ignores this
+        rm = new RowMutation(""Keyspace2"", ByteBufferUtil.bytes(""k1""));
+        rm.add(""Indexed1"", ByteBufferUtil.bytes(""birthdate""), ByteBufferUtil.bytes(3L), 0);
+        rm.apply();
+
+        rows = keyspace.getColumnFamilyStore(""Indexed1"").search(range, clause, filter, 100);
+        key = ByteBufferUtil.string(rows.get(0).key.key);
+        assert ""k1"".equals( key );
+
+    }"
+83,9019,cassandra,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.cassandra.io.sstable,org.apache.cassandra.io.sstable.SSTableReaderTest,,assertIndexQueryWorks,,StorageService,"StorageService,getPartitioner",357,357,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//test/unit/org/apache/cassandra/io/sstable/SSTableReaderTest.java#L357,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/io/sstable/SSTableReaderTest.java,,unknown,"private void assertIndexQueryWorks(ColumnFamilyStore indexedCFS) throws IOException
+    {
+        assert ""Indexed1"".equals(indexedCFS.name);
+
+        // make sure all sstables including 2ary indexes load from disk
+        for (ColumnFamilyStore cfs : indexedCFS.concatWithIndexes())
+            clearAndLoad(cfs);
+
+        // query using index to see if sstable for secondary index opens
+        IndexExpression expr = new IndexExpression(ByteBufferUtil.bytes(""birthdate""), IndexOperator.EQ, ByteBufferUtil.bytes(1L));
+        List<IndexExpression> clause = Arrays.asList(expr);
+        IPartitioner p = StorageService.getPartitioner();
+        Range<RowPosition> range = Util.range("""", """");
+        List<Row> rows = indexedCFS.search(range, clause, new IdentityQueryFilter(), 100);
+        assert rows.size() == 1;
+    }"
+84,9229,cassandra,DLS_DEAD_LOCAL_STORE,C,last,,STYLE,org.apache.cassandra.db,org.apache.cassandra.db.ColumnFamilyStoreTest,,queryBirthdate,,StorageService,"StorageService,getPartitioner",682,682,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java#L682,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/db/ColumnFamilyStoreTest.java,,unknown,"private void queryBirthdate(Keyspace keyspace) throws CharacterCodingException
+    {
+        IndexExpression expr = new IndexExpression(ByteBufferUtil.bytes(""birthdate""), IndexOperator.EQ, ByteBufferUtil.bytes(1L));
+        List<IndexExpression> clause = Arrays.asList(expr);
+        IDiskAtomFilter filter = new IdentityQueryFilter();
+        IPartitioner p = StorageService.getPartitioner();
+        List<Row> rows = keyspace.getColumnFamilyStore(""Indexed2"").search(Util.range("""", """"), clause, filter, 100);
+        assert rows.size() == 1 : StringUtils.join(rows, "","");
+        assertEquals(""k1"", ByteBufferUtil.string(rows.get(0).key.key));
+    }"
+85,4847,cassandra,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.cassandra.thrift,org.apache.cassandra.thrift.Cassandra$describe_snitch_args,,compareTo,,describe_snitch_args typedOther = (describe_snitch_args)other;,,27105,27105,close,https://github.com/apache/cassandra/tree/69337a43670f71ae1fc55e23d6a9031230423900//interface/thrift/gen-java/org/apache/cassandra/thrift/Cassandra.java#L27105,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//interface/thrift/gen-java/org/apache/cassandra/thrift/Cassandra.java,,close,"public int compareTo(login_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      login_args typedOther = (login_args)other;
+
+      lastComparison = Boolean.valueOf(isSetAuth_request()).compareTo(typedOther.isSetAuth_request());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetAuth_request()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.auth_request, typedOther.auth_request);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }"
+86,6115,cassandra,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.cassandra.io.sstable,org.apache.cassandra.io.sstable.SSTableUtils$Context,,write,,System,"System,currentTimeMillis",206,206,close,https://github.com/apache/cassandra/tree/69337a43670f71ae1fc55e23d6a9031230423900//test/unit/org/apache/cassandra/io/sstable/SSTableUtils.java#L206,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//test/unit/org/apache/cassandra/io/sstable/SSTableUtils.java,,close,"public SSTableReader write(Set<String> keys) throws IOException
+        {
+            Map<String, ColumnFamily> map = new HashMap<String, ColumnFamily>();
+            for (String key : keys)
+            {
+                ColumnFamily cf = ColumnFamily.create(ksname, cfname);
+                cf.addColumn(new Column(ByteBufferUtil.bytes(key), ByteBufferUtil.bytes(key), 0));
+                map.put(key, cf);
+            }
+            return write(map);
+        }"
+87,8628,cassandra,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.cassandra.thrift,org.apache.cassandra.thrift.SchemaDisagreementException,,compareTo,,other,other,186,186,close,https://github.com/apache/cassandra/tree/69337a43670f71ae1fc55e23d6a9031230423900//interface/thrift/gen-java/org/apache/cassandra/thrift/SchemaDisagreementException.java#L186,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//interface/thrift/gen-java/org/apache/cassandra/thrift/SchemaDisagreementException.java,,close,"public int compareTo(SchemaDisagreementException other) {
+    if (!getClass().equals(other.getClass())) {
+      return getClass().getName().compareTo(other.getClass().getName());
+    }
+
+    int lastComparison = 0;
+    SchemaDisagreementException typedOther = (SchemaDisagreementException)other;
+
+    return 0;
+  }"
+88,1201,tomcat,UC_USELESS_OBJECT,C,last,,STYLE,org.apache.catalina.connector,org.apache.catalina.connector.Request,,setCharacterEncoding,[byte,byte buffer[] = new byte[1];,,1598,1598,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/connector/Request.java#L1598,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/connector/Request.java,,open,"@Override
+    public void setCharacterEncoding(String enc)
+        throws UnsupportedEncodingException {
+
+        if (usingReader) {
+            return;
+        }
+
+        // Ensure that the specified encoding is valid
+        byte buffer[] = new byte[1];
+        buffer[0] = (byte) 'a';
+
+        // Confirm that the encoding name is valid
+        B2CConverter.getCharset(enc);
+
+        // Save the validated encoding
+        coyoteRequest.setCharacterEncoding(enc);
+    }"
+89,1587,tomcat,UC_USELESS_OBJECT,C,last,,STYLE,org.apache.tomcat.websocket,org.apache.tomcat.websocket.WsWebSocketContainer,,generateExtensionHeaders,lang,StringBuilder header = new StringBuilder();,,483,483,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/tomcat/websocket/WsWebSocketContainer.java#L483,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/tomcat/websocket/WsWebSocketContainer.java,,close,"private List<String> generateExtensionHeaders(List<Extension> extensions) {
+        List<String> result = new ArrayList<>(extensions.size());
+        for (Extension extension : extensions) {
+            StringBuilder header = new StringBuilder();
+            header.append(extension.getName());
+            for (Extension.Parameter param : extension.getParameters()) {
+                header.append(';');
+                header.append(param.getName());
+                String value = param.getValue();
+                if (value != null && value.length() > 0) {
+                    header.append('=');
+                    header.append(value);
+                }
+            }
+        }
+        return result;
+    }"
+90,1633,tomcat,UC_USELESS_OBJECT,A,last,,STYLE,org.apache.catalina.valves,org.apache.catalina.valves.AccessLogValve$DateAndTimeElement,,tidyFormat,lang,StringBuilder result = new StringBuilder();,,1436,1436,close,https://github.com/apache/tomcat/tree/3787242a83ee5555c79fd2e4c6b6952e9195ed8b//java/org/apache/catalina/valves/AccessLogValve.java#L1436,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/valves/AccessLogValve.java,,unknown,"private void tidyFormat() {
+            boolean escape = false;
+            StringBuilder result = new StringBuilder();
+            int len = format.length();
+            char x;
+            for (int i = 0; i < len; i++) {
+                x = format.charAt(i);
+                if (escape || x != 'S') {
+                    result.append(x);
+                } else {
+                    result.append(msecPattern);
+                    usesMsecs = true;
+                }
+                if (x == '\'') {
+                    escape = !escape;
+                }
+            }
+        }"

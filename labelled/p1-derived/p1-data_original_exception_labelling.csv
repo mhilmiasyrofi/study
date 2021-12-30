@@ -1,0 +1,1101 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,21,derby,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.derbyPreBuild,org.apache.derbyPreBuild.ReleaseProperties,,execute,,,,166,166,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/build/org/apache/derbyPreBuild/ReleaseProperties.java#L166,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/build/org/apache/derbyPreBuild/ReleaseProperties.java,,open,"public  void    execute()
+        throws BuildException
+    {
+        File                 target = new File( _releasePropertiesFileName );
+        FileWriter      propertiesFW = null;
+        PrintWriter    propertiesPW = null;
+
+        try {
+            VersionID versionID = new VersionID( _releaseID );
+            if ( _bump ) { versionID.bump(); }
+            
+            int major = versionID.getMajor();
+            int minor = versionID.getMinor();
+            int currentYear = getCurrentYear();
+
+            propertiesFW = new FileWriter( target );
+            propertiesPW = new PrintWriter( propertiesFW );
+
+            propertiesPW.println( APACHE_LICENSE_HEADER );
+
+            propertiesPW.println( ""drdamaint=0"" );
+            propertiesPW.println( ""maint="" + encodeFixpackAndPoint( versionID ) );
+            propertiesPW.println( ""major="" + major );
+            propertiesPW.println( ""minor="" + minor );
+            propertiesPW.println( ""eversion="" + versionID.getBranchName() );
+            propertiesPW.println( ""beta="" + versionID.isBeta() );
+            propertiesPW.println( ""copyright.comment=Copyright 1997, "" + currentYear + "" The Apache Software Foundation or its licensors, as applicable."" );
+            propertiesPW.println( ""vendor=The Apache Software Foundation"" ) ;
+            propertiesPW.println( ""copyright.year="" + currentYear ) ;
+            propertiesPW.println( ""release.id.long="" + versionID.toString() ) ;
+
+            setProperty( NEW_RELEASE_ID, versionID.toString() );
+        }
+        catch (Exception e)
+        {
+            throw new BuildException( ""Could not generate release properties: "" + e.getMessage(), e );
+        }
+        finally
+        {
+            try {
+                finishWriting( propertiesFW, propertiesPW );
+            }
+            catch (Exception ex)
+            {
+                throw new BuildException( ""Error closing file writers."", ex );
+            }
+        }
+    }"
+1,1057,tomcat,REC_CATCH_EXCEPTION,B,last,,STYLE,org.apache.catalina.startup,org.apache.catalina.startup.HostConfig,,deployWAR,,,,862,862,close,https://github.com/apache/tomcat/tree/ad9a49cb08bf004af97cad465bba45d21d112325//java/org/apache/catalina/startup/HostConfig.java#L862,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/startup/HostConfig.java,,unknown,"protected void deployWAR(ContextName cn, File war) {
+
+        // Checking for a nested /META-INF/context.xml
+        JarFile jar = null;
+        JarEntry entry = null;
+        InputStream istream = null;
+        FileOutputStream fos = null;
+        BufferedOutputStream ostream = null;
+        File xml;
+        if (copyXML) {
+            xml = new File(host.getConfigBaseFile(), cn.getBaseName() + "".xml"");
+        } else {
+            xml = new File(host.getAppBaseFile(),
+                    cn.getBaseName() + ""/META-INF/context.xml"");
+        }
+        boolean xmlInWar = false;
+
+        if (deployXML && !xml.exists()) {
+            try {
+                jar = new JarFile(war);
+                entry = jar.getJarEntry(Constants.ApplicationContextXml);
+                if (entry != null) {
+                    xmlInWar = true;
+                }
+                if ((copyXML || unpackWARs) && xmlInWar) {
+                    istream = jar.getInputStream(entry);
+
+                    fos = new FileOutputStream(xml);
+                    ostream = new BufferedOutputStream(fos, 1024);
+                    byte buffer[] = new byte[1024];
+                    while (true) {
+                        int n = istream.read(buffer);
+                        if (n < 0) {
+                            break;
+                        }
+                        ostream.write(buffer, 0, n);
+                    }
+                    ostream.flush();
+                }
+            } catch (IOException e) {
+                /* Ignore */
+            } finally {
+                if (ostream != null) {
+                    try {
+                        ostream.close();
+                    } catch (IOException ioe) {
+                        // Ignore
+                    }
+                    ostream = null;
+                }
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException ioe) {
+                        // Ignore
+                    }
+                    fos = null;
+                }
+                if (istream != null) {
+                    try {
+                        istream.close();
+                    } catch (IOException ioe) {
+                        // Ignore
+                    }
+                    istream = null;
+                }
+                entry = null;
+                if (jar != null) {
+                    try {
+                        jar.close();
+                    } catch (IOException ioe) {
+                        // Ignore;
+                    }
+                    jar = null;
+                }
+            }
+        }
+
+        DeployedApplication deployedApp = new DeployedApplication(cn.getName());
+
+        // Deploy the application in this WAR file
+        if(log.isInfoEnabled())
+            log.info(sm.getString(""hostConfig.deployWar"",
+                    war.getAbsolutePath()));
+
+        Context context = null;
+        try {
+            if (deployXML && xml.exists()) {
+                synchronized (digester) {
+                    try {
+                        context = (Context) digester.parse(xml);
+                    } catch (Exception e) {
+                        log.error(sm.getString(
+                                ""hostConfig.deployDescriptor.error"",
+                                war.getAbsolutePath()));
+                    } finally {
+                        if (context == null) {
+                            context = new FailedContext();
+                        }
+                        digester.reset();
+                    }
+                }
+                context.setConfigFile(xml.toURI().toURL());
+            } else if (deployXML && xmlInWar) {
+                synchronized (digester) {
+                    try {
+                        jar = new JarFile(war);
+                        entry =
+                            jar.getJarEntry(Constants.ApplicationContextXml);
+                        istream = jar.getInputStream(entry);
+                        context = (Context) digester.parse(istream);
+                    } catch (Exception e) {
+                        log.error(sm.getString(
+                                ""hostConfig.deployDescriptor.error"",
+                                war.getAbsolutePath()));
+                    } finally {
+                        if (context == null) {
+                            context = new FailedContext();
+                        }
+                        context.setConfigFile(new URL(""jar:"" +
+                                war.toURI().toString() + ""!/"" +
+                                Constants.ApplicationContextXml));
+                        if (istream != null) {
+                            try {
+                                istream.close();
+                            } catch (IOException e) {
+                                /* Ignore */
+                            }
+                            istream = null;
+                        }
+                        entry = null;
+                        if (jar != null) {
+                            try {
+                                jar.close();
+                            } catch (IOException e) {
+                                /* Ignore */
+                            }
+                            jar = null;
+                        }
+                        digester.reset();
+                    }
+                }
+            } else {
+                context = (Context) Class.forName(contextClass).newInstance();
+            }
+
+            // Populate redeploy resources with the WAR file
+            deployedApp.redeployResources.put
+                (war.getAbsolutePath(), Long.valueOf(war.lastModified()));
+
+            if (deployXML && xml.exists() && copyXML) {
+                deployedApp.redeployResources.put(xml.getAbsolutePath(),
+                        Long.valueOf(xml.lastModified()));
+            }
+
+            Class<?> clazz = Class.forName(host.getConfigClass());
+            LifecycleListener listener =
+                (LifecycleListener) clazz.newInstance();
+            context.addLifecycleListener(listener);
+
+            context.setName(cn.getName());
+            context.setPath(cn.getPath());
+            context.setWebappVersion(cn.getVersion());
+            context.setDocBase(cn.getBaseName() + "".war"");
+            host.addChild(context);
+        } catch (Throwable t) {
+            ExceptionUtils.handleThrowable(t);
+            log.error(sm.getString(""hostConfig.deployWar.error"",
+                    war.getAbsolutePath()), t);
+        } finally {
+            // If we're unpacking WARs, the docBase will be mutated after
+            // starting the context
+            if (unpackWARs && context != null && context.getDocBase() != null) {
+                File docBase = new File(host.getAppBaseFile(), cn.getBaseName());
+                deployedApp.redeployResources.put(docBase.getAbsolutePath(),
+                        Long.valueOf(docBase.lastModified()));
+                addWatchedResources(deployedApp, docBase.getAbsolutePath(),
+                        context);
+                if (deployXML && !copyXML && (xmlInWar || xml.exists())) {
+                    deployedApp.redeployResources.put(xml.getAbsolutePath(),
+                            Long.valueOf(xml.lastModified()));
+                }
+            } else {
+                // Passing null for docBase means that no resources will be
+                // watched. This will be logged at debug level.
+                addWatchedResources(deployedApp, null, context);
+            }
+            // Add the global redeploy resources (which are never deleted) at
+            // the end so they don't interfere with the deletion process
+            addGlobalRedeployResources(deployedApp);
+        }
+
+        deployed.put(cn.getName(), deployedApp);
+    }"
+2,1383,tomcat,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.catalina.startup,org.apache.catalina.startup.PasswdUserDatabase,,init,,,,184,184,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/startup/PasswdUserDatabase.java#L184,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/startup/PasswdUserDatabase.java,,open,"private void init() {
+
+        BufferedReader reader = null;
+        try {
+
+            reader = new BufferedReader(new FileReader(PASSWORD_FILE));
+
+            while (true) {
+
+                // Accumulate the next line
+                StringBuilder buffer = new StringBuilder();
+                while (true) {
+                    int ch = reader.read();
+                    if ((ch < 0) || (ch == '\n'))
+                        break;
+                    buffer.append((char) ch);
+                }
+                String line = buffer.toString();
+                if (line.length() < 1)
+                    break;
+
+                // Parse the line into constituent elements
+                int n = 0;
+                String tokens[] = new String[7];
+                for (int i = 0; i < tokens.length; i++)
+                    tokens[i] = null;
+                while (n < tokens.length) {
+                    String token = null;
+                    int colon = line.indexOf(':');
+                    if (colon >= 0) {
+                        token = line.substring(0, colon);
+                        line = line.substring(colon + 1);
+                    } else {
+                        token = line;
+                        line = """";
+                    }
+                    tokens[n++] = token;
+                }
+
+                // Add this user and corresponding directory
+                if ((tokens[0] != null) && (tokens[5] != null))
+                    homes.put(tokens[0], tokens[5]);
+
+            }
+
+            reader.close();
+            reader = null;
+
+        } catch (Exception e) {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException f) {
+                    // Ignore
+                }
+                reader = null;
+            }
+        }
+
+    }"
+3,1456,tomcat,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.catalina.ant.jmx,org.apache.catalina.ant.jmx.JMXAccessorEqualsCondition,,accessJMXValue,,,,212,212,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/ant/jmx/JMXAccessorEqualsCondition.java#L212,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/ant/jmx/JMXAccessorEqualsCondition.java,,unknown,"protected String accessJMXValue() {
+        try {
+            Object result = getJMXConnection().getAttribute(
+                    new ObjectName(name), attribute);
+            if(result != null)
+                return result.toString();
+        } catch (Exception e) {
+            // ignore access or connection open errors
+        }
+        return null;
+    }"
+4,1460,tomcat,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.catalina.ant.jmx,org.apache.catalina.ant.jmx.JMXAccessorCondition,,accessJMXValue,,,,297,297,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/ant/jmx/JMXAccessorCondition.java#L297,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/ant/jmx/JMXAccessorCondition.java,,unknown,"protected String accessJMXValue() {
+        try {
+            Object result = getJMXConnection().getAttribute(
+                    new ObjectName(name), attribute);
+            if(result != null)
+                return result.toString();
+        } catch (Exception e) {
+            // ignore access or connection open errors
+        }
+        return null;
+    }"
+5,1932,lucene-solr,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.solr.handler.admin,org.apache.solr.handler.admin.CoreAdminHandler,,handleSplitAction,,,,314,314,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java#L314,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java,,unknown,"protected void handleSplitAction(SolrQueryRequest adminReq, SolrQueryResponse rsp) throws IOException {
+    SolrParams params = adminReq.getParams();
+    List<DocRouter.Range> ranges = null;
+
+    String[] pathsArr = params.getParams(""path"");
+    String rangesStr = params.get(CoreAdminParams.RANGES);    // ranges=a-b,c-d,e-f
+    if (rangesStr != null)  {
+      String[] rangesArr = rangesStr.split("","");
+      if (rangesArr.length == 0) {
+        throw new SolrException(ErrorCode.BAD_REQUEST, ""There must be at least one range specified to split an index"");
+      } else  {
+        ranges = new ArrayList<DocRouter.Range>(rangesArr.length);
+        for (String r : rangesArr) {
+          try {
+            ranges.add(DocRouter.DEFAULT.fromString(r));
+          } catch (Exception e) {
+            throw new SolrException(ErrorCode.BAD_REQUEST, ""Exception parsing hexadecimal hash range: "" + r, e);
+          }
+        }
+      }
+    }
+    String splitKey = params.get(""split.key"");
+    String[] newCoreNames = params.getParams(""targetCore"");
+    String cname = params.get(CoreAdminParams.CORE, """");
+
+    if ((pathsArr == null || pathsArr.length == 0) && (newCoreNames == null || newCoreNames.length == 0)) {
+      throw new SolrException(ErrorCode.BAD_REQUEST, ""Either path or targetCore param must be specified"");
+    }
+
+    log.info(""Invoked split action for core: "" + cname);
+    SolrCore core = coreContainer.getCore(cname);
+    SolrQueryRequest req = new LocalSolrQueryRequest(core, params);
+    List<SolrCore> newCores = null;
+
+    try {
+      // TODO: allow use of rangesStr in the future
+      List<String> paths = null;
+      int partitions = pathsArr != null ? pathsArr.length : newCoreNames.length;
+
+      DocRouter router = null;
+      String routeFieldName = null;
+      if (coreContainer.isZooKeeperAware()) {
+        ClusterState clusterState = coreContainer.getZkController().getClusterState();
+        String collectionName = req.getCore().getCoreDescriptor().getCloudDescriptor().getCollectionName();
+        DocCollection collection = clusterState.getCollection(collectionName);
+        String sliceName = req.getCore().getCoreDescriptor().getCloudDescriptor().getShardId();
+        Slice slice = clusterState.getSlice(collectionName, sliceName);
+        router = collection.getRouter() != null ? collection.getRouter() : DocRouter.DEFAULT;
+        if (ranges == null) {
+          DocRouter.Range currentRange = slice.getRange();
+          ranges = currentRange != null ? router.partitionRange(partitions, currentRange) : null;
+        }
+        Map m = (Map) collection.get(DOC_ROUTER);
+        if (m != null)  {
+          routeFieldName = (String) m.get(""field"");
+        }
+      }
+
+      if (pathsArr == null) {
+        newCores = new ArrayList<SolrCore>(partitions);
+        for (String newCoreName : newCoreNames) {
+          SolrCore newcore = coreContainer.getCore(newCoreName);
+          if (newcore != null) {
+            newCores.add(newcore);
+          } else {
+            throw new SolrException(ErrorCode.BAD_REQUEST, ""Core with core name "" + newCoreName + "" expected but doesn't exist."");
+          }
+        }
+      } else {
+        paths = Arrays.asList(pathsArr);
+      }
+
+
+      SplitIndexCommand cmd = new SplitIndexCommand(req, paths, newCores, ranges, router, routeFieldName, splitKey);
+      core.getUpdateHandler().split(cmd);
+
+      // After the split has completed, someone (here?) should start the process of replaying the buffered updates.
+
+    } catch (Exception e) {
+      log.error(""ERROR executing split:"", e);
+      throw new RuntimeException(e);
+
+    } finally {
+      if (req != null) req.close();
+      if (core != null) core.close();
+      if (newCores != null) {
+        for (SolrCore newCore : newCores) {
+          newCore.close();
+        }
+      }
+    }
+
+  }"
+6,2059,lucene-solr,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.solr.core,org.apache.solr.core.CoreContainer,,reload,,,,725,725,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/core/CoreContainer.java#L725,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/core/CoreContainer.java,,unknown,"public void reload(String name) {
+    try {
+      name = checkDefault(name);
+
+      SolrCore core = solrCores.getCoreFromAnyList(name, false);
+      if (core == null)
+        throw new SolrException( SolrException.ErrorCode.BAD_REQUEST, ""No such core: "" + name );
+
+      try {
+        solrCores.waitAddPendingCoreOps(name);
+        CoreDescriptor cd = core.getCoreDescriptor();
+
+        File instanceDir = new File(cd.getInstanceDir());
+
+        log.info(""Reloading SolrCore '{}' using instanceDir: {}"",
+                 cd.getName(), instanceDir.getAbsolutePath());
+        SolrResourceLoader solrLoader;
+        if(zkSys.getZkController() == null) {
+          solrLoader = new SolrResourceLoader(instanceDir.getAbsolutePath(), loader.getClassLoader(),
+                                                cd.getSubstitutableProperties());
+        } else {
+          try {
+            String collection = cd.getCloudDescriptor().getCollectionName();
+            zkSys.getZkController().createCollectionZkNode(cd.getCloudDescriptor());
+
+            String zkConfigName = zkSys.getZkController().getZkStateReader().readConfigName(collection);
+            if (zkConfigName == null) {
+              log.error(""Could not find config name for collection:"" + collection);
+              throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR,
+                                           ""Could not find config name for collection:"" + collection);
+            }
+            solrLoader = new ZkSolrResourceLoader(instanceDir.getAbsolutePath(), zkConfigName, loader.getClassLoader(),
+                cd.getSubstitutableProperties(), zkSys.getZkController());
+          } catch (KeeperException e) {
+            log.error("""", e);
+            throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR,
+                                         """", e);
+          } catch (InterruptedException e) {
+            // Restore the interrupted status
+            Thread.currentThread().interrupt();
+            log.error("""", e);
+            throw new ZooKeeperException(SolrException.ErrorCode.SERVER_ERROR,
+                                         """", e);
+          }
+        }
+        SolrCore newCore = core.reload(solrLoader, core);
+        // keep core to orig name link
+        solrCores.removeCoreToOrigName(newCore, core);
+        registerCore(false, name, newCore, false);
+      } finally {
+        solrCores.removeFromPendingOps(name);
+      }
+      // :TODO: Java7...
+      // http://docs.oracle.com/javase/7/docs/technotes/guides/language/catch-multiple.html
+    } catch (Exception ex) {
+      throw recordAndThrow(name, ""Unable to reload core: "" + name, ex);
+    }
+  }"
+7,2338,lucene-solr,REC_CATCH_EXCEPTION,B,last,,STYLE,org.apache.solr.handler,org.apache.solr.handler.ReplicationHandler,,loadReplicationProperties,,,,764,764,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//solr/core/src/java/org/apache/solr/handler/ReplicationHandler.java#L764,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/ReplicationHandler.java,,unknown,"Properties loadReplicationProperties() {
+    FileInputStream inFile = null;
+    Properties props = new Properties();
+    try {
+      File f = new File(core.getDataDir(), SnapPuller.REPLICATION_PROPERTIES);
+      if (f.exists()) {
+        inFile = new FileInputStream(f);
+        props.load(inFile);
+      }
+    } catch (Exception e) {
+      LOG.warn(""Exception while reading "" + SnapPuller.REPLICATION_PROPERTIES);
+    } finally {
+      IOUtils.closeQuietly(inFile);
+    }
+    return props;
+  }"
+8,2393,lucene-solr,REC_CATCH_EXCEPTION,A,last,,STYLE,org.apache.solr.handler.admin,org.apache.solr.handler.admin.CoreAdminHandler,,handleCreateAction,,,,344,344,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java#L344,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java,,unknown,"protected boolean handleCreateAction(SolrQueryRequest req, SolrQueryResponse rsp) throws SolrException {
+    try {
+      SolrParams params = req.getParams();
+      String name = params.get(CoreAdminParams.NAME);
+
+      String instanceDir = params.get(CoreAdminParams.INSTANCE_DIR);
+      if (instanceDir == null) {
+        // instanceDir = coreContainer.getSolrHome() + ""/"" + name;
+        instanceDir = name; // bare name is already relative to solr home
+      }
+
+      CoreDescriptor dcore = new CoreDescriptor(coreContainer, name, instanceDir);
+
+      //  fillup optional parameters
+      String opts = params.get(CoreAdminParams.CONFIG);
+      if (opts != null)
+        dcore.setConfigName(opts);
+
+      opts = params.get(CoreAdminParams.SCHEMA);
+      if (opts != null)
+        dcore.setSchemaName(opts);
+
+      opts = params.get(CoreAdminParams.DATA_DIR);
+      if (opts != null)
+        dcore.setDataDir(opts);
+
+      CloudDescriptor cd = dcore.getCloudDescriptor();
+      if (cd != null) {
+        cd.setParams(req.getParams());
+
+        opts = params.get(CoreAdminParams.COLLECTION);
+        if (opts != null)
+          cd.setCollectionName(opts);
+        
+        opts = params.get(CoreAdminParams.SHARD);
+        if (opts != null)
+          cd.setShardId(opts);
+      }
+      
+      // Process all property.name=value parameters and set them as name=value core properties
+      Properties coreProperties = new Properties();
+      Iterator<String> parameterNamesIterator = params.getParameterNamesIterator();
+      while (parameterNamesIterator.hasNext()) {
+          String parameterName = parameterNamesIterator.next();
+          if(parameterName.startsWith(CoreAdminParams.PROPERTY_PREFIX)) {
+              String parameterValue = params.get(parameterName);
+              String propertyName = parameterName.substring(CoreAdminParams.PROPERTY_PREFIX.length()); // skip prefix
+              coreProperties.put(propertyName, parameterValue);
+          }
+      }
+      dcore.setCoreProperties(coreProperties);
+      
+      SolrCore core = coreContainer.create(dcore);
+      coreContainer.register(name, core, false);
+      rsp.add(""core"", core.getName());
+      return coreContainer.isPersistent();
+    } catch (Exception ex) {
+      throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+              ""Error executing default implementation of CREATE"", ex);
+    }
+  }"
+9,2524,lucene-solr,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.solr.handler.admin,org.apache.solr.handler.admin.CoreAdminHandler,,handleMergeAction,,,,388,388,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java#L388,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/admin/CoreAdminHandler.java,,unknown,"protected void handleMergeAction(SolrQueryRequest req, SolrQueryResponse rsp) throws Exception {
+    SolrParams params = req.getParams();
+    String cname = params.required().get(CoreAdminParams.CORE);
+    SolrCore core = coreContainer.getCore(cname);
+    SolrQueryRequest wrappedReq = null;
+
+    List<SolrCore> sourceCores = Lists.newArrayList();
+    List<RefCounted<SolrIndexSearcher>> searchers = Lists.newArrayList();
+    // stores readers created from indexDir param values
+    List<DirectoryReader> readersToBeClosed = Lists.newArrayList();
+    List<Directory> dirsToBeReleased = Lists.newArrayList();
+    if (core != null) {
+      try {
+        String[] dirNames = params.getParams(CoreAdminParams.INDEX_DIR);
+        if (dirNames == null || dirNames.length == 0) {
+          String[] sources = params.getParams(""srcCore"");
+          if (sources == null || sources.length == 0)
+            throw new SolrException( SolrException.ErrorCode.BAD_REQUEST,
+                ""At least one indexDir or srcCore must be specified"");
+
+          for (int i = 0; i < sources.length; i++) {
+            String source = sources[i];
+            SolrCore srcCore = coreContainer.getCore(source);
+            if (srcCore == null)
+              throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+                  ""Core: "" + source + "" does not exist"");
+            sourceCores.add(srcCore);
+          }
+        } else  {
+          DirectoryFactory dirFactory = core.getDirectoryFactory();
+          for (int i = 0; i < dirNames.length; i++) {
+            Directory dir = dirFactory.get(dirNames[i], DirContext.DEFAULT, core.getSolrConfig().indexConfig.lockType);
+            dirsToBeReleased.add(dir);
+            // TODO: why doesn't this use the IR factory? what is going on here?
+            readersToBeClosed.add(DirectoryReader.open(dir));
+          }
+        }
+
+        List<DirectoryReader> readers = null;
+        if (readersToBeClosed.size() > 0)  {
+          readers = readersToBeClosed;
+        } else {
+          readers = Lists.newArrayList();
+          for (SolrCore solrCore: sourceCores) {
+            // record the searchers so that we can decref
+            RefCounted<SolrIndexSearcher> searcher = solrCore.getSearcher();
+            searchers.add(searcher);
+            readers.add(searcher.get().getIndexReader());
+          }
+        }
+
+        UpdateRequestProcessorChain processorChain =
+                core.getUpdateProcessingChain(params.get(UpdateParams.UPDATE_CHAIN));
+        wrappedReq = new LocalSolrQueryRequest(core, req.getParams());
+        UpdateRequestProcessor processor =
+                processorChain.createProcessor(wrappedReq, rsp);
+        processor.processMergeIndexes(new MergeIndexesCommand(readers, req));
+      } catch (Exception e) {
+        // log and rethrow so that if the finally fails we don't lose the original problem
+        log.error(""ERROR executing merge:"", e);
+        throw e;
+      } finally {
+        for (RefCounted<SolrIndexSearcher> searcher : searchers) {
+          if (searcher != null) searcher.decref();
+        }
+        for (SolrCore solrCore : sourceCores) {
+          if (solrCore != null) solrCore.close();
+        }
+        IOUtils.closeWhileHandlingException(readersToBeClosed);
+        for (Directory dir : dirsToBeReleased) {
+          DirectoryFactory dirFactory = core.getDirectoryFactory();
+          dirFactory.release(dir);
+        }
+        if (wrappedReq != null) wrappedReq.close();
+        core.close();
+      }
+    }
+  }"
+10,2869,lucene-solr,REC_CATCH_EXCEPTION,A,last,,STYLE,org.apache.solr.uima.processor.ae,org.apache.solr.uima.processor.ae.OverridingParamsAEProvider,,getAE,,,,84,84,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/contrib/uima/src/java/org/apache/solr/uima/processor/ae/OverridingParamsAEProvider.java#L84,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/contrib/uima/src/java/org/apache/solr/uima/processor/ae/OverridingParamsAEProvider.java,,unknown,"public synchronized AnalysisEngine getAE() throws ResourceInitializationException {
+    try {
+      if (cachedAE == null) {
+        // get Resource Specifier from XML file
+        URL url = this.getClass().getResource(aeFilePath);
+        XMLInputSource in = new XMLInputSource(url);
+
+        // get AE description
+        AnalysisEngineDescription desc = UIMAFramework.getXMLParser()
+                .parseAnalysisEngineDescription(in);
+
+        /* iterate over each AE (to set runtime parameters) */
+        for (String attributeName : runtimeParameters.keySet()) {
+          Object val = getRuntimeValue(desc, attributeName);
+          desc.getAnalysisEngineMetaData().getConfigurationParameterSettings().setParameterValue(
+                  attributeName, val);
+          if (log.isDebugEnabled())
+            log.debug(new StringBuilder(""setting "").append(attributeName).append("" : "").append(
+                  runtimeParameters.get(attributeName)).toString());
+        }
+        // create AE here
+        cachedAE = UIMAFramework.produceAnalysisEngine(desc);
+        if (log.isDebugEnabled())
+          log.debug(new StringBuilder(""AE "").append(cachedAE.getAnalysisEngineMetaData().getName())
+                  .append("" created from descriptor "").append(aeFilePath).toString());
+      } else {
+        cachedAE.reconfigure();
+        if (log.isDebugEnabled())
+          log.debug(new StringBuilder(""AE "").append(cachedAE.getAnalysisEngineMetaData().getName())
+                  .append("" at path "").append(aeFilePath).append("" reconfigured "").toString());
+      }
+    } catch (Exception e) {
+      cachedAE = null;
+      throw new ResourceInitializationException(e);
+    }
+    return cachedAE;
+  }"
+11,5342,cassandra,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.cassandra.utils,org.apache.cassandra.utils.Hex,,wrapCharArray,,,,95,95,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/utils/Hex.java#L95,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/utils/Hex.java,,close,"public static String wrapCharArray(char[] c)
+    {
+        if (c == null)
+            return null;
+
+        String s = null;
+
+        if (stringConstructor != null)
+        {
+            try
+            {
+                s = stringConstructor.newInstance(0, c.length, c);
+            }
+            catch (Exception e)
+            {
+                // Swallowing as we'll just use a copying constructor
+            }
+        }
+        return s == null ? new String(c) : s;
+    }"
+12,9554,jmeter,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.jmeter.protocol.smtp.sampler,org.apache.jmeter.protocol.smtp.sampler.SmtpSampler,,sample,,,,207,207,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/protocol/mail/org/apache/jmeter/protocol/smtp/sampler/SmtpSampler.java#L207,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/protocol/mail/org/apache/jmeter/protocol/smtp/sampler/SmtpSampler.java,,unknown,"@Override
+    public SampleResult sample(Entry e) {
+        Message message = null;
+        SampleResult res = new SampleResult();
+        res.setSampleLabel(getName());
+        boolean isOK = false; // Did sample succeed?
+        SendMailCommand instance = new SendMailCommand();
+        instance.setSmtpServer(getPropertyAsString(SmtpSampler.SERVER));
+        instance.setSmtpPort(getPropertyAsString(SmtpSampler.SERVER_PORT));
+
+        instance.setUseSSL(getPropertyAsBoolean(SecuritySettingsPanel.USE_SSL));
+        instance.setUseStartTLS(getPropertyAsBoolean(SecuritySettingsPanel.USE_STARTTLS));
+        instance.setTrustAllCerts(getPropertyAsBoolean(SecuritySettingsPanel.SSL_TRUST_ALL_CERTS));
+        instance.setEnforceStartTLS(getPropertyAsBoolean(SecuritySettingsPanel.ENFORCE_STARTTLS));
+
+        instance.setUseAuthentication(getPropertyAsBoolean(USE_AUTH));
+        instance.setUsername(getPropertyAsString(USERNAME));
+        instance.setPassword(getPropertyAsString(PASSWORD));
+
+        instance.setUseLocalTrustStore(getPropertyAsBoolean(SecuritySettingsPanel.USE_LOCAL_TRUSTSTORE));
+        instance.setTrustStoreToUse(getPropertyAsString(SecuritySettingsPanel.TRUSTSTORE_TO_USE));
+        instance.setEmlMessage(getPropertyAsString(EML_MESSAGE_TO_SEND));
+        instance.setUseEmlMessage(getPropertyAsBoolean(USE_EML));
+
+        instance.setEnableDebug(getPropertyAsBoolean(ENABLE_DEBUG));
+
+        if (getPropertyAsString(MAIL_FROM).matches("".*@.*"")) {
+            instance.setSender(getPropertyAsString(MAIL_FROM));
+        }
+
+        final String receiverTo = getPropertyAsString(SmtpSampler.RECEIVER_TO).trim();
+        final String receiverCC = getPropertyAsString(SmtpSampler.RECEIVER_CC).trim();
+        final String receiverBcc = getPropertyAsString(SmtpSampler.RECEIVER_BCC).trim();
+        final String replyTo = getPropertyAsString(SmtpSampler.MAIL_REPLYTO).trim();
+
+        try {
+            // Process address lists
+            instance.setReceiverTo(getPropNameAsAddresses(receiverTo));
+            instance.setReceiverCC(getPropNameAsAddresses(receiverCC));
+            instance.setReceiverBCC(getPropNameAsAddresses(receiverBcc));
+            instance.setReplyTo(getPropNameAsAddresses(replyTo));
+
+            if(getPropertyAsBoolean(SUPPRESS_SUBJECT)){
+                instance.setSubject(null);
+            }else{
+                String subject = getPropertyAsString(SUBJECT);
+                if (getPropertyAsBoolean(INCLUDE_TIMESTAMP)){
+                    StringBuilder sb = new StringBuilder(subject);
+                    sb.append("" <<< current timestamp: "");
+                    sb.append(new Date().getTime());
+                    sb.append("" >>>"");
+                    subject = sb.toString();
+                }
+                instance.setSubject(subject);
+            }
+
+            if (!getPropertyAsBoolean(USE_EML)) { // part is only needed if we
+                // don't send an .eml-file
+                instance.setMailBody(getPropertyAsString(MESSAGE));
+                instance.setPlainBody(getPropertyAsBoolean(PLAIN_BODY));
+                final String filesToAttach = getPropertyAsString(ATTACH_FILE);
+                if (!filesToAttach.equals("""")) {
+                    String[] attachments = filesToAttach.split(FILENAME_SEPARATOR);
+                    for (String attachment : attachments) {
+                        File file = new File(attachment);
+                        if(!file.isAbsolute() && !file.exists()){
+                            log.debug(""loading file with relative path: "" +attachment);
+                            file = new File(FileServer.getFileServer().getBaseDir(), attachment);
+                            log.debug(""file path set to: ""+attachment);
+                        }
+                        instance.addAttachment(file);
+                    }
+                }
+
+            }
+
+            // needed for measuring sending time
+            instance.setSynchronousMode(true);
+
+            instance.setHeaderFields((CollectionProperty)getProperty(SmtpSampler.HEADER_FIELDS));
+            message = instance.prepareMessage();
+
+            if (getPropertyAsBoolean(MESSAGE_SIZE_STATS)) {
+                // calculate message size
+                CounterOutputStream cs = new CounterOutputStream();
+                message.writeTo(cs);
+                res.setBytes(cs.getCount());
+            } else {
+                res.setBytes(-1);
+            }
+
+        } catch (Exception ex) {
+            log.warn(""Error while preparing message"", ex);
+            res.setResponseCode(""500"");
+            res.setResponseMessage(ex.toString());
+            return res;
+        }
+
+        // Set up the sample result details
+        res.setDataType(SampleResult.TEXT);
+        try {
+            res.setRequestHeaders(getRequestHeaders(message));
+            res.setSamplerData(getSamplerData(message));
+        } catch (MessagingException e1) {
+            res.setSamplerData(""Error occurred trying to save request info: ""+e1);
+            log.warn(""Error occurred trying to save request info"",e1);
+        } catch (IOException e1) {
+            res.setSamplerData(""Error occurred trying to save request info: ""+e1);
+            log.warn(""Error occurred trying to save request info"",e1);
+        }
+
+        // Perform the sampling
+        res.sampleStart();
+
+        try {
+            instance.execute(message);
+
+            res.setResponseCodeOK();
+            /*
+             * TODO if(instance.getSMTPStatusCode == 250)
+             * res.setResponseMessage(""Message successfully sent!""); else
+             * res.setResponseMessage(instance.getSMTPStatusCodeIncludingMessage);
+             */
+            res.setResponseMessage(""Message successfully sent!\n""
+                    + instance.getServerResponse());
+            isOK = true;
+        }
+        // username / password incorrect
+        catch (AuthenticationFailedException afex) {
+            log.warn("""", afex);
+            res.setResponseCode(""500"");
+            res.setResponseMessage(""AuthenticationFailedException: authentication failed - wrong username / password!\n""
+                            + afex);
+        // SSL not supported, startTLS not supported, other messagingException
+        } catch (MessagingException mex) {
+            log.warn("""",mex);
+            res.setResponseCode(""500"");
+            if (mex.getMessage().matches("".*Could not connect to SMTP host.*465.*"")
+                    && mex.getCause().getMessage().matches("".*Connection timed out.*"")) {
+                res.setResponseMessage(""MessagingException: Probably, SSL is not supported by the SMTP-Server!\n""
+                                + mex);
+            } else if (mex.getMessage().matches("".*StartTLS failed.*"")) {
+                res.setResponseMessage(""MessagingException: StartTLS not supported by server or initializing failed!\n""
+                                + mex);
+            } else if (mex.getMessage().matches("".*send command to.*"")
+                    && mex.getCause().getMessage().matches(
+                                    "".*unable to find valid certification path to requested target.*"")) {
+                res.setResponseMessage(""MessagingException: Server certificate not trusted - perhaps you have to restart JMeter!\n""
+                                + mex);
+            } else {
+                res.setResponseMessage(""Other MessagingException: "" + mex.toString());
+            }
+        }  catch (Exception ex) {   // general exception
+            log.warn("""",ex);
+            res.setResponseCode(""500"");
+            if (null != ex.getMessage()
+                    && ex.getMessage().matches(""Failed to build truststore"")) {
+                res.setResponseMessage(""Failed to build truststore - did not try to send mail!"");
+            } else {
+                res.setResponseMessage(""Other Exception: "" + ex.toString());
+            }
+        }
+
+        res.sampleEnd();
+
+        try {
+            // process the sampler result
+            InputStream is = message.getInputStream();
+            StringBuilder sb = new StringBuilder();
+            byte[] buf = new byte[1024];
+            int read = is.read(buf);
+            while (read > 0) {
+                sb.append(new String(buf, 0, read));  // TODO - charset?
+                read = is.read(buf);
+            }
+            // TODO - charset?
+            res.setResponseData(sb.toString().getBytes()); // TODO this should really be request data, but there is none
+        } catch (IOException ex) {
+            log.warn("""",ex);
+        } catch (MessagingException ex) {
+            log.warn("""",ex);
+        }
+
+        res.setSuccessful(isOK);
+
+        return res;
+    }"
+13,9655,jmeter,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.jmeter.util,org.apache.jmeter.util.XPathUtil,,formatXml,,,,446,446,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/util/XPathUtil.java#L446,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/util/XPathUtil.java,,open,"public static final String formatXml(String xml){
+        try {
+            Transformer serializer= TransformerFactory.newInstance().newTransformer();
+            serializer.setOutputProperty(OutputKeys.INDENT, ""yes"");
+            serializer.setOutputProperty(""{http://xml.apache.org/xslt}indent-amount"", ""2"");
+            Source xmlSource=new SAXSource(new InputSource(new StringReader(xml)));
+            StringWriter stringWriter = new StringWriter();
+            StreamResult res =  new StreamResult(stringWriter);            
+            serializer.transform(xmlSource, res);
+            return stringWriter.toString();
+        } catch (Exception e) {
+            return xml;
+        }
+    }"
+14,9698,ant,REC_CATCH_EXCEPTION,C,last,,STYLE,org.apache.tools.ant.taskdefs,org.apache.tools.ant.taskdefs.EchoTest,,testLogUTF8Echo,,,,72,72,close,https://github.com/apache/ant/tree/c92f8f160a3197e8f3df74ceb588f581d08404c0//src/tests/junit/org/apache/tools/ant/taskdefs/EchoTest.java#L72,https://github.com/apache/ant/tree/7a7307bc999be080c99412b1c67d111af1366ef7//src/tests/junit/org/apache/tools/ant/taskdefs/EchoTest.java,,close,"public void testLogUTF8Echo() {
+        Project p = new Project();
+        p.init();
+        EchoTestLogger logger = new EchoTestLogger();
+        p.addBuildListener(logger);
+        Echo echo = new Echo();
+        echo.setProject(p);
+        echo.setTaskName(""testLogUTF8Echo"");
+        echo.setMessage(""\u00e4\u00a9"");
+        removeThis = new File(""abc.txt"");
+        echo.setFile(removeThis);
+        echo.setEncoding(""UTF-8"");
+        echo.execute();
+        FileUtils fu = FileUtils.getFileUtils();
+        try {
+        String x = FileUtils.readFully(new InputStreamReader(new FileInputStream(removeThis), ""UTF-8"" ));
+            assertEquals(x,""\u00e4\u00a9"");
+        } catch (Exception exc) {
+
+        }
+    }"
+15,2037,lucene-solr,DE_MIGHT_IGNORE,A,last,,BAD_PRACTICE,org.apache.solr.common.util,org.apache.solr.common.util.FileUtils,,copyFile,,in,"in,in,null,close",51,51,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/solrj/src/java/org/apache/solr/common/util/FileUtils.java#L51,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/solrj/src/java/org/apache/solr/common/util/FileUtils.java,,unknown,"public static void copyFile(File src , File destination) throws IOException {
+    FileChannel in = null;
+    FileChannel out = null;
+    try {
+      in = new FileInputStream(src).getChannel();
+      out = new FileOutputStream(destination).getChannel();
+      in.transferTo(0, in.size(), out);
+    } finally {
+      try { if (in != null) in.close(); } catch (IOException e) {}
+      try { if (out != null) out.close(); } catch (IOException e) {}
+    }
+  }"
+16,9490,jmeter,DM_EXIT,C,last,,BAD_PRACTICE,org.apache.jmeter.engine,org.apache.jmeter.engine.StandardJMeterEngine$1,,run,,System,"System,exit",564,564,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/engine/StandardJMeterEngine.java#L564,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/engine/StandardJMeterEngine.java,,open,"@Override
+        public void run() {
+            running = false;
+            engine = null;
+            if (now) {
+                tellThreadGroupsToStop();
+                pause(10 * countStillActiveThreads());
+                boolean stopped = verifyThreadsStopped();
+                if (!stopped) {  // we totally failed to stop the test
+                    if (JMeter.isNonGUI()) {
+                        // TODO should we call test listeners? That might hang too ...
+                        log.fatalError(JMeterUtils.getResString(""stopping_test_failed"")); //$NON-NLS-1$
+                        if (SYSTEM_EXIT_ON_STOP_FAIL) { // default is true
+                            log.fatalError(""Exitting"");
+                            System.out.println(""Fatal error, could not stop test, exitting"");
+                            System.exit(1);
+                        } else {
+                            System.out.println(""Fatal error, could not stop test"");                            
+                        }
+                    } else {
+                        JMeterUtils.reportErrorToUser(
+                                JMeterUtils.getResString(""stopping_test_failed""), //$NON-NLS-1$
+                                JMeterUtils.getResString(""stopping_test_title"")); //$NON-NLS-1$
+                    }
+                } // else will be done by threadFinished()
+            } else {
+                stopAllThreadGroups();
+            }
+        }"
+17,9609,jmeter,DM_EXIT,C,last,,BAD_PRACTICE,org.apache.jmeter.gui.action,org.apache.jmeter.gui.action.ExitCommand,,doAction,,System,"System,exit",69,69,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/gui/action/ExitCommand.java#L69,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/gui/action/ExitCommand.java,,unknown,"@Override
+    public void doAction(ActionEvent e) {
+        ActionRouter.getInstance().doActionNow(new ActionEvent(e.getSource(), e.getID(), ActionNames.CHECK_DIRTY));
+        if (GuiPackage.getInstance().isDirty()) {
+            int chosenOption = JOptionPane.showConfirmDialog(GuiPackage.getInstance().getMainFrame(), JMeterUtils
+                    .getResString(""cancel_exit_to_save""), // $NON-NLS-1$
+                    JMeterUtils.getResString(""save?""), // $NON-NLS-1$
+                    JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+            if (chosenOption == JOptionPane.NO_OPTION) {
+                System.exit(0);
+            } else if (chosenOption == JOptionPane.YES_OPTION) {
+                ActionRouter.getInstance().doActionNow(new ActionEvent(e.getSource(), e.getID(), ActionNames.SAVE));
+                if (!GuiPackage.getInstance().isDirty()) {
+                    System.exit(0);
+                }
+            }
+        } else {
+            System.exit(0);
+        }
+    }"
+18,9650,jmeter,DM_EXIT,C,last,,BAD_PRACTICE,org.apache.jmeter,org.apache.jmeter.JMeter,,start,,System,"System,exit",401,401,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/JMeter.java#L401,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/JMeter.java,,open,"public void start(String[] args) {
+
+        CLArgsParser parser = new CLArgsParser(args, options);
+        String error = parser.getErrorString();
+        if (error == null){// Check option combinations
+            boolean gui = parser.getArgumentById(NONGUI_OPT)==null;
+            boolean nonGuiOnly = parser.getArgumentById(REMOTE_OPT)!=null
+                               || parser.getArgumentById(REMOTE_OPT_PARAM)!=null
+                               || parser.getArgumentById(REMOTE_STOP)!=null;
+            if (gui && nonGuiOnly) {
+                error = ""-r and -R and -X are only valid in non-GUI mode"";
+            }
+        }
+        if (null != error) {
+            System.err.println(""Error: "" + error);
+            System.out.println(""Usage"");
+            System.out.println(CLUtil.describeOptions(options).toString());
+            return;
+        }
+        try {
+            initializeProperties(parser); // Also initialises JMeter logging
+
+            /*
+             * The following is needed for HTTPClient.
+             * (originally tried doing this in HTTPSampler2,
+             * but it appears that it was done too late when running in GUI mode)
+             * Set the commons logging default to Avalon Logkit, if not already defined
+             */
+            if (System.getProperty(""org.apache.commons.logging.Log"") == null) { // $NON-NLS-1$
+                System.setProperty(""org.apache.commons.logging.Log"" // $NON-NLS-1$
+                        , ""org.apache.commons.logging.impl.LogKitLogger""); // $NON-NLS-1$
+            }
+
+            Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {                
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    if (!(e instanceof ThreadDeath)) {
+                        log.error(""Uncaught exception: "", e);
+                        System.err.println(""Uncaught Exception "" + e + "". See log file for details."");
+                    }
+                }
+            });
+
+            log.info(JMeterUtils.getJMeterCopyright());
+            log.info(""Version "" + JMeterUtils.getJMeterVersion());
+            logProperty(""java.version""); //$NON-NLS-1$
+            logProperty(""java.vm.name""); //$NON-NLS-1$
+            logProperty(""os.name""); //$NON-NLS-1$
+            logProperty(""os.arch""); //$NON-NLS-1$
+            logProperty(""os.version""); //$NON-NLS-1$
+            logProperty(""file.encoding""); // $NON-NLS-1$
+            log.info(""Default Locale="" + Locale.getDefault().getDisplayName());
+            log.info(""JMeter  Locale="" + JMeterUtils.getLocale().getDisplayName());
+            log.info(""JMeterHome=""     + JMeterUtils.getJMeterHome());
+            logProperty(""user.dir"",""  =""); //$NON-NLS-1$
+            log.info(""PWD       =""+new File(""."").getCanonicalPath());//$NON-NLS-1$
+            log.info(""IP: ""+JMeterUtils.getLocalHostIP()
+                    +"" Name: ""+JMeterUtils.getLocalHostName()
+                    +"" FullName: ""+JMeterUtils.getLocalHostFullName());
+            setProxy(parser);
+
+            updateClassLoader();
+            if (log.isDebugEnabled())
+            {
+                String jcp=System.getProperty(""java.class.path"");// $NON-NLS-1$
+                String bits[] =jcp.split(File.pathSeparator);
+                log.debug(""ClassPath"");
+                for(String bit : bits){
+                    log.debug(bit);
+                }
+                log.debug(jcp);
+            }
+
+            // Set some (hopefully!) useful properties
+            long now=System.currentTimeMillis();
+            JMeterUtils.setProperty(""START.MS"",Long.toString(now));// $NON-NLS-1$
+            Date today=new Date(now); // so it agrees with above
+            // TODO perhaps should share code with __time() function for this...
+            JMeterUtils.setProperty(""START.YMD"",new SimpleDateFormat(""yyyyMMdd"").format(today));// $NON-NLS-1$ $NON-NLS-2$
+            JMeterUtils.setProperty(""START.HMS"",new SimpleDateFormat(""HHmmss"").format(today));// $NON-NLS-1$ $NON-NLS-2$
+
+            if (parser.getArgumentById(VERSION_OPT) != null) {
+                System.out.println(JMeterUtils.getJMeterCopyright());
+                System.out.println(""Version "" + JMeterUtils.getJMeterVersion());
+            } else if (parser.getArgumentById(HELP_OPT) != null) {
+                System.out.println(JMeterUtils.getResourceFileAsText(""org/apache/jmeter/help.txt""));// $NON-NLS-1$
+            } else if (parser.getArgumentById(SERVER_OPT) != null) {
+                // Start the server
+                try {
+                    RemoteJMeterEngineImpl.startServer(JMeterUtils.getPropDefault(""server_port"", 0)); // $NON-NLS-1$
+                } catch (Exception ex) {
+                    System.err.println(""Server failed to start: ""+ex);
+                    log.error(""Giving up, as server failed with:"", ex);
+                    throw ex;
+                }
+                startOptionalServers();
+            } else {
+                String testFile=null;
+                CLOption testFileOpt = parser.getArgumentById(TESTFILE_OPT);
+                if (testFileOpt != null){
+                    testFile = testFileOpt.getArgument();
+                    if (USE_LAST_JMX.equals(testFile)) {
+                        testFile = LoadRecentProject.getRecentFile(0);// most recent
+                    }
+                }
+                if (parser.getArgumentById(NONGUI_OPT) == null) {
+                    startGui(testFile);
+                    startOptionalServers();
+                } else {
+                    CLOption rem=parser.getArgumentById(REMOTE_OPT_PARAM);
+                    if (rem==null) { rem=parser.getArgumentById(REMOTE_OPT); }
+                    CLOption jtl = parser.getArgumentById(LOGFILE_OPT);
+                    String jtlFile = null;
+                    if (jtl != null){
+                        jtlFile=processLAST(jtl.getArgument(), "".jtl""); // $NON-NLS-1$
+                    }
+                    startNonGui(testFile, jtlFile, rem);
+                    startOptionalServers();
+                }
+            }
+        } catch (IllegalUserActionException e) {
+            System.out.println(e.getMessage());
+            System.out.println(""Incorrect Usage"");
+            System.out.println(CLUtil.describeOptions(options).toString());
+        } catch (Throwable e) {
+            log.fatalError(""An error occurred: "",e);
+            System.out.println(""An error occurred: "" + e.getMessage());
+            System.exit(1); // TODO - could this be return?
+        }
+    }"

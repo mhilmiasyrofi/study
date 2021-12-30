@@ -1,0 +1,2342 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,17,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,setMaxThreads,,"consolePropertyMessage(""DRDA_InvalidValue.U"", new String []",,3743,3743,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L3743,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"private void setMaxThreads(int value) throws Exception
+	{
+		if (value < MIN_MAXTHREADS)
+			consolePropertyMessage(""DRDA_InvalidValue.U"", new String [] 
+				{new Integer(value).toString(), ""maxthreads""});
+		if (value == USE_DEFAULT)
+			value = DEFAULT_MAXTHREADS;
+		synchronized(threadsSync) {
+			maxThreads = value;
+		}
+	}"
+1,40,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,getPropertyValues,,"retval.put(Property.DRDA_PROP_PORTNUMBER, new Integer(portNumber).toString());",,3893,3893,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L3893,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"Properties getPropertyValues()
+	{
+		Properties retval = new Properties();
+		retval.put(Property.DRDA_PROP_PORTNUMBER, new Integer(portNumber).toString());
+		retval.put(Property.DRDA_PROP_HOSTNAME, hostArg);
+		retval.put(Property.DRDA_PROP_KEEPALIVE, new Boolean(keepAlive).toString());
+
+		String tracedir = getTraceDirectory();
+		if (tracedir != null)
+			retval.put(Property.DRDA_PROP_TRACEDIRECTORY, tracedir);
+		retval.put(Property.DRDA_PROP_TRACEALL, new Boolean(getTraceAll()).toString());
+		retval.put(Property.DRDA_PROP_MINTHREADS, new Integer(getMinThreads()).toString());
+		retval.put(Property.DRDA_PROP_MAXTHREADS, new Integer(getMaxThreads()).toString());
+		retval.put(Property.DRDA_PROP_TIMESLICE, new Integer(getTimeSlice()).toString());
+
+		retval.put(Property.DRDA_PROP_TIMESLICE, new  Integer(getTimeSlice()).toString());
+		retval.put(Property.DRDA_PROP_LOGCONNECTIONS, new Boolean(getLogConnections()).toString());
+		String startDRDA = PropertyUtil.getSystemProperty(Property.START_DRDA);
+		//DERBY-375 If a system property is specified without any value, getProperty returns 
+		//an empty string. Use default values in such cases.
+		if(startDRDA!=null && startDRDA.equals(""""))
+			startDRDA = ""false"";
+
+		retval.put(Property.START_DRDA, (startDRDA == null)? ""false"" : startDRDA);
+
+		// DERBY-2108 SSL
+		retval.put(Property.DRDA_PROP_SSL_MODE, getSSLModeString(getSSLMode()));
+		
+        // if Property.DRDA_PROP_SECURITYMECHANISM has been set on server
+        // then put it in retval else the default behavior is as though 
+        // it is not set
+        if ( getSecurityMechanism() != INVALID_OR_NOTSET_SECURITYMECHANISM )
+            retval.put( Property.DRDA_PROP_SECURITYMECHANISM, getStringValueForSecMec(getSecurityMechanism()));
+        
+		//get the trace value for each session if tracing for all is not set
+		if (!getTraceAll())
+		{
+			synchronized(sessionTable) {
+				for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
+				{	
+					Session session = (Session) e.nextElement();
+					if (session.isTraceOn())
+						retval.put(Property.DRDA_PROP_TRACE+"".""+session.getConnNum(), ""true"");
+				}
+			}
+		}
+		return retval;
+	}"
+2,133,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,consoleTraceMessage,,args[1] = new Integer(connNum).toString();,,1314,1314,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L1314,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"private void consoleTraceMessage(int connNum, boolean on)
+		throws Exception
+	{
+		if (connNum == 0)
+			consolePropertyMessage(""DRDA_TraceChangeAll.I"", on ? ""DRDA_ON.I"" : ""DRDA_OFF.I"");
+		else
+		{
+			String[] args = new String[2];
+			args[0] = on ? ""DRDA_ON.I"" : ""DRDA_OFF.I"";
+			args[1] = new Integer(connNum).toString();
+			consolePropertyMessage(""DRDA_TraceChangeOne.I"", args);
+		}
+	}"
+3,247,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,executeWork,,"consolePropertyMessage(""DRDA_ConnectionTested.I"", new String []",,2264,2264,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L2264,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"public void executeWork(int command) throws Exception
+	{
+		// if we didn't have a valid command just return - error already generated
+		if (command == COMMAND_UNKNOWN)
+			return;
+
+		// check that we have the right number of required arguments
+		if (commandArgs.size() != COMMAND_ARGS[command])
+			consolePropertyMessage(""DRDA_InvalidNoArgs.U"", COMMANDS[command]);
+		int min;
+		int max;
+
+
+		switch (command)
+		{
+			case COMMAND_START:
+				// the server was started from the command line, shutdown the
+				// databases when the server is shutdown
+				shutdownDatabasesOnShutdown = true;
+				blockingStart(makePrintWriter(System.out));
+				break;
+			case COMMAND_SHUTDOWN:
+				shutdown();
+				consolePropertyMessage(""DRDA_ShutdownSuccess.I"", new String [] 
+								{att_srvclsnm, versionString});
+				break;
+			case COMMAND_TRACE:
+				{
+					boolean on = isOn((String)commandArgs.get(0));
+					trace(sessionArg, on);
+					consoleTraceMessage(sessionArg, on);
+					break;
+				}
+			case COMMAND_TRACEDIRECTORY:
+				String directory = (String) commandArgs.get(0);
+				sendSetTraceDirectory(directory);
+				consolePropertyMessage(""DRDA_TraceDirectoryChange.I"", directory);
+				break;
+			case COMMAND_TESTCONNECTION:
+				ping();
+				consolePropertyMessage(""DRDA_ConnectionTested.I"", new String [] 
+					{hostArg, (new Integer(portNumber)).toString()});
+				break;
+			case COMMAND_LOGCONNECTIONS:
+				{
+					boolean on = isOn((String)commandArgs.get(0));
+					logConnections(on);
+					consolePropertyMessage(""DRDA_LogConnectionsChange.I"", on ? ""DRDA_ON.I"" : ""DRDA_OFF.I"");
+					break;
+				}
+			case COMMAND_SYSINFO:
+				{
+					String info = sysinfo();
+					consoleMessage(info, false);
+					break;
+				}
+			case COMMAND_MAXTHREADS:
+				max = 0;
+				try{
+					max = Integer.parseInt((String)commandArgs.get(0));
+				}catch(NumberFormatException e){
+					consolePropertyMessage(""DRDA_InvalidValue.U"", new String [] 
+						{(String)commandArgs.get(0), ""maxthreads""});
+				}
+				if (max < MIN_MAXTHREADS)
+					consolePropertyMessage(""DRDA_InvalidValue.U"", new String [] 
+						{new Integer(max).toString(), ""maxthreads""});
+				netSetMaxThreads(max);
+
+				break;
+			case COMMAND_RUNTIME_INFO:
+				String reply = runtimeInfo();
+				consoleMessage(reply, false);
+				break;
+			case COMMAND_TIMESLICE:
+				int timeslice = 0;
+				String timeSliceArg = (String)commandArgs.get(0);
+            	try{
+                	timeslice = Integer.parseInt(timeSliceArg);
+            	}catch(NumberFormatException e){
+					consolePropertyMessage(""DRDA_InvalidValue.U"", new String [] 
+						{(String)commandArgs.get(0), ""timeslice""});
+            	}
+				if (timeslice < MIN_TIMESLICE)
+					consolePropertyMessage(""DRDA_InvalidValue.U"", new String [] 
+						{new Integer(timeslice).toString(), ""timeslice""});
+				netSetTimeSlice(timeslice);
+				
+				break;
+			default:
+				//shouldn't get here
+				if (SanityManager.DEBUG)
+					SanityManager.THROWASSERT(""Invalid command in switch:""+ command);
+		}
+	}"
+4,332,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.client.am,org.apache.derby.client.am.ColumnMetaData,,assignColumnName,,Integer,"Integer,column,toString",835,835,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/client/org/apache/derby/client/am/ColumnMetaData.java#L835,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/am/ColumnMetaData.java,,close,"void assignColumnName(int column) {
+        if (columnNameToIndexCache_ == null) {
+            columnNameToIndexCache_ = new java.util.Hashtable();
+        }
+        String columnName = (new Integer(column)).toString();
+        columnNameToIndexCache_.put(columnName, new Integer(column));
+        sqlName_[column - 1] = columnName;
+    }"
+5,414,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,netSetTimeSlice,,"consolePropertyMessage(""DRDA_TimeSliceChange.I"",",,1447,1447,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L1447,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"public void netSetTimeSlice(int timeslice)
+		throws Exception
+	{
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_TIMESLICE);
+            commandOs.writeInt(timeslice);
+            send();
+            readResult();
+            int newval = readInt();
+            consolePropertyMessage(""DRDA_TimeSliceChange.I"",
+                    new Integer(newval).toString());
+        } finally {
+            closeSocket();
+        }  
+	}"
+6,461,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,setUpSocket,,"consolePropertyMessage(""DRDA_NoIO.S"",",,2597,2597,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L2597,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"private void setUpSocket() throws Exception
+	{
+		
+		try {
+			clientSocket = (Socket) AccessController.doPrivileged(
+								new PrivilegedExceptionAction() {
+										
+									public Object run() 
+										throws UnknownHostException,
+											   IOException, 
+											   java.security.NoSuchAlgorithmException,
+											   java.security.KeyManagementException,
+                                               java.security.NoSuchProviderException,
+                                               java.security.KeyStoreException,
+                                               java.security.UnrecoverableKeyException,
+                                               java.security.cert.CertificateException
+									{
+										if (hostAddress == null)
+											hostAddress = InetAddress.getByName(hostArg);
+                                        
+										switch(getSSLMode()) {
+										case SSL_BASIC:
+											SSLSocket s1 = (SSLSocket)NaiveTrustManager.getSocketFactory().
+												createSocket(hostAddress, portNumber);
+											// Need to handshake now to get proper error reporting.
+											s1.startHandshake();
+											return s1;
+
+										case SSL_PEER_AUTHENTICATION:
+											SSLSocket s2 = (SSLSocket)SSLSocketFactory.getDefault().
+												createSocket(hostAddress, portNumber);
+											// Need to handshake now to get proper error reporting.
+											s2.startHandshake();
+											return s2;
+
+										case SSL_OFF:
+										default:
+											return SocketFactory.getDefault().
+												createSocket(hostAddress, portNumber);
+										}
+									}
+								}
+							);
+		} catch (PrivilegedActionException pae) {
+			Exception e1 = pae.getException();
+			if (e1 instanceof UnknownHostException) {
+					consolePropertyMessage(""DRDA_UnknownHost.S"", hostArg);
+			}
+			else if (e1 instanceof IOException) {
+					consolePropertyMessage(""DRDA_NoIO.S"",
+										   new String [] {hostArg, 
+														  (new Integer(portNumber)).toString(), 
+														  e1.getMessage()});
+			}
+		} catch (Exception e) {
+		// If we find other (unexpected) errors, we ultimately exit--so make
+		// sure we print the error message before doing so (Beetle 5033).
+			throwUnexpectedException(e);
+		}
+
+		try
+		{
+		   clientIs = clientSocket.getInputStream();
+	       clientOs = clientSocket.getOutputStream();
+		} catch (IOException e) {
+			consolePropertyMessage(""DRDA_NoInputStream.I"", true);
+			throw e;
+        }
+	}"
+7,585,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,processCommands,,"throw new Throwable(langUtil.getTextMessage(""DRDA_UnknownProtocol.S"",  new Integer(version).toString()));",,1658,1658,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L1658,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"protected synchronized void processCommands(DDMReader reader, DDMWriter writer, 
+		Session session) throws Throwable
+	{
+		try {
+			String protocolStr = reader.readCmdString(4);
+			String locale = DEFAULT_LOCALE;
+			String codeset = null;
+			// get the version
+			int version = reader.readNetworkShort();
+			if (version <= 0 || version > MAX_ALLOWED_PROTOCOL_VERSION)
+				throw new Throwable(langUtil.getTextMessage(""DRDA_UnknownProtocol.S"",  new Integer(version).toString()));
+			int localeLen = reader.readByte();
+			if (localeLen > 0)
+			{
+				currentSession = session;
+				locale = reader.readCmdString(localeLen);
+				session.langUtil = new LocalizedResource(codeset,locale,DRDA_PROP_MESSAGES);
+			}
+			String notLocalMessage = null;
+			// for now codesetLen is always 0
+			int codesetLen = reader.readByte();
+			int command = reader.readByte();
+			if (command !=  COMMAND_TESTCONNECTION)
+			{
+				try {
+					checkAddressIsLocal(session.clientSocket.getInetAddress());
+				}catch (Exception e)
+				{
+					notLocalMessage = e.getMessage();
+				}
+			}
+			if (notLocalMessage != null)
+			{
+				sendMessage(writer, ERROR,notLocalMessage);
+				session.langUtil = null;
+				currentSession = null;
+				return;
+			}
+
+			switch(command)
+			{
+				case COMMAND_SHUTDOWN:
+					if (version == SHUTDOWN_WITH_CREDENTIAL_PROTOCOL_VERSION) {
+						//Protocol version of client is not at default protocol
+						//of 1 because this version of shutdown command has
+						//username and password supplied with it. When the
+						//protocol version of client is 
+						//SHUTDOWN_WITH_CREDENTIAL_PROTOCOL_VERSION, then we 
+						//know to expect username and password
+						// DERBY-2109: receive user credentials for shutdown
+						// System Privileges check
+						userArg = reader.readCmdString();
+						passwordArg = reader.readCmdString();
+					}
+					try {
+						checkShutdownPrivileges();
+						sendOK(writer);
+						directShutdownInternal();
+					} catch (SQLException sqle) {
+						sendSQLMessage(writer, sqle, SQLERROR);
+						// also print a message to the console
+						consolePropertyMessage(""DRDA_ShutdownWarning.I"",
+											   sqle.getMessage());
+					}
+					break;
+				case COMMAND_TRACE:
+					sessionArg = reader.readNetworkInt();
+					boolean on = (reader.readByte() == 1);
+					if (setTrace(on))
+					{
+						sendOK(writer);
+					}
+					else
+					{
+					    if (sessionArg != 0)
+							sendMessage(writer, ERROR,  
+							    localizeMessage(""DRDA_SessionNotFound.U"", 
+									    (session.langUtil == null) ? langUtil : session.langUtil,
+									    new String [] {new Integer(sessionArg).toString()}));
+					    else
+							sendMessage(writer, ERROR,  
+										localizeMessage(""DRDA_ErrorStartingTracing.S"",null));          
+					}
+					break;
+				case COMMAND_TRACEDIRECTORY:
+					setTraceDirectory(reader.readCmdString());
+					sendOK(writer);
+					consolePropertyMessage(""DRDA_TraceDirectoryChange.I"", traceDirectory);
+					break;
+				case COMMAND_TESTCONNECTION:
+					databaseArg = reader.readCmdString();
+					userArg = reader.readCmdString();
+					passwordArg = reader.readCmdString();
+					if (databaseArg != null)
+						connectToDatabase(writer, databaseArg, userArg, passwordArg);
+					else
+						sendOK(writer);
+					break;
+				case COMMAND_LOGCONNECTIONS:
+					boolean log = (reader.readByte() == 1);
+					setLogConnections(log);
+					sendOK(writer);
+					consolePropertyMessage(""DRDA_LogConnectionsChange.I"",
+						(log ? ""DRDA_ON.I"" : ""DRDA_OFF.I""));
+					break;
+				case COMMAND_SYSINFO:
+					sendSysInfo(writer);
+					break;
+				case COMMAND_PROPERTIES:
+					sendPropInfo(writer);
+					break;
+				case COMMAND_RUNTIME_INFO:
+					sendRuntimeInfo(writer);
+					break;
+				case COMMAND_MAXTHREADS:
+					int max = reader.readNetworkInt();
+					try {
+						setMaxThreads(max);
+					}catch (Exception e) {
+						sendMessage(writer, ERROR, e.getMessage());
+						return;
+					}
+					int newval = getMaxThreads();
+					sendOKInt(writer, newval);
+					consolePropertyMessage(""DRDA_MaxThreadsChange.I"", 
+						new Integer(newval).toString());
+					break;
+				case COMMAND_TIMESLICE:
+					int timeslice = reader.readNetworkInt();
+					try {
+						setTimeSlice(timeslice);
+					}catch (Exception e) {
+						sendMessage(writer, ERROR, e.getMessage());
+						return;
+					}
+					newval = getTimeSlice();
+					sendOKInt(writer, newval);
+					consolePropertyMessage(""DRDA_TimeSliceChange.I"", 
+						new Integer(newval).toString());
+					break;
+			}
+		} catch (DRDAProtocolException e) {
+			//we need to handle this since we aren't in DRDA land here
+			consoleExceptionPrintTrace(e);
+
+		} catch (Exception e) {
+			consoleExceptionPrintTrace(e);
+		}
+		finally {
+			session.langUtil = null;
+			currentSession = null;
+		}
+	}"
+8,811,derby,DM_BOXED_PRIMITIVE_FOR_PARSING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,getIntPropVal,,val = (new Integer(propVal)).intValue();,,3241,3241,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L3241,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"private int getIntPropVal(String propName, String propVal)
+		throws Exception
+	{
+		int val = 0;
+		try {
+			 val = (new Integer(propVal)).intValue();
+		} catch (Exception e)
+		{
+			consolePropertyMessage(""DRDA_InvalidPropVal.S"", new String [] 
+				{propName, propVal});
+		}
+		return val;
+	}"
+9,882,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,netSetMaxThreads,,"consolePropertyMessage(""DRDA_MaxThreadsChange.I"", new Integer(",,1421,1421,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L1421,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"public void netSetMaxThreads(int max) throws Exception
+	{
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_MAXTHREADS);
+            commandOs.writeInt(max);
+            send();
+            readResult();
+            int newval = readInt();
+            consolePropertyMessage(""DRDA_MaxThreadsChange.I"", new Integer(
+                    newval).toString());
+        } finally {
+            closeSocket();
+        }		
+        
+	}"
+10,999,derby,DM_BOXED_PRIMITIVE_TOSTRING,A,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,setTimeSlice,,"consolePropertyMessage(""DRDA_InvalidValue.U"", new String []",,3683,3683,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L3683,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"private void setTimeSlice(int value)
+		throws Exception
+	{
+		if (value < MIN_TIMESLICE)
+			consolePropertyMessage(""DRDA_InvalidValue.U"", new String [] 
+				{new Integer(value).toString(), ""timeslice""});
+		if (value == USE_DEFAULT)
+			value = DEFAULT_TIMESLICE;
+		synchronized(timeSliceSync) {
+			timeSlice = value;
+		}
+	}"
+11,57,derby,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.derby.iapi.services.cache,org.apache.derby.iapi.services.cache.ClassSize,,fetchRefSizeFromSystemProperties,,Integer,"Integer,dataModel,intValue",311,311,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/iapi/services/cache/ClassSize.java#L311,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/services/cache/ClassSize.java,,close,"private static final int fetchRefSizeFromSystemProperties() {
+        // Try the direct way first, by looking for 'sun.arch.data.model'
+        String dataModel = getSystemProperty(""sun.arch.data.model"");
+        try {
+            return (new Integer(dataModel).intValue() / 8);
+        } catch (NumberFormatException ignoreNFE) {}
+
+        // Try 'os.arch'
+        String arch = getSystemProperty(""os.arch"");
+        // See if we recognize the property value.
+        if (arch != null) {
+            // Is it a known 32 bit architecture?
+            String[] b32 = new String[] {""i386"", ""x86"", ""sparc""};
+            if (Arrays.asList(b32).contains(arch)) return 4; // 4 bytes per ref
+            // Is it a known 64 bit architecture?
+            String[] b64 = new String[] {""amd64"", ""x86_64"", ""sparcv9""};
+            if (Arrays.asList(b64).contains(arch)) return 8; // 8 bytes per ref
+        }
+
+        // Didn't find out anything.
+        if (SanityManager.DEBUG) {
+            SanityManager.DEBUG_PRINT(
+                    ""REFSIZE"", ""Bitness undetermined, sun.arch.data.model='"" +
+                    dataModel + ""', os.arch='"" + arch + ""'"");
+        }
+        return -1;
+    }"
+12,84,derby,DM_BOXED_PRIMITIVE_TOSTRING,C,last,,PERFORMANCE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,pingWithNoOpen,,"consolePropertyMessage(""DRDA_NoIO.S"",",,1286,1286,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L1286,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,close,"private void pingWithNoOpen() throws Exception
+    {
+    
+        // database no longer used, but don't change the protocol 
+        // in case we add
+        // authorization  later.
+        String database = null; // no longer used but don't change the protocol
+        String user = null;
+        String password = null;
+
+            try {
+                writeCommandHeader(COMMAND_TESTCONNECTION);
+                writeLDString(database);
+                writeLDString(user);
+                writeLDString(password);
+                send();
+                readResult();
+            } catch (IOException ioe) {
+                consolePropertyMessage(""DRDA_NoIO.S"",
+                        new String [] {hostArg, 
+                        (new Integer(portNumber)).toString(), 
+                        ioe.getMessage()}); 
+            }
+    }"
+13,117,derby,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.derby.drda,org.apache.derby.drda.NetServlet,,getIntParameter,,Integer,"Integer,retval,val,intValue",923,923,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/drda/org/apache/derby/drda/NetServlet.java#L923,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/drda/NetServlet.java,,close,"private int getIntParameter
+        (
+         HttpServletRequest request,
+         String name,
+         String fieldKey,
+         LocalizedResource localUtil,
+         String returnMessage,
+         PrintWriter out
+         )
+    {
+        String val = request.getParameter(name);
+        int retval;
+        if (val == null || val.equals(""""))
+            return NOT_GIVEN;
+        try {
+            retval = (new Integer(val)).intValue();
+        } catch (Exception e) {
+            printErrorForm(localUtil,localUtil.getTextMessage(""SRV_InvalidVal"",
+                val, localUtil.getTextMessage(fieldKey)), returnMessage, out);
+            return INVALID;
+        }
+        if (retval < 0) {
+        // negative integers not allowed for the parameters we're getting.
+            printErrorForm(localUtil, localUtil.getTextMessage(""SRV_InvalidVal"",
+                 val, localUtil.getTextMessage(fieldKey)), returnMessage, out);
+            return INVALID;
+        }
+        return retval;
+    }"
+14,142,derby,DM_BOXED_PRIMITIVE_TOSTRING,C,last,,PERFORMANCE,org.apache.derby.impl.store.access.heap,org.apache.derby.impl.store.access.heap.Heap,,open,,StandardException,"StandardException,newException",701,701,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/impl/store/access/heap/Heap.java#L701,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/heap/Heap.java,,close,"public ConglomerateController open(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran,
+    boolean                         hold,
+    int                             open_mode,
+    int                             lock_level,
+    LockingPolicy                   locking_policy,
+    StaticCompiledOpenConglomInfo   static_info,
+    DynamicCompiledOpenConglomInfo  dynamic_info)
+		throws StandardException
+	{
+        OpenConglomerate open_conglom = new OpenHeap();
+
+        if (open_conglom.init(
+                (ContainerHandle) null,
+                this,
+                this.format_ids,
+                this.collation_ids,
+                xact_manager,
+                rawtran,
+                hold,
+                open_mode,
+                lock_level,
+                locking_policy,
+                dynamic_info) == null)
+        {
+            throw StandardException.newException(
+                    SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                    new Long(id.getContainerId()).toString());
+        }
+
+		HeapController heapcontroller = new HeapController();
+
+        heapcontroller.init(open_conglom);
+
+		return(heapcontroller);
+	}"
+15,285,derby,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.derby.impl.store.replication.slave,org.apache.derby.impl.store.replication.slave.SlaveController,,boot,,Integer,"Integer,port,slavePort,intValue",141,141,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/impl/store/replication/slave/SlaveController.java#L141,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/replication/slave/SlaveController.java,,close,"public void boot(boolean create, Properties properties)
+        throws StandardException {
+
+        String port = properties.getProperty(Attribute.REPLICATION_SLAVE_PORT);
+        
+        try {
+            //if slavePort is -1 the default port
+            //value will be used.
+            int slavePort = -1;
+            if (port != null) {
+                slavePort = (new Integer(port)).intValue();
+            }
+            slaveAddr = new SlaveAddress(
+                    properties.getProperty(Attribute.REPLICATION_SLAVE_HOST), 
+                    slavePort);
+        } catch (UnknownHostException uhe) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe, 
+                     dbname, getHostName(), String.valueOf(getPortNumber()));
+        }
+
+        dbname = properties.getProperty(SlaveFactory.SLAVE_DB);
+        repLogger = new ReplicationLogger(dbname);
+    }"
+16,405,derby,DM_BOXED_PRIMITIVE_TOSTRING,C,last,,PERFORMANCE,org.apache.derby.impl.store.access.heap,org.apache.derby.impl.store.access.heap.Heap,,purgeConglomerate,,StandardException,"StandardException,newException",856,856,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/impl/store/access/heap/Heap.java#L856,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/heap/Heap.java,,close,"public void purgeConglomerate(
+    TransactionManager              xact_manager,
+    Transaction                     rawtran)
+        throws StandardException
+    {
+        OpenConglomerate        open_for_ddl_lock   = null;
+        HeapController          heapcontroller      = null;
+        TransactionManager      nested_xact         = null;
+
+        try
+        {
+            open_for_ddl_lock = new OpenHeap();
+
+            // Open table in intended exclusive mode in the top level 
+            // transaction, this will stop any ddl from happening until 
+            // purge of whole table is finished.
+
+            if (open_for_ddl_lock.init(
+                    (ContainerHandle) null,
+                    this,
+                    this.format_ids,
+                    this.collation_ids,
+                    xact_manager,
+                    rawtran,
+                    false,
+                    TransactionController.OPENMODE_FORUPDATE,
+                    TransactionController.MODE_RECORD,
+                    null,
+                    null) == null)
+            {
+                throw StandardException.newException(
+                        SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                        new Long(id.getContainerId()));
+            }
+
+            // perform all the ""real"" work in a non-readonly nested user 
+            // transaction, so that as work is completed on each page resources
+            // can be released.  Must be careful as all locks obtained in nested
+            // transaction will conflict with parent transaction - so this call
+            // must be made only if parent transaction can have no conflicting
+            // locks on the table, otherwise the purge will fail with a self
+            // deadlock.
+            nested_xact = (TransactionManager) 
+                xact_manager.startNestedUserTransaction(false, true);
+
+            // now open the table in a nested user transaction so that each
+            // page worth of work can be committed after it is done.
+
+            OpenConglomerate open_conglom = new OpenHeap();
+
+            if (open_conglom.init(
+                (ContainerHandle) null,
+                this,
+                this.format_ids,
+                this.collation_ids,
+                nested_xact,
+                nested_xact.getRawStoreXact(),
+                true,
+                TransactionController.OPENMODE_FORUPDATE,
+                TransactionController.MODE_RECORD,
+                nested_xact.getRawStoreXact().newLockingPolicy(
+                    LockingPolicy.MODE_RECORD,
+                        TransactionController.ISOLATION_REPEATABLE_READ, true),
+                null) == null)
+            {
+                throw StandardException.newException(
+                        SQLState.HEAP_CONTAINER_NOT_FOUND, 
+                        new Long(id.getContainerId()).toString());
+            }
+
+            heapcontroller = new HeapController();
+
+            heapcontroller.init(open_conglom);
+
+            Page page   = open_conglom.getContainer().getFirstPage();
+
+            boolean purgingDone = false;
+
+            while (page != null)
+            {
+                long pageno = page.getPageNumber();
+                purgingDone = heapcontroller.purgeCommittedDeletes(page);
+
+                if (purgingDone)
+                {
+                    page = null;
+
+                    // commit xact to free resouurces ASAP, commit will
+                    // unlatch the page if it has not already been unlatched
+                    // by a remove.
+                    open_conglom.getXactMgr().commitNoSync(
+                                TransactionController.RELEASE_LOCKS);
+
+                    // the commit closes the underlying container, so let
+                    // the heapcontroller know this has happened.  Usually
+                    // the transaction takes care of this, but this controller
+                    // is internal, so the transaction does not know about it.
+                    heapcontroller.closeForEndTransaction(false);
+                    
+                    // the commit will close the underlying 
+                    open_conglom.reopen();
+                }
+                else
+                {
+                    page.unlatch();
+                    page = null;
+                }
+
+                page = open_conglom.getContainer().getNextPage(pageno);
+            }
+        }
+        finally
+        {
+            if (open_for_ddl_lock != null)
+                open_for_ddl_lock.close();
+            if (heapcontroller != null)
+                heapcontroller.close();
+            if (nested_xact != null)
+            {
+                nested_xact.commitNoSync(TransactionController.RELEASE_LOCKS);
+                nested_xact.destroy();
+            }
+        }
+
+        return;
+    }"
+17,693,derby,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.derby.impl.load,org.apache.derby.impl.load.ColumnInfo,,<init>,,Integer,"Integer,columnIndex,intValue",138,138,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/engine/org/apache/derby/impl/load/ColumnInfo.java#L138,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/load/ColumnInfo.java,,close,
+18,773,derby,DM_BOXED_PRIMITIVE_TOSTRING,C,last,,PERFORMANCE,org.apache.derby.drda,org.apache.derby.drda.NetServlet,,runServer,,Exception,"Exception,localUtil,getTextMessage",589,589,close,https://github.com/apache/derby/tree/acbecbb96a5ae0a3b6bc5948b03f061dfea91662//java/drda/org/apache/derby/drda/NetServlet.java#L589,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/drda/NetServlet.java,,close,"private void runServer
+        ( LocalizedResource localUtil, String returnMessage, PrintWriter out )
+        throws ServletException
+    {
+        final Runnable service = new Runnable() {
+            public void run() {
+                try {
+                    //Echo server output to console
+                    NetworkServerControl runserver = new
+                        NetworkServerControl(InetAddress.getByName(host),
+                                             portNumber);
+                    runserver.start(null);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e.getMessage());
+                }
+            }
+        };
+        Thread servThread = null;
+        try {
+            servThread = AccessController.doPrivileged(
+                                new PrivilegedExceptionAction<Thread>() {
+                                    public Thread run() throws Exception
+                                    {
+                                        return new Thread(service);
+                                    }
+                                }
+                            );
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        servThread.start();
+
+        // try to connect to server
+        try {
+            boolean connectWorked = false;
+            int t = 0;
+            do
+            {
+                t++;
+                try {
+                        Thread.sleep(100);
+                } catch (InterruptedException ie) {
+                    throw new ServletException(localUtil.getTextMessage(""SRV_Interupt""));
+                }
+                try {
+                    if (isServerStarted(server,1))
+                        connectWorked = true;
+                } catch (Exception e) {} //ignore error we'll just try again
+                
+            }while (!connectWorked && t < MAX_CONNECT_TRYS);
+            if (t >= MAX_CONNECT_TRYS)
+                throw new Exception(localUtil.getTextMessage(""SRV_MaxTrys"",
+                    new Integer(MAX_CONNECT_TRYS).toString()));
+            // turn logging on if required
+            if (logStatus)
+                server.logConnections(true);
+            // turn tracing on
+            if (traceStatus)
+                server.trace(true);
+        }catch (Exception e) {
+            if (out != null)
+                printErrorForm(localUtil, e, returnMessage, out);
+            else
+                throw new ServletException(e.getMessage());
+        }
+    }"
+19,2934,lucene-solr,DM_BOXED_PRIMITIVE_FOR_PARSING,A,last,,PERFORMANCE,org.apache.solr.analysis,org.apache.solr.analysis.CapitalizationFilterFactory,,init,,Integer,"Integer,k,minWordLength,valueOf",111,111,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/core/src/java/org/apache/solr/analysis/CapitalizationFilterFactory.java#L111,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/analysis/CapitalizationFilterFactory.java,,unknown,"@Override
+  public void init(Map<String, String> args) {
+    super.init(args);
+    assureMatchVersion();
+
+    String k = args.get(KEEP);
+    if (k != null) {
+      StringTokenizer st = new StringTokenizer(k);
+      boolean ignoreCase = false;
+      String ignoreStr = args.get(KEEP_IGNORE_CASE);
+      if (""true"".equalsIgnoreCase(ignoreStr)) {
+        ignoreCase = true;
+      }
+      keep = new CharArraySet(luceneMatchVersion, 10, ignoreCase);
+      while (st.hasMoreTokens()) {
+        k = st.nextToken().trim();
+        keep.add(k.toCharArray());
+      }
+    }
+
+    k = args.get(OK_PREFIX);
+    if (k != null) {
+      okPrefix = new ArrayList<char[]>();
+      StringTokenizer st = new StringTokenizer(k);
+      while (st.hasMoreTokens()) {
+        okPrefix.add(st.nextToken().trim().toCharArray());
+      }
+    }
+
+    k = args.get(MIN_WORD_LENGTH);
+    if (k != null) {
+      minWordLength = Integer.valueOf(k);
+    }
+
+    k = args.get(MAX_WORD_COUNT);
+    if (k != null) {
+      maxWordCount = Integer.valueOf(k);
+    }
+
+    k = args.get(MAX_TOKEN_LENGTH);
+    if (k != null) {
+      maxTokenLength = Integer.valueOf(k);
+    }
+
+    k = args.get(ONLY_FIRST_WORD);
+    if (k != null) {
+      onlyFirstWord = Boolean.valueOf(k);
+    }
+
+    k = args.get(FORCE_FIRST_LETTER);
+    if (k != null) {
+      forceFirstLetter = Boolean.valueOf(k);
+    }
+  }"
+20,2767,lucene-solr,DM_BOXED_PRIMITIVE_FOR_PARSING,B,last,,PERFORMANCE,org.apache.lucene.analysis.miscellaneous,org.apache.lucene.analysis.miscellaneous.CapitalizationFilterFactory,,init,,Integer,"Integer,k,minWordLength,valueOf",112,112,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//lucene/analysis/common/src/java/org/apache/lucene/analysis/miscellaneous/CapitalizationFilterFactory.java#L112,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/analysis/common/src/java/org/apache/lucene/analysis/miscellaneous/CapitalizationFilterFactory.java,,unknown,"@Override
+  public void init(Map<String, String> args) {
+    super.init(args);
+    assureMatchVersion();
+
+    String k = args.get(KEEP);
+    if (k != null) {
+      StringTokenizer st = new StringTokenizer(k);
+      boolean ignoreCase = false;
+      String ignoreStr = args.get(KEEP_IGNORE_CASE);
+      if (""true"".equalsIgnoreCase(ignoreStr)) {
+        ignoreCase = true;
+      }
+      keep = new CharArraySet(luceneMatchVersion, 10, ignoreCase);
+      while (st.hasMoreTokens()) {
+        k = st.nextToken().trim();
+        keep.add(k.toCharArray());
+      }
+    }
+
+    k = args.get(OK_PREFIX);
+    if (k != null) {
+      okPrefix = new ArrayList<char[]>();
+      StringTokenizer st = new StringTokenizer(k);
+      while (st.hasMoreTokens()) {
+        okPrefix.add(st.nextToken().trim().toCharArray());
+      }
+    }
+
+    k = args.get(MIN_WORD_LENGTH);
+    if (k != null) {
+      minWordLength = Integer.valueOf(k);
+    }
+
+    k = args.get(MAX_WORD_COUNT);
+    if (k != null) {
+      maxWordCount = Integer.valueOf(k);
+    }
+
+    k = args.get(MAX_TOKEN_LENGTH);
+    if (k != null) {
+      maxTokenLength = Integer.valueOf(k);
+    }
+
+    k = args.get(ONLY_FIRST_WORD);
+    if (k != null) {
+      onlyFirstWord = Boolean.valueOf(k);
+    }
+
+    k = args.get(FORCE_FIRST_LETTER);
+    if (k != null) {
+      forceFirstLetter = Boolean.valueOf(k);
+    }
+  }"
+21,1739,lucene-solr,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.solr.analytics.util,org.apache.solr.analytics.util.RangeEndpointCalculator$LongRangeEndpointCalculator,,parseAndAddGap,,Long,"Long,Long,gap,value,longValue,longValue,valueOf",318,318,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/analytics/util/RangeEndpointCalculator.java#L318,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/analytics/util/RangeEndpointCalculator.java,,unknown,"@Override
+    public Float parseAndAddGap(Float value, String gap) {
+      return new Float(value.floatValue() + Float.valueOf(gap).floatValue());
+    }"
+22,2119,lucene-solr,DM_BOXED_PRIMITIVE_FOR_COMPARE,C,last,,PERFORMANCE,org.apache.solr.common.cloud,org.apache.solr.common.cloud.DocRouter$Range,,compareTo,,Integer,"Integer,min,that,compareTo,min,valueOf",147,147,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/solrj/src/java/org/apache/solr/common/cloud/DocRouter.java#L147,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/solrj/src/java/org/apache/solr/common/cloud/DocRouter.java,,close,"@Override
+    public int compareTo(Range that) {
+      int mincomp = Integer.valueOf(this.min).compareTo(that.min);
+      return mincomp == 0 ? Integer.valueOf(this.max).compareTo(that.max) : mincomp;
+    }"
+23,2160,lucene-solr,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.solr.util,org.apache.solr.util.DateMathParser,,parseMath,,Integer,"Integer,ops,pos,val,valueOf",328,328,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/util/DateMathParser.java#L328,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/util/DateMathParser.java,,close,"public Date parseMath(String math) throws ParseException {
+
+    Calendar cal = Calendar.getInstance(zone, loc);
+    cal.setTime(getNow());
+
+    /* check for No-Op */
+    if (0==math.length()) {
+      return cal.getTime();
+    }
+    
+    String[] ops = splitter.split(math);
+    int pos = 0;
+    while ( pos < ops.length ) {
+
+      if (1 != ops[pos].length()) {
+        throw new ParseException
+          (""Multi character command found: \"""" + ops[pos] + ""\"""", pos);
+      }
+      char command = ops[pos++].charAt(0);
+
+      switch (command) {
+      case '/':
+        if (ops.length < pos + 1) {
+          throw new ParseException
+            (""Need a unit after command: \"""" + command + ""\"""", pos);
+        }
+        try {
+          round(cal, ops[pos++]);
+        } catch (IllegalArgumentException e) {
+          throw new ParseException
+            (""Unit not recognized: \"""" + ops[pos-1] + ""\"""", pos-1);
+        }
+        break;
+      case '+': /* fall through */
+      case '-':
+        if (ops.length < pos + 2) {
+          throw new ParseException
+            (""Need a value and unit for command: \"""" + command + ""\"""", pos);
+        }
+        int val = 0;
+        try {
+          val = Integer.valueOf(ops[pos++]);
+        } catch (NumberFormatException e) {
+          throw new ParseException
+            (""Not a Number: \"""" + ops[pos-1] + ""\"""", pos-1);
+        }
+        if ('-' == command) {
+          val = 0 - val;
+        }
+        try {
+          String unit = ops[pos++];
+          add(cal, val, unit);
+        } catch (IllegalArgumentException e) {
+          throw new ParseException
+            (""Unit not recognized: \"""" + ops[pos-1] + ""\"""", pos-1);
+        }
+        break;
+      default:
+        throw new ParseException
+          (""Unrecognized command: \"""" + command + ""\"""", pos-1);
+      }
+    }
+    
+    return cal.getTime();
+  }"
+24,2555,lucene-solr,DM_BOXED_PRIMITIVE_FOR_COMPARE,C,last,,PERFORMANCE,org.apache.lucene.util,org.apache.lucene.util.VirtualMethod,,compareImplementationDistance,,Integer,"Integer,clazz,clazz,m1,m2,compareTo,getImplementationDistance,getImplementationDistance,valueOf",146,146,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/core/src/java/org/apache/lucene/util/VirtualMethod.java#L146,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/util/VirtualMethod.java,,close,"public static <C> int compareImplementationDistance(final Class<? extends C> clazz,
+    final VirtualMethod<C> m1, final VirtualMethod<C> m2)
+  {
+    return Integer.valueOf(m1.getImplementationDistance(clazz)).compareTo(m2.getImplementationDistance(clazz));
+  }"
+25,2608,lucene-solr,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.solr.handler,org.apache.solr.handler.ReplicationHandler,,addVal,,l.add(new Date(Long.valueOf(ss[i])).toString());,,780,780,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/handler/ReplicationHandler.java#L780,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/ReplicationHandler.java,,unknown,"private void addVal(NamedList<Object> nl, String key, Properties props, Class clzz) {
+    String s = props.getProperty(key);
+    if (s == null || s.trim().length() == 0) return;
+    if (clzz == Date.class) {
+      try {
+        Long l = Long.parseLong(s);
+        nl.add(key, new Date(l).toString());
+      } catch (NumberFormatException e) {/*no op*/ }
+    } else if (clzz == List.class) {
+      String ss[] = s.split("","");
+      List<String> l = new ArrayList<String>();
+      for (int i = 0; i < ss.length; i++) {
+        l.add(new Date(Long.valueOf(ss[i])).toString());
+      }
+      nl.add(key, l);
+    } else {
+      nl.add(key, s);
+    }
+
+  }"
+26,2697,lucene-solr,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.solr.handler.dataimport,org.apache.solr.handler.dataimport.MailEntityProcessor,,getIntFromContext,,Integer,"Integer,v,val,valueOf",593,593,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/contrib/dataimporthandler-extras/src/java/org/apache/solr/handler/dataimport/MailEntityProcessor.java#L593,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/contrib/dataimporthandler-extras/src/java/org/apache/solr/handler/dataimport/MailEntityProcessor.java,,close,"private int getIntFromContext(String prop, int ifNull) {
+    int v = ifNull;
+    try {
+      String val = context.getEntityAttribute(prop);
+      if (val != null) {
+        val = context.replaceTokens(val);
+        v = Integer.valueOf(val);
+      }
+    } catch (NumberFormatException e) {
+      //do nothing
+    }
+    return v;
+  }"
+27,1045,tomcat,DM_BOXED_PRIMITIVE_TOSTRING,C,last,,PERFORMANCE,org.apache.jasper.compiler,org.apache.jasper.compiler.ELParser$Char,,toString,,Character,"Character,ch,toString",376,376,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/jasper/compiler/ELParser.java#L376,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/compiler/ELParser.java,,close,"@Override
+        public String toString() {
+            return """";
+        }"
+28,1053,tomcat,DM_BOXED_PRIMITIVE_TOSTRING,C,last,,PERFORMANCE,org.apache.catalina.servlets,org.apache.catalina.servlets.CGIServlet$CGIEnvironment,,setCGIEnvironment,,"String sContentLength = (contentLength <= 0 ? """" :",,1069,1069,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/servlets/CGIServlet.java#L1069,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/servlets/CGIServlet.java,,close,"protected boolean setCGIEnvironment(HttpServletRequest req) throws IOException {
+
+            /*
+             * This method is slightly ugly; c'est la vie.
+             * ""You cannot stop [ugliness], you can only hope to contain [it]""
+             * (apologies to Marv Albert regarding MJ)
+             */
+
+            Hashtable<String,String> envp = new Hashtable<>();
+
+            // Add the shell environment variables (if any)
+            envp.putAll(shellEnv);
+
+            // Add the CGI environment variables
+            String sPathInfoOrig = null;
+            String sPathInfoCGI = null;
+            String sPathTranslatedCGI = null;
+            String sCGIFullPath = null;
+            String sCGIScriptName = null;
+            String sCGIFullName = null;
+            String sCGIName = null;
+            String[] sCGINames;
+
+
+            sPathInfoOrig = this.pathInfo;
+            sPathInfoOrig = sPathInfoOrig == null ? """" : sPathInfoOrig;
+
+            if (webAppRootDir == null ) {
+                // The app has not been deployed in exploded form
+                webAppRootDir = tmpDir.toString();
+                expandCGIScript();
+            }
+
+            sCGINames = findCGI(sPathInfoOrig,
+                                webAppRootDir,
+                                contextPath,
+                                servletPath,
+                                cgiPathPrefix);
+
+            sCGIFullPath = sCGINames[0];
+            sCGIScriptName = sCGINames[1];
+            sCGIFullName = sCGINames[2];
+            sCGIName = sCGINames[3];
+
+            if (sCGIFullPath == null
+                || sCGIScriptName == null
+                || sCGIFullName == null
+                || sCGIName == null) {
+                return false;
+            }
+
+            envp.put(""SERVER_SOFTWARE"", ""TOMCAT"");
+
+            envp.put(""SERVER_NAME"", nullsToBlanks(req.getServerName()));
+
+            envp.put(""GATEWAY_INTERFACE"", ""CGI/1.1"");
+
+            envp.put(""SERVER_PROTOCOL"", nullsToBlanks(req.getProtocol()));
+
+            int port = req.getServerPort();
+            Integer iPort =
+                (port == 0 ? Integer.valueOf(-1) : Integer.valueOf(port));
+            envp.put(""SERVER_PORT"", iPort.toString());
+
+            envp.put(""REQUEST_METHOD"", nullsToBlanks(req.getMethod()));
+
+            envp.put(""REQUEST_URI"", nullsToBlanks(req.getRequestURI()));
+
+
+            /*-
+             * PATH_INFO should be determined by using sCGIFullName:
+             * 1) Let sCGIFullName not end in a ""/"" (see method findCGI)
+             * 2) Let sCGIFullName equal the pathInfo fragment which
+             *    corresponds to the actual cgi script.
+             * 3) Thus, PATH_INFO = request.getPathInfo().substring(
+             *                      sCGIFullName.length())
+             *
+             * (see method findCGI, where the real work is done)
+             *
+             */
+            if (pathInfo == null
+                || (pathInfo.substring(sCGIFullName.length()).length() <= 0)) {
+                sPathInfoCGI = """";
+            } else {
+                sPathInfoCGI = pathInfo.substring(sCGIFullName.length());
+            }
+            envp.put(""PATH_INFO"", sPathInfoCGI);
+
+
+            /*-
+             * PATH_TRANSLATED must be determined after PATH_INFO (and the
+             * implied real cgi-script) has been taken into account.
+             *
+             * The following example demonstrates:
+             *
+             * servlet info   = /servlet/cgigw/dir1/dir2/cgi1/trans1/trans2
+             * cgifullpath    = /servlet/cgigw/dir1/dir2/cgi1
+             * path_info      = /trans1/trans2
+             * webAppRootDir  = servletContext.getRealPath(""/"")
+             *
+             * path_translated = servletContext.getRealPath(""/trans1/trans2"")
+             *
+             * That is, PATH_TRANSLATED = webAppRootDir + sPathInfoCGI
+             * (unless sPathInfoCGI is null or blank, then the CGI
+             * specification dictates that the PATH_TRANSLATED metavariable
+             * SHOULD NOT be defined.
+             *
+             */
+            if (sPathInfoCGI != null && !("""".equals(sPathInfoCGI))) {
+                sPathTranslatedCGI = context.getRealPath(sPathInfoCGI);
+            }
+            if (sPathTranslatedCGI == null || """".equals(sPathTranslatedCGI)) {
+                //NOOP
+            } else {
+                envp.put(""PATH_TRANSLATED"", nullsToBlanks(sPathTranslatedCGI));
+            }
+
+
+            envp.put(""SCRIPT_NAME"", nullsToBlanks(sCGIScriptName));
+
+            envp.put(""QUERY_STRING"", nullsToBlanks(req.getQueryString()));
+
+            envp.put(""REMOTE_HOST"", nullsToBlanks(req.getRemoteHost()));
+
+            envp.put(""REMOTE_ADDR"", nullsToBlanks(req.getRemoteAddr()));
+
+            envp.put(""AUTH_TYPE"", nullsToBlanks(req.getAuthType()));
+
+            envp.put(""REMOTE_USER"", nullsToBlanks(req.getRemoteUser()));
+
+            envp.put(""REMOTE_IDENT"", """"); //not necessary for full compliance
+
+            envp.put(""CONTENT_TYPE"", nullsToBlanks(req.getContentType()));
+
+
+            /* Note CGI spec says CONTENT_LENGTH must be NULL ("""") or undefined
+             * if there is no content, so we cannot put 0 or -1 in as per the
+             * Servlet API spec.
+             */
+            int contentLength = req.getContentLength();
+            String sContentLength = (contentLength <= 0 ? """" :
+                (Integer.valueOf(contentLength)).toString());
+            envp.put(""CONTENT_LENGTH"", sContentLength);
+
+
+            Enumeration<String> headers = req.getHeaderNames();
+            String header = null;
+            while (headers.hasMoreElements()) {
+                header = null;
+                header = headers.nextElement().toUpperCase(Locale.ENGLISH);
+                //REMIND: rewrite multiple headers as if received as single
+                //REMIND: change character set
+                //REMIND: I forgot what the previous REMIND means
+                if (""AUTHORIZATION"".equalsIgnoreCase(header) ||
+                    ""PROXY_AUTHORIZATION"".equalsIgnoreCase(header)) {
+                    //NOOP per CGI specification section 11.2
+                } else {
+                    envp.put(""HTTP_"" + header.replace('-', '_'),
+                             req.getHeader(header));
+                }
+            }
+
+            File fCGIFullPath = new File(sCGIFullPath);
+            command = fCGIFullPath.getCanonicalPath();
+
+            envp.put(""X_TOMCAT_SCRIPT_PATH"", command);  //for kicks
+
+            envp.put(""SCRIPT_FILENAME"", command);  //for PHP
+
+            this.env = envp;
+
+            return true;
+
+        }"
+29,1063,tomcat,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.catalina.tribes.membership,org.apache.catalina.tribes.membership.McastService,,getFrequency,,Long,"Long,p,longValue",255,255,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/tribes/membership/McastService.java#L255,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/tribes/membership/McastService.java,,close,"public long getFrequency() {
+        String p = properties.getProperty(""mcastFrequency"");
+        return new Long(p).longValue();
+    }"
+30,1219,tomcat,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.catalina.servlets,org.apache.catalina.servlets.WebdavServlet,,doLock,,lockDuration,lockDuration,900,900,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/servlets/WebdavServlet.java#L900,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/servlets/WebdavServlet.java,,close,"protected void doLock(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+
+        if (readOnly) {
+            resp.sendError(WebdavStatus.SC_FORBIDDEN);
+            return;
+        }
+
+        if (isLocked(req)) {
+            resp.sendError(WebdavStatus.SC_LOCKED);
+            return;
+        }
+
+        LockInfo lock = new LockInfo();
+
+        // Parsing lock request
+
+        // Parsing depth header
+
+        String depthStr = req.getHeader(""Depth"");
+
+        if (depthStr == null) {
+            lock.depth = maxDepth;
+        } else {
+            if (depthStr.equals(""0"")) {
+                lock.depth = 0;
+            } else {
+                lock.depth = maxDepth;
+            }
+        }
+
+        // Parsing timeout header
+
+        int lockDuration = DEFAULT_TIMEOUT;
+        String lockDurationStr = req.getHeader(""Timeout"");
+        if (lockDurationStr == null) {
+            lockDuration = DEFAULT_TIMEOUT;
+        } else {
+            int commaPos = lockDurationStr.indexOf("","");
+            // If multiple timeouts, just use the first
+            if (commaPos != -1) {
+                lockDurationStr = lockDurationStr.substring(0,commaPos);
+            }
+            if (lockDurationStr.startsWith(""Second-"")) {
+                lockDuration =
+                    (new Integer(lockDurationStr.substring(7))).intValue();
+            } else {
+                if (lockDurationStr.equalsIgnoreCase(""infinity"")) {
+                    lockDuration = MAX_TIMEOUT;
+                } else {
+                    try {
+                        lockDuration =
+                            (new Integer(lockDurationStr)).intValue();
+                    } catch (NumberFormatException e) {
+                        lockDuration = MAX_TIMEOUT;
+                    }
+                }
+            }
+            if (lockDuration == 0) {
+                lockDuration = DEFAULT_TIMEOUT;
+            }
+            if (lockDuration > MAX_TIMEOUT) {
+                lockDuration = MAX_TIMEOUT;
+            }
+        }
+        lock.expiresAt = System.currentTimeMillis() + (lockDuration * 1000);
+
+        int lockRequestType = LOCK_CREATION;
+
+        Node lockInfoNode = null;
+
+        DocumentBuilder documentBuilder = getDocumentBuilder();
+
+        try {
+            Document document = documentBuilder.parse(new InputSource
+                (req.getInputStream()));
+
+            // Get the root element of the document
+            Element rootElement = document.getDocumentElement();
+            lockInfoNode = rootElement;
+        } catch (IOException e) {
+            lockRequestType = LOCK_REFRESH;
+        } catch (SAXException e) {
+            lockRequestType = LOCK_REFRESH;
+        }
+
+        if (lockInfoNode != null) {
+
+            // Reading lock information
+
+            NodeList childList = lockInfoNode.getChildNodes();
+            StringWriter strWriter = null;
+            DOMWriter domWriter = null;
+
+            Node lockScopeNode = null;
+            Node lockTypeNode = null;
+            Node lockOwnerNode = null;
+
+            for (int i=0; i < childList.getLength(); i++) {
+                Node currentNode = childList.item(i);
+                switch (currentNode.getNodeType()) {
+                case Node.TEXT_NODE:
+                    break;
+                case Node.ELEMENT_NODE:
+                    String nodeName = currentNode.getNodeName();
+                    if (nodeName.endsWith(""lockscope"")) {
+                        lockScopeNode = currentNode;
+                    }
+                    if (nodeName.endsWith(""locktype"")) {
+                        lockTypeNode = currentNode;
+                    }
+                    if (nodeName.endsWith(""owner"")) {
+                        lockOwnerNode = currentNode;
+                    }
+                    break;
+                }
+            }
+
+            if (lockScopeNode != null) {
+
+                childList = lockScopeNode.getChildNodes();
+                for (int i=0; i < childList.getLength(); i++) {
+                    Node currentNode = childList.item(i);
+                    switch (currentNode.getNodeType()) {
+                    case Node.TEXT_NODE:
+                        break;
+                    case Node.ELEMENT_NODE:
+                        String tempScope = currentNode.getNodeName();
+                        if (tempScope.indexOf(':') != -1) {
+                            lock.scope = tempScope.substring
+                                (tempScope.indexOf(':') + 1);
+                        } else {
+                            lock.scope = tempScope;
+                        }
+                        break;
+                    }
+                }
+
+                if (lock.scope == null) {
+                    // Bad request
+                    resp.setStatus(WebdavStatus.SC_BAD_REQUEST);
+                }
+
+            } else {
+                // Bad request
+                resp.setStatus(WebdavStatus.SC_BAD_REQUEST);
+            }
+
+            if (lockTypeNode != null) {
+
+                childList = lockTypeNode.getChildNodes();
+                for (int i=0; i < childList.getLength(); i++) {
+                    Node currentNode = childList.item(i);
+                    switch (currentNode.getNodeType()) {
+                    case Node.TEXT_NODE:
+                        break;
+                    case Node.ELEMENT_NODE:
+                        String tempType = currentNode.getNodeName();
+                        if (tempType.indexOf(':') != -1) {
+                            lock.type =
+                                tempType.substring(tempType.indexOf(':') + 1);
+                        } else {
+                            lock.type = tempType;
+                        }
+                        break;
+                    }
+                }
+
+                if (lock.type == null) {
+                    // Bad request
+                    resp.setStatus(WebdavStatus.SC_BAD_REQUEST);
+                }
+
+            } else {
+                // Bad request
+                resp.setStatus(WebdavStatus.SC_BAD_REQUEST);
+            }
+
+            if (lockOwnerNode != null) {
+
+                childList = lockOwnerNode.getChildNodes();
+                for (int i=0; i < childList.getLength(); i++) {
+                    Node currentNode = childList.item(i);
+                    switch (currentNode.getNodeType()) {
+                    case Node.TEXT_NODE:
+                        lock.owner += currentNode.getNodeValue();
+                        break;
+                    case Node.ELEMENT_NODE:
+                        strWriter = new StringWriter();
+                        domWriter = new DOMWriter(strWriter, true);
+                        domWriter.print(currentNode);
+                        lock.owner += strWriter.toString();
+                        break;
+                    }
+                }
+
+                if (lock.owner == null) {
+                    // Bad request
+                    resp.setStatus(WebdavStatus.SC_BAD_REQUEST);
+                }
+
+            } else {
+                lock.owner = """";
+            }
+
+        }
+
+        String path = getRelativePath(req);
+
+        lock.path = path;
+
+        WebResource resource = resources.getResource(path);
+
+        Enumeration<LockInfo> locksList = null;
+
+        if (lockRequestType == LOCK_CREATION) {
+
+            // Generating lock id
+            String lockTokenStr = req.getServletPath() + ""-"" + lock.type + ""-""
+                + lock.scope + ""-"" + req.getUserPrincipal() + ""-""
+                + lock.depth + ""-"" + lock.owner + ""-"" + lock.tokens + ""-""
+                + lock.expiresAt + ""-"" + System.currentTimeMillis() + ""-""
+                + secret;
+            String lockToken = MD5Encoder.encode(md5Helper.digest(
+                    lockTokenStr.getBytes(StandardCharsets.ISO_8859_1)));
+
+            if (resource.isDirectory() && lock.depth == maxDepth) {
+
+                // Locking a collection (and all its member resources)
+
+                // Checking if a child resource of this collection is
+                // already locked
+                Vector<String> lockPaths = new Vector<>();
+                locksList = collectionLocks.elements();
+                while (locksList.hasMoreElements()) {
+                    LockInfo currentLock = locksList.nextElement();
+                    if (currentLock.hasExpired()) {
+                        resourceLocks.remove(currentLock.path);
+                        continue;
+                    }
+                    if ( (currentLock.path.startsWith(lock.path)) &&
+                         ((currentLock.isExclusive()) ||
+                          (lock.isExclusive())) ) {
+                        // A child collection of this collection is locked
+                        lockPaths.addElement(currentLock.path);
+                    }
+                }
+                locksList = resourceLocks.elements();
+                while (locksList.hasMoreElements()) {
+                    LockInfo currentLock = locksList.nextElement();
+                    if (currentLock.hasExpired()) {
+                        resourceLocks.remove(currentLock.path);
+                        continue;
+                    }
+                    if ( (currentLock.path.startsWith(lock.path)) &&
+                         ((currentLock.isExclusive()) ||
+                          (lock.isExclusive())) ) {
+                        // A child resource of this collection is locked
+                        lockPaths.addElement(currentLock.path);
+                    }
+                }
+
+                if (!lockPaths.isEmpty()) {
+
+                    // One of the child paths was locked
+                    // We generate a multistatus error report
+
+                    Enumeration<String> lockPathsList = lockPaths.elements();
+
+                    resp.setStatus(WebdavStatus.SC_CONFLICT);
+
+                    XMLWriter generatedXML = new XMLWriter();
+                    generatedXML.writeXMLHeader();
+
+                    generatedXML.writeElement(""D"", DEFAULT_NAMESPACE,
+                            ""multistatus"", XMLWriter.OPENING);
+
+                    while (lockPathsList.hasMoreElements()) {
+                        generatedXML.writeElement(""D"", ""response"",
+                                XMLWriter.OPENING);
+                        generatedXML.writeElement(""D"", ""href"",
+                                XMLWriter.OPENING);
+                        generatedXML.writeText(lockPathsList.nextElement());
+                        generatedXML.writeElement(""D"", ""href"",
+                                XMLWriter.CLOSING);
+                        generatedXML.writeElement(""D"", ""status"",
+                                XMLWriter.OPENING);
+                        generatedXML
+                            .writeText(""HTTP/1.1 "" + WebdavStatus.SC_LOCKED
+                                       + "" "" + WebdavStatus
+                                       .getStatusText(WebdavStatus.SC_LOCKED));
+                        generatedXML.writeElement(""D"", ""status"",
+                                XMLWriter.CLOSING);
+
+                        generatedXML.writeElement(""D"", ""response"",
+                                XMLWriter.CLOSING);
+                    }
+
+                    generatedXML.writeElement(""D"", ""multistatus"",
+                            XMLWriter.CLOSING);
+
+                    Writer writer = resp.getWriter();
+                    writer.write(generatedXML.toString());
+                    writer.close();
+
+                    return;
+
+                }
+
+                boolean addLock = true;
+
+                // Checking if there is already a shared lock on this path
+                locksList = collectionLocks.elements();
+                while (locksList.hasMoreElements()) {
+
+                    LockInfo currentLock = locksList.nextElement();
+                    if (currentLock.path.equals(lock.path)) {
+
+                        if (currentLock.isExclusive()) {
+                            resp.sendError(WebdavStatus.SC_LOCKED);
+                            return;
+                        } else {
+                            if (lock.isExclusive()) {
+                                resp.sendError(WebdavStatus.SC_LOCKED);
+                                return;
+                            }
+                        }
+
+                        currentLock.tokens.addElement(lockToken);
+                        lock = currentLock;
+                        addLock = false;
+
+                    }
+
+                }
+
+                if (addLock) {
+                    lock.tokens.addElement(lockToken);
+                    collectionLocks.addElement(lock);
+                }
+
+            } else {
+
+                // Locking a single resource
+
+                // Retrieving an already existing lock on that resource
+                LockInfo presentLock = resourceLocks.get(lock.path);
+                if (presentLock != null) {
+
+                    if ((presentLock.isExclusive()) || (lock.isExclusive())) {
+                        // If either lock is exclusive, the lock can't be
+                        // granted
+                        resp.sendError(WebdavStatus.SC_PRECONDITION_FAILED);
+                        return;
+                    } else {
+                        presentLock.tokens.addElement(lockToken);
+                        lock = presentLock;
+                    }
+
+                } else {
+
+                    lock.tokens.addElement(lockToken);
+                    resourceLocks.put(lock.path, lock);
+
+                    // Checking if a resource exists at this path
+                    if (!resource.exists()) {
+
+                        // ""Creating"" a lock-null resource
+                        int slash = lock.path.lastIndexOf('/');
+                        String parentPath = lock.path.substring(0, slash);
+
+                        Vector<String> lockNulls =
+                            lockNullResources.get(parentPath);
+                        if (lockNulls == null) {
+                            lockNulls = new Vector<>();
+                            lockNullResources.put(parentPath, lockNulls);
+                        }
+
+                        lockNulls.addElement(lock.path);
+
+                    }
+                    // Add the Lock-Token header as by RFC 2518 8.10.1
+                    // - only do this for newly created locks
+                    resp.addHeader(""Lock-Token"", ""<opaquelocktoken:""
+                                   + lockToken + "">"");
+                }
+
+            }
+
+        }
+
+        if (lockRequestType == LOCK_REFRESH) {
+
+            String ifHeader = req.getHeader(""If"");
+            if (ifHeader == null)
+                ifHeader = """";
+
+            // Checking resource locks
+
+            LockInfo toRenew = resourceLocks.get(path);
+            Enumeration<String> tokenList = null;
+
+            if (toRenew != null) {
+                // At least one of the tokens of the locks must have been given
+                tokenList = toRenew.tokens.elements();
+                while (tokenList.hasMoreElements()) {
+                    String token = tokenList.nextElement();
+                    if (ifHeader.indexOf(token) != -1) {
+                        toRenew.expiresAt = lock.expiresAt;
+                        lock = toRenew;
+                    }
+                }
+            }
+
+            // Checking inheritable collection locks
+
+            Enumeration<LockInfo> collectionLocksList =
+                collectionLocks.elements();
+            while (collectionLocksList.hasMoreElements()) {
+                toRenew = collectionLocksList.nextElement();
+                if (path.equals(toRenew.path)) {
+
+                    tokenList = toRenew.tokens.elements();
+                    while (tokenList.hasMoreElements()) {
+                        String token = tokenList.nextElement();
+                        if (ifHeader.indexOf(token) != -1) {
+                            toRenew.expiresAt = lock.expiresAt;
+                            lock = toRenew;
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+        // Set the status, then generate the XML response containing
+        // the lock information
+        XMLWriter generatedXML = new XMLWriter();
+        generatedXML.writeXMLHeader();
+        generatedXML.writeElement(""D"", DEFAULT_NAMESPACE, ""prop"",
+                XMLWriter.OPENING);
+
+        generatedXML.writeElement(""D"", ""lockdiscovery"", XMLWriter.OPENING);
+
+        lock.toXML(generatedXML);
+
+        generatedXML.writeElement(""D"", ""lockdiscovery"", XMLWriter.CLOSING);
+
+        generatedXML.writeElement(""D"", ""prop"", XMLWriter.CLOSING);
+
+        resp.setStatus(WebdavStatus.SC_OK);
+        resp.setContentType(""text/xml; charset=UTF-8"");
+        Writer writer = resp.getWriter();
+        writer.write(generatedXML.toString());
+        writer.close();
+
+    }"
+31,1471,tomcat,DM_BOXED_PRIMITIVE_TOSTRING,C,last,,PERFORMANCE,org.apache.catalina.filters,org.apache.catalina.filters.RequestDumperFilter,,doFilter,,doLog,doLog,110,110,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/filters/RequestDumperFilter.java#L110,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/filters/RequestDumperFilter.java,,close,"@Override
+    public void doFilter(ServletRequest request, ServletResponse response,
+            FilterChain chain)
+        throws IOException, ServletException {
+
+        HttpServletRequest hRequest = null;
+        HttpServletResponse hResponse = null;
+
+        if (request instanceof HttpServletRequest) {
+            hRequest = (HttpServletRequest) request;
+        }
+        if (response instanceof HttpServletResponse) {
+            hResponse = (HttpServletResponse) response;
+        }
+
+        // Log pre-service information
+        doLog(""START TIME        "", getTimestamp());
+
+        if (hRequest == null) {
+            doLog(""        requestURI"", NON_HTTP_REQ_MSG);
+            doLog(""          authType"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""        requestURI"", hRequest.getRequestURI());
+            doLog(""          authType"", hRequest.getAuthType());
+        }
+
+        doLog("" characterEncoding"", request.getCharacterEncoding());
+        doLog(""     contentLength"",
+                Integer.valueOf(request.getContentLength()).toString());
+        doLog(""       contentType"", request.getContentType());
+
+        if (hRequest == null) {
+            doLog(""       contextPath"", NON_HTTP_REQ_MSG);
+            doLog(""            cookie"", NON_HTTP_REQ_MSG);
+            doLog(""            header"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""       contextPath"", hRequest.getContextPath());
+            Cookie cookies[] = hRequest.getCookies();
+            if (cookies != null) {
+                for (int i = 0; i < cookies.length; i++) {
+                    doLog(""            cookie"", cookies[i].getName() +
+                            ""="" + cookies[i].getValue());
+                }
+            }
+            Enumeration<String> hnames = hRequest.getHeaderNames();
+            while (hnames.hasMoreElements()) {
+                String hname = hnames.nextElement();
+                Enumeration<String> hvalues = hRequest.getHeaders(hname);
+                while (hvalues.hasMoreElements()) {
+                    String hvalue = hvalues.nextElement();
+                    doLog(""            header"", hname + ""="" + hvalue);
+                }
+            }
+        }
+
+        doLog(""            locale"", request.getLocale().toString());
+
+        if (hRequest == null) {
+            doLog(""            method"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""            method"", hRequest.getMethod());
+        }
+
+        Enumeration<String> pnames = request.getParameterNames();
+        while (pnames.hasMoreElements()) {
+            String pname = pnames.nextElement();
+            String pvalues[] = request.getParameterValues(pname);
+            StringBuilder result = new StringBuilder(pname);
+            result.append('=');
+            for (int i = 0; i < pvalues.length; i++) {
+                if (i > 0) {
+                    result.append("", "");
+                }
+                result.append(pvalues[i]);
+            }
+            doLog(""         parameter"", result.toString());
+        }
+
+        if (hRequest == null) {
+            doLog(""          pathInfo"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""          pathInfo"", hRequest.getPathInfo());
+        }
+
+        doLog(""          protocol"", request.getProtocol());
+
+        if (hRequest == null) {
+            doLog(""       queryString"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""       queryString"", hRequest.getQueryString());
+        }
+
+        doLog(""        remoteAddr"", request.getRemoteAddr());
+        doLog(""        remoteHost"", request.getRemoteHost());
+
+        if (hRequest == null) {
+            doLog(""        remoteUser"", NON_HTTP_REQ_MSG);
+            doLog(""requestedSessionId"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""        remoteUser"", hRequest.getRemoteUser());
+            doLog(""requestedSessionId"", hRequest.getRequestedSessionId());
+        }
+
+        doLog(""            scheme"", request.getScheme());
+        doLog(""        serverName"", request.getServerName());
+        doLog(""        serverPort"",
+                Integer.valueOf(request.getServerPort()).toString());
+
+        if (hRequest == null) {
+            doLog(""       servletPath"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""       servletPath"", hRequest.getServletPath());
+        }
+
+        doLog(""          isSecure"",
+                Boolean.valueOf(request.isSecure()).toString());
+        doLog(""------------------"",
+                ""--------------------------------------------"");
+
+        // Perform the request
+        chain.doFilter(request, response);
+
+        // Log post-service information
+        doLog(""------------------"",
+                ""--------------------------------------------"");
+        if (hRequest == null) {
+            doLog(""          authType"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""          authType"", hRequest.getAuthType());
+        }
+
+        doLog(""       contentType"", response.getContentType());
+
+        if (hResponse == null) {
+            doLog(""            header"", NON_HTTP_RES_MSG);
+        } else {
+            Iterable<String> rhnames = hResponse.getHeaderNames();
+            for (String rhname : rhnames) {
+                Iterable<String> rhvalues = hResponse.getHeaders(rhname);
+                for (String rhvalue : rhvalues) {
+                    doLog(""            header"", rhname + ""="" + rhvalue);
+                }
+            }
+        }
+
+        if (hRequest == null) {
+            doLog(""        remoteUser"", NON_HTTP_REQ_MSG);
+        } else {
+            doLog(""        remoteUser"", hRequest.getRemoteUser());
+        }
+
+        if (hResponse == null) {
+            doLog(""        remoteUser"", NON_HTTP_RES_MSG);
+        } else {
+            doLog(""            status"",
+                    Integer.valueOf(hResponse.getStatus()).toString());
+        }
+
+        doLog(""END TIME          "", getTimestamp());
+        doLog(""=================="",
+                ""============================================"");
+    }"
+32,1486,tomcat,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.catalina.tribes.membership,org.apache.catalina.tribes.membership.McastService,,getRecoverySleepTime,,Long,"Long,p,longValue",227,227,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/tribes/membership/McastService.java#L227,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/tribes/membership/McastService.java,,close,"public long getRecoverySleepTime(){
+        String p = properties.getProperty(""recoverySleepTime"");
+        if(p != null){
+            return new Long(p).longValue();
+        }
+        return -1;
+    }"
+33,1573,tomcat,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.catalina.tribes.membership,org.apache.catalina.tribes.membership.McastService,,getPort,,Integer,"Integer,p,intValue",246,246,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/tribes/membership/McastService.java#L246,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/tribes/membership/McastService.java,,close,"public int getPort() {
+        String p = properties.getProperty(""mcastPort"");
+        return new Integer(p).intValue();
+    }"
+34,9513,jmeter,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.jmeter.util,org.apache.jmeter.util.JMeterUtils,,getPropDefault,,Long,"Long,Long,ans,appProperties,defaultVal,propName,getProperty,longValue,toString,trim,valueOf",829,829,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/util/JMeterUtils.java#L829,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/util/JMeterUtils.java,,close,"public static int getPropDefault(String propName, int defaultVal) {
+        int ans;
+        try {
+            ans = (Integer.valueOf(appProperties.getProperty(propName, Integer.toString(defaultVal)).trim()))
+                    .intValue();
+        } catch (Exception e) {
+            ans = defaultVal;
+        }
+        return ans;
+    }"
+35,9597,jmeter,DM_BOXED_PRIMITIVE_FOR_PARSING,A,last,,PERFORMANCE,org.apache.jmeter.timers,org.apache.jmeter.timers.JSR223Timer,,delay,,Long,"Long,delay,o,longValue,toString,valueOf",49,49,close,https://github.com/apache/jmeter/tree/e21247b3b461bf0af80f0e80cb876dfb1f83ca9f//src/components/org/apache/jmeter/timers/JSR223Timer.java#L49,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/components/org/apache/jmeter/timers/JSR223Timer.java,,close,"public long delay() {
+        long delay = 0;
+        try {
+            ScriptEngineManager mgr = getManager();
+            if (mgr == null) {
+                return 0; 
+            }
+            Object o = processFileOrScript(mgr);
+            if (o == null) {
+                log.warn(""Script did not return a value"");
+                return 0;
+            }
+            delay = Long.valueOf(o.toString()).longValue();
+        } catch (NumberFormatException e) {
+            log.warn(""Problem in JSR223 script ""+e);
+        } catch (IOException e) {
+            log.warn(""Problem in JSR223 script ""+e);
+        } catch (ScriptException e) {
+            log.warn(""Problem in JSR223 script ""+e);
+        }
+        return delay;
+    }"
+36,9616,jmeter,DM_BOXED_PRIMITIVE_FOR_PARSING,A,last,,PERFORMANCE,org.apache.jmeter.protocol.http.control,org.apache.jmeter.protocol.http.control.HttpMirrorThread,,run,,Integer,"Integer,contentLength,contentLengthHeaderValue,intValue,valueOf",111,111,close,https://github.com/apache/jmeter/tree/e21247b3b461bf0af80f0e80cb876dfb1f83ca9f//src/protocol/http/org/apache/jmeter/protocol/http/control/HttpMirrorThread.java#L111,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/protocol/http/org/apache/jmeter/protocol/http/control/HttpMirrorThread.java,,close,"@Override
+    public void run() {
+        log.debug(""Starting thread"");
+        BufferedInputStream in = null;
+        BufferedOutputStream out = null;
+
+        try {
+            in = new BufferedInputStream(clientSocket.getInputStream());
+
+            // Read the header part, we will be looking for a content-length
+            // header, so we know how much we should read.
+            // We assume headers are in ISO_8859_1
+            // If we do not find such a header, we will just have to read until
+            // we have to block to read more, until we support chunked transfer
+            int contentLength = -1;
+            boolean isChunked = false;
+            byte[] buffer = new byte[1024];
+            StringBuilder headers = new StringBuilder();
+            int length = 0;
+            int positionOfBody = 0;
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            while(positionOfBody <= 0 && ((length = in.read(buffer)) != -1)) {
+                log.debug(""Write body"");
+                baos.write(buffer, 0, length); // echo back
+                headers.append(new String(buffer, 0, length, ISO_8859_1));
+                // Check if we have read all the headers
+                positionOfBody = getPositionOfBody(headers.toString());
+            }
+
+            baos.close();
+            final String headerString = headers.toString();
+
+            log.debug(""Write headers"");
+            out = new BufferedOutputStream(clientSocket.getOutputStream());
+            // The headers are written using ISO_8859_1 encoding
+            out.write(""HTTP/1.0 200 OK"".getBytes(ISO_8859_1)); //$NON-NLS-1$
+            out.write(CRLF);
+            out.write(""Content-Type: text/plain"".getBytes(ISO_8859_1)); //$NON-NLS-1$
+            out.write(CRLF);
+            // Look for special Cookie request
+            String cookieHeaderValue = getRequestHeaderValue(headerString, ""X-SetCookie""); //$NON-NLS-1$
+            if (cookieHeaderValue != null) {
+                out.write(""Set-Cookie: "".getBytes(ISO_8859_1));
+                out.write(cookieHeaderValue.getBytes(ISO_8859_1));
+                out.write(CRLF);
+            }
+            out.write(CRLF);
+            out.flush();
+
+            out.write(baos.toByteArray());
+
+            // Check if we have found a content-length header
+            String contentLengthHeaderValue = getRequestHeaderValue(headerString, ""Content-Length""); //$NON-NLS-1$
+            if(contentLengthHeaderValue != null) {
+                contentLength = Integer.valueOf(contentLengthHeaderValue).intValue();
+            }
+            // Look for special Sleep request
+            String sleepHeaderValue = getRequestHeaderValue(headerString, ""X-Sleep""); //$NON-NLS-1$
+            if(sleepHeaderValue != null) {
+                Thread.sleep(Integer.parseInt(sleepHeaderValue));
+            }
+            String transferEncodingHeaderValue = getRequestHeaderValue(headerString, ""Transfer-Encoding""); //$NON-NLS-1$
+            if(transferEncodingHeaderValue != null) {
+                isChunked = transferEncodingHeaderValue.equalsIgnoreCase(""chunked""); //$NON-NLS-1$
+                // We only support chunked transfer encoding
+                if(!isChunked) {
+                    log.error(""Transfer-Encoding header set, the value is not supported : "" + transferEncodingHeaderValue);
+                }
+            }
+
+            // If we know the content length, we can allow the reading of
+            // the request to block until more data arrives.
+            // If it is chunked transfer, we cannot allow the reading to
+            // block, because we do not know when to stop reading, because
+            // the chunked transfer is not properly supported yet
+            length = 0;
+            if(contentLength > 0) {
+                // Check how much of the body we have already read as part of reading
+                // the headers
+                // We subtract two bytes for the crlf divider between header and body
+                int totalReadBytes = headerString.length() - positionOfBody - 2;
+
+                // We know when to stop reading, so we can allow the read method to block
+                log.debug(""Reading, ""+totalReadBytes+"" < "" +contentLength);
+                while((totalReadBytes < contentLength) && ((length = in.read(buffer)) != -1)) {
+                    log.debug(""Read bytes: ""+length);
+                    out.write(buffer, 0, length);
+
+                    totalReadBytes += length;
+                    log.debug(""totalReadBytes: ""+totalReadBytes);
+                }
+            }
+            else if (isChunked) {
+                // It is chunked transfer encoding, which we do not really support yet.
+                // So we just read without blocking, because we do not know when to
+                // stop reading, so we cannot block
+                // TODO propery implement support for chunked transfer, i.e. to
+                // know when we have read the whole request, and therefore allow
+                // the reading to block
+                log.debug(""Chunked"");
+                while(in.available() > 0 && ((length = in.read(buffer)) != -1)) {
+                    out.write(buffer, 0, length);
+                }
+            }
+            else {
+                // The reqest has no body, or it has a transfer encoding we do not support.
+                // In either case, we read any data available
+                log.debug(""Other"");
+                while(in.available() > 0 && ((length = in.read(buffer)) != -1)) {
+                    log.debug(""Read bytes: ""+length);
+                    out.write(buffer, 0, length);
+                }
+            }
+            log.debug(""Flush"");
+            out.flush();
+        } catch (IOException e) {
+            log.error("""", e);
+        } catch (InterruptedException e) {
+            log.error("""", e);
+        } finally {
+            JOrphanUtils.closeQuietly(out);
+            JOrphanUtils.closeQuietly(in);
+            JOrphanUtils.closeQuietly(clientSocket);
+        }
+        log.debug(""End of Thread"");
+    }"
+37,3924,cassandra,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.cassandra.cql,org.apache.cassandra.cql.CqlParser,,termPairWithOperation,,"if (op != null) v = new Term(-(Long.valueOf(v.getText())), v.getType());",,3431,3431,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/gen-java/org/apache/cassandra/cql/CqlParser.java#L3431,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/gen-java/org/apache/cassandra/cql/CqlParser.java,,unknown,
+38,4069,cassandra,DM_BOXED_PRIMITIVE_FOR_COMPARE,C,last,,PERFORMANCE,org.apache.cassandra.db.commitlog,org.apache.cassandra.db.commitlog.ReplayPosition$2,,compare,,return Long.valueOf(o1.segment).compareTo(o2.segment);,,73,73,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/db/commitlog/ReplayPosition.java#L73,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/db/commitlog/ReplayPosition.java,,unknown,"public int compare(ReplayPosition o1, ReplayPosition o2)
+        {
+            if (o1.segment != o2.segment)
+                return Long.valueOf(o1.segment).compareTo(o2.segment);
+
+            return Integer.valueOf(o1.position).compareTo(o2.position);
+        }"
+39,9331,cassandra,DM_BOXED_PRIMITIVE_FOR_PARSING,C,last,,PERFORMANCE,org.apache.cassandra.tools,org.apache.cassandra.tools.StandaloneSplitter$Options,,parseArgs,,opts.sizeInMB = Integer.valueOf(cmd.getOptionValue(SIZE_OPTION));,,217,217,close,https://github.com/apache/cassandra/tree/4ed2234078c4d302c256332252a8ddd6ae345484//src/java/org/apache/cassandra/tools/StandaloneSplitter.java#L217,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/tools/StandaloneSplitter.java,,close,"public static Options parseArgs(String cmdArgs[])
+        {
+            CommandLineParser parser = new GnuParser();
+            CmdLineOptions options = getCmdLineOptions();
+            try
+            {
+                CommandLine cmd = parser.parse(options, cmdArgs, false);
+
+                if (cmd.hasOption(HELP_OPTION))
+                {
+                    printUsage(options);
+                    System.exit(0);
+                }
+
+                String[] args = cmd.getArgs();
+                if (args.length == 0)
+                {
+                    System.err.println(""No sstables to split"");
+                    printUsage(options);
+                    System.exit(1);
+                }
+                Options opts = new Options(Arrays.asList(args));
+                opts.debug = cmd.hasOption(DEBUG_OPTION);
+                opts.verbose = cmd.hasOption(VERBOSE_OPTION);
+                opts.snapshot = !cmd.hasOption(NO_SNAPSHOT_OPTION);
+                opts.sizeInMB = DEFAULT_SSTABLE_SIZE;
+
+                if (cmd.hasOption(SIZE_OPTION))
+                    opts.sizeInMB = Integer.valueOf(cmd.getOptionValue(SIZE_OPTION));
+
+                return opts;
+            }
+            catch (ParseException e)
+            {
+                errorMsg(e.getMessage(), options);
+                return null;
+            }
+        }"
+40,8089,cassandra,DM_BOXED_PRIMITIVE_FOR_PARSING,A,last,,PERFORMANCE,org.apache.cassandra.db.commitlog,org.apache.cassandra.db.commitlog.CommitLogSegment,,idFromFilename,,Long,"Long,matcher,group,valueOf",79,79,close,https://github.com/apache/cassandra/tree/7efab48e72247734ae38eabfc61a9ff0a5aa87ec//src/java/org/apache/cassandra/db/commitlog/CommitLogSegment.java#L79,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/db/commitlog/CommitLogSegment.java,,unknown,"public static long idFromFilename(String filename)
+    {
+        Matcher matcher = COMMIT_LOG_FILE_PATTERN.matcher(filename);
+        try
+        {
+            if (matcher.matches())
+                return Long.valueOf(matcher.group(1));
+            else
+                return -1L;
+        }
+        catch (NumberFormatException e)
+        {
+            return -1L;
+        }
+    }"
+41,5420,cassandra,DM_BOXED_PRIMITIVE_FOR_PARSING,B,last,,PERFORMANCE,org.apache.cassandra.cql3,org.apache.cassandra.cql3.CqlParser,,operation,,"t = new Term(-(Long.valueOf(t.getText())), t.getType());",,5327,5327,close,https://github.com/apache/cassandra/tree/69337a43670f71ae1fc55e23d6a9031230423900//src/gen-java/org/apache/cassandra/cql3/CqlParser.java#L5327,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/gen-java/org/apache/cassandra/cql3/CqlParser.java,,unknown,
+42,1292,tomcat,BC_VACUOUS_INSTANCEOF,C,last,,STYLE,org.apache.catalina.core,org.apache.catalina.core.ApplicationHttpRequest,,getParameterValues,lang,instanceof,instanceof,413,413,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/core/ApplicationHttpRequest.java#L413,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/core/ApplicationHttpRequest.java,,close,"@Override
+    public String[] getParameterValues(String name) {
+
+        parseParameters();
+        Object value = parameters.get(name);
+        if (value == null)
+            return null;
+        else if (value instanceof String[])
+            return ((String[]) value);
+        else if (value instanceof String) {
+            String values[] = new String[1];
+            values[0] = (String) value;
+            return (values);
+        } else {
+            String values[] = new String[1];
+            values[0] = value.toString();
+            return (values);
+        }
+
+    }"
+43,1408,tomcat,BC_VACUOUS_INSTANCEOF,C,last,,STYLE,org.apache.catalina.core,org.apache.catalina.core.ApplicationHttpRequest,,getParameter,lang,instanceof,instanceof,365,365,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/core/ApplicationHttpRequest.java#L365,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/core/ApplicationHttpRequest.java,,close,"@Override
+    public String getParameter(String name) {
+
+        parseParameters();
+
+        Object value = parameters.get(name);
+        if (value == null)
+            return (null);
+        else if (value instanceof String[])
+            return (((String[]) value)[0]);
+        else if (value instanceof String)
+            return ((String) value);
+        else
+            return (value.toString());
+
+    }"
+44,4401,cassandra,BC_VACUOUS_INSTANCEOF,B,last,,STYLE,org.apache.cassandra.tools,org.apache.cassandra.tools.SSTableExport,,serializeRow,apache,instanceof,instanceof,289,289,close,https://github.com/apache/cassandra/tree/69337a43670f71ae1fc55e23d6a9031230423900//src/java/org/apache/cassandra/tools/SSTableExport.java#L289,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/tools/SSTableExport.java,,unknown,"private static void serializeRow(SSTableIdentityIterator row, DecoratedKey key, PrintStream out)
+    {
+        ColumnFamily columnFamily = row.getColumnFamily();
+        boolean isSuperCF = columnFamily.isSuper();
+        CFMetaData cfMetaData = columnFamily.metadata();
+        AbstractType<?> comparator = columnFamily.getComparator();
+
+        out.print(""{"");
+        writeKey(out, ""key"");
+        writeJSON(out, bytesToHex(key.key));
+        out.print("","");
+
+        writeMeta(out, columnFamily);
+
+        writeKey(out, ""columns"");
+        out.print(isSuperCF ? ""{"" : ""["");
+
+        if (isSuperCF)
+        {
+            while (row.hasNext())
+            {
+                SuperColumn scol = (SuperColumn)row.next();
+                assert scol instanceof IColumn;
+                IColumn column = (IColumn)scol;
+                writeKey(out, comparator.getString(column.name()));
+                out.print(""{"");
+                writeMeta(out, scol);
+                writeKey(out, ""subColumns"");
+                out.print(""["");
+                serializeIColumns(column.getSubColumns().iterator(), out, columnFamily.getSubComparator(), cfMetaData);
+                out.print(""]"");
+                out.print(""}"");
+
+                if (row.hasNext())
+                    out.print("", "");
+            }
+        }
+        else
+        {
+            serializeColumns(row, out, comparator, cfMetaData);
+        }
+
+        out.print(isSuperCF ? ""}"" : ""]"");
+        out.print(""}"");
+    }"
+45,70,derby,BC_UNCONFIRMED_CAST,B,last,,STYLE,org.apache.derby.client.net,org.apache.derby.client.net.ClientJDBCObjectFactoryImpl,,newNetConnection,apache,org,"org,Connection,am,apache,client,derby",248,248,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/net/ClientJDBCObjectFactoryImpl.java#L248,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/net/ClientJDBCObjectFactoryImpl.java,,unknown,"public org.apache.derby.client.am.Connection newNetConnection(
+            org.apache.derby.client.am.LogWriter netLogWriter,
+            String databaseName,java.util.Properties properties)
+            throws SqlException {
+        return (org.apache.derby.client.am.Connection)
+        (new NetConnection((NetLogWriter)netLogWriter,databaseName,properties));
+    }"
+46,309,derby,BC_UNCONFIRMED_CAST,B,last,,STYLE,org.apache.derby.client,org.apache.derby.client.ClientPooledConnection,,<init>,apache,"netXAPhysicalConnection_ = getNetXAConnection(ds,",,162,162,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/ClientPooledConnection.java#L162,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/ClientPooledConnection.java,,close,
+47,462,derby,BC_UNCONFIRMED_CAST,B,last,,STYLE,org.apache.derby.client.net,org.apache.derby.client.net.ClientJDBCObjectFactoryImpl,,newClientXAConnection,apache,ClientXAConnection,"ClientXAConnection,ds",82,82,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/net/ClientJDBCObjectFactoryImpl.java#L82,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/net/ClientJDBCObjectFactoryImpl.java,,close,"public ClientXAConnection newClientXAConnection(ClientBaseDataSource ds,
+        LogWriter logWriter,String user, String password) throws SQLException
+    {
+        return new ClientXAConnection((ClientXADataSource)ds,
+            (NetLogWriter)logWriter,user,password);
+    }"
+48,754,derby,BC_UNCONFIRMED_CAST,B,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.SYSTRIGGERSRowFactory,,makeRow,apache,td,td,171,171,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/catalog/SYSTRIGGERSRowFactory.java#L171,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/SYSTRIGGERSRowFactory.java,,open,"public ExecRow makeRow(TupleDescriptor td, TupleDescriptor parent)
+		throws StandardException
+	{
+		DataTypeDescriptor		dtd;
+		ExecRow    				row;
+		DataValueDescriptor		col;
+		String					name = null;
+		UUID					uuid = null;	
+		UUID					suuid = null;			// schema	
+		UUID					tuuid = null;			// referenced table	
+		UUID					actionSPSID = null;		// action sps uuid string
+		UUID					whenSPSID = null;		// when clause sps uuid string
+		Timestamp				createTime = null;
+		String					event = null;
+		String					time = null;
+		String					type = null;
+		String					enabled = null;
+		String					triggerDefinition = null;
+		String					oldReferencingName = null;
+		String					newReferencingName = null;
+		ReferencedColumns rcd = null;
+		boolean					referencingOld = false;
+		boolean					referencingNew = false;
+
+		if (td != null)
+		{
+			TriggerDescriptor triggerDescriptor = (TriggerDescriptor)td;
+			name = triggerDescriptor.getName();
+			uuid = triggerDescriptor.getUUID();
+			suuid = triggerDescriptor.getSchemaDescriptor().getUUID();
+			createTime = triggerDescriptor.getCreationTimestamp();
+			// for now we are assuming that a trigger can only listen to a single event
+			event = triggerDescriptor.listensForEvent(TriggerDescriptor.TRIGGER_EVENT_UPDATE) ? ""U"" :
+					triggerDescriptor.listensForEvent(TriggerDescriptor.TRIGGER_EVENT_DELETE) ? ""D"" : ""I"";
+			time = triggerDescriptor.isBeforeTrigger() ? ""B"" : ""A"";
+			type = triggerDescriptor.isRowTrigger() ? ""R"" : ""S"";
+			enabled = triggerDescriptor.isEnabled() ? ""E"" : ""D"";
+			tuuid = triggerDescriptor.getTableDescriptor().getUUID();
+			int[] refCols = triggerDescriptor.getReferencedCols();
+			int[] refColsInTriggerAction = triggerDescriptor.getReferencedColsInTriggerAction();
+			rcd = (refCols != null || refColsInTriggerAction != null) ? new
+				ReferencedColumnsDescriptorImpl(refCols, refColsInTriggerAction) : null;
+
+			actionSPSID =  triggerDescriptor.getActionId();
+			whenSPSID =  triggerDescriptor.getWhenClauseId();
+			triggerDefinition = triggerDescriptor.getTriggerDefinition();
+			referencingOld = triggerDescriptor.getReferencingOld();
+			referencingNew = triggerDescriptor.getReferencingNew();
+			oldReferencingName = triggerDescriptor.getOldReferencingName();
+			newReferencingName = triggerDescriptor.getNewReferencingName();
+		}
+
+		/* Build the row to insert */
+		row = getExecutionFactory().getValueRow(SYSTRIGGERS_COLUMN_COUNT);
+
+		/* 1st column is TRIGGERID */
+		row.setColumn(1, new SQLChar((uuid == null) ? null : uuid.toString()));
+
+		/* 2nd column is TRIGGERNAME */
+		row.setColumn(2, new SQLVarchar(name));
+
+		/* 3rd column is SCHEMAID */
+		row.setColumn(3, new SQLChar((suuid == null) ? null : suuid.toString()));
+
+		/* 4th column is CREATIONTIMESTAMP */
+		row.setColumn(4, new SQLTimestamp(createTime));
+
+		/* 5th column is EVENT */
+		row.setColumn(5, new SQLChar(event));
+
+		/* 6th column is FIRINGTIME */
+		row.setColumn(6, new SQLChar(time));
+
+		/* 7th column is TYPE */
+		row.setColumn(7, new SQLChar(type));
+
+		/* 8th column is STATE */
+		row.setColumn(8, new SQLChar(enabled));
+
+		/* 9th column is TABLEID */
+		row.setColumn(9, new SQLChar((tuuid == null) ? null : tuuid.toString()));
+
+		/* 10th column is WHENSTMTID */
+		row.setColumn(10, new SQLChar((whenSPSID == null) ? null : whenSPSID.toString()));
+
+		/* 11th column is ACTIONSTMTID */
+		row.setColumn(11, new SQLChar((actionSPSID == null) ? null : actionSPSID.toString()));
+
+		/* 12th column is REFERENCEDCOLUMNS 
+		 *  (user type org.apache.derby.catalog.ReferencedColumns)
+		 */
+		row.setColumn(12, new UserType(rcd));
+
+		/* 13th column is TRIGGERDEFINITION */
+		row.setColumn(13, dvf.getLongvarcharDataValue(triggerDefinition));
+
+		/* 14th column is REFERENCINGOLD */
+		row.setColumn(14, new SQLBoolean(referencingOld));
+
+		/* 15th column is REFERENCINGNEW */
+		row.setColumn(15, new SQLBoolean(referencingNew));
+
+		/* 16th column is OLDREFERENCINGNAME */
+		row.setColumn(16, new SQLVarchar(oldReferencingName));
+
+		/* 17th column is NEWREFERENCINGNAME */
+		row.setColumn(17, new SQLVarchar(newReferencingName));
+
+		return row;
+	}"
+49,1740,lucene-solr,ICAST_INTEGER_MULTIPLY_CAST_TO_LONG,A,last,,STYLE,org.apache.lucene.codecs,org.apache.lucene.codecs.FixedGapTermsIndexReader,,<init>,,indexDivisor,"indexDivisor,indexInterval,totalIndexInterval",92,92,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/java/org/apache/lucene/codecs/FixedGapTermsIndexReader.java#L92,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/java/org/apache/lucene/codecs/FixedGapTermsIndexReader.java,,unknown,
+50,1996,lucene-solr,ICAST_INTEGER_MULTIPLY_CAST_TO_LONG,A,last,,STYLE,org.apache.lucene.search.suggest.fst,org.apache.lucene.search.suggest.fst.Sort$BufferSize,,megabytes,,BufferSize,"BufferSize,MB,mb",63,63,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//modules/suggest/src/java/org/apache/lucene/search/suggest/fst/Sort.java#L63,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//modules/suggest/src/java/org/apache/lucene/search/suggest/fst/Sort.java,,unknown,"public static BufferSize megabytes(int mb) {
+      return new BufferSize(mb * MB);
+    }"
+51,2032,lucene-solr,ICAST_INTEGER_MULTIPLY_CAST_TO_LONG,B,last,,STYLE,org.apache.solr.schema,org.apache.solr.schema.OpenExchangeRatesOrgProvider,,getExchangeRate,,System,"System,rates,refreshInterval,currentTimeMillis,getTimestamp",77,77,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//solr/core/src/java/org/apache/solr/schema/OpenExchangeRatesOrgProvider.java#L77,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/schema/OpenExchangeRatesOrgProvider.java,,close,"@Override
+  public double getExchangeRate(String sourceCurrencyCode, String targetCurrencyCode) {
+    if (rates == null) {
+      throw new SolrException(SolrException.ErrorCode.SERVICE_UNAVAILABLE, ""Rates not initialized."");
+    }
+      
+    if (sourceCurrencyCode == null || targetCurrencyCode == null) {
+      throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, ""Cannot get exchange rate; currency was null."");
+    }
+    
+    if (rates.getTimestamp() + refreshInterval*60*1000 > System.currentTimeMillis()) {
+      log.debug(""Refresh interval has expired. Refreshing exchange rates."");
+      reload();
+    }
+    
+    Double source = (Double) rates.getRates().get(sourceCurrencyCode);
+    Double target = (Double) rates.getRates().get(targetCurrencyCode);
+
+    if (source == null || target == null) {
+      throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, 
+          ""No available conversion rate from "" + sourceCurrencyCode + "" to "" + targetCurrencyCode + "". ""
+          + ""Available rates are ""+listAvailableCurrencies());
+    }
+    
+    return target / source;  
+  }"
+52,2043,lucene-solr,ICAST_IDIV_CAST_TO_DOUBLE,B,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TieredMergePolicy,,getMaxCFSSegmentSizeMB,,maxCFSSegmentSize,maxCFSSegmentSize,710,710,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java#L710,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/index/TieredMergePolicy.java,,open,"public final double getMaxCFSSegmentSizeMB() {
+    return maxCFSSegmentSize/1024/1024.;
+  }"
+53,2239,lucene-solr,ICAST_IDIV_CAST_TO_DOUBLE,B,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.LogMergePolicy,,getMaxCFSSegmentSizeMB,,maxCFSSegmentSize,maxCFSSegmentSize,744,744,close,https://github.com/apache/lucene-solr/tree/9e82c2409d62e7be04dc4fae7c45c3712be639a2//lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java#L744,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/core/src/java/org/apache/lucene/index/LogMergePolicy.java,,open,"public final double getMaxCFSSegmentSizeMB() {
+    return maxCFSSegmentSize/1024/1024.;
+  }"
+54,1807,lucene-solr,ICAST_INTEGER_MULTIPLY_CAST_TO_LONG,C,last,,STYLE,org.apache.lucene.codecs.simpletext,org.apache.lucene.codecs.simpletext.SimpleTextDocValuesReader$4,,get,,field,"field,field,field,in,index,dataStartFilePointer,length,maxLength,pattern,seek",255,255,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/codecs/src/java/org/apache/lucene/codecs/simpletext/SimpleTextDocValuesReader.java#L255,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/codecs/src/java/org/apache/lucene/codecs/simpletext/SimpleTextDocValuesReader.java,,unknown,"@Override
+      public long get(int docID) {
+        try {
+          //System.out.println(Thread.currentThread().getName() + "": get docID="" + docID + "" in="" + in);
+          if (docID < 0 || docID >= maxDoc) {
+            throw new IndexOutOfBoundsException(""docID must be 0 .. "" + (maxDoc-1) + ""; got "" + docID);
+          }
+          in.seek(field.dataStartFilePointer + (1+field.pattern.length()+2)*docID);
+          SimpleTextUtil.readLine(in, scratch);
+          //System.out.println(""parsing delta: "" + scratch.utf8ToString());
+          BigDecimal bd;
+          try {
+            bd = (BigDecimal) decoder.parse(scratch.utf8ToString());
+          } catch (ParseException pe) {
+            CorruptIndexException e = new CorruptIndexException(""failed to parse BigDecimal value (resource="" + in + "")"");
+            e.initCause(pe);
+            throw e;
+          }
+          SimpleTextUtil.readLine(in, scratch); // read the line telling us if its real or not
+          return BigInteger.valueOf(field.minValue).add(bd.toBigIntegerExact()).longValue();
+        } catch (IOException ioe) {
+          throw new RuntimeException(ioe);
+        }
+      }"
+55,2594,lucene-solr,ICAST_INTEGER_MULTIPLY_CAST_TO_LONG,C,last,,STYLE,org.apache.lucene.codecs.simpletext,org.apache.lucene.codecs.simpletext.SimpleTextDocValuesReader$6,,setDocument,,docID,"docID,field,field,field,field,field,in,dataStartFilePointer,length,length,maxLength,numValues,ordPattern,pattern,seek",382,382,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//lucene/codecs/src/java/org/apache/lucene/codecs/simpletext/SimpleTextDocValuesReader.java#L382,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/codecs/src/java/org/apache/lucene/codecs/simpletext/SimpleTextDocValuesReader.java,,unknown,"@Override
+      public void setDocument(int docID) {
+        if (docID < 0 || docID >= maxDoc) {
+          throw new IndexOutOfBoundsException(""docID must be 0 .. "" + (maxDoc-1) + ""; got "" + docID);
+        }
+        try {
+          in.seek(field.dataStartFilePointer + field.numValues * (9 + field.pattern.length() + field.maxLength) + docID * (1 + field.ordPattern.length()));
+          SimpleTextUtil.readLine(in, scratch);
+          String ordList = scratch.utf8ToString().trim();
+          if (ordList.isEmpty()) {
+            currentOrds = new String[0];
+          } else {
+            currentOrds = ordList.split("","");
+          }
+          currentIndex = 0;
+        } catch (IOException ioe) {
+          throw new RuntimeException(ioe);
+        }
+      }"
+56,2721,lucene-solr,BC_IMPOSSIBLE_CAST,C,last,,CORRECTNESS,org.apache.solr.analytics.util.valuesource,org.apache.solr.analytics.util.valuesource.ConstDoubleSource,,equals,apache,o,o,72,72,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/analytics/util/valuesource/ConstDoubleSource.java#L72,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/analytics/util/valuesource/ConstDoubleSource.java,,unknown,"@Override
+  public boolean equals(Object o) {
+    if (!(o instanceof ConstValueSource)) return false;
+    ConstDoubleSource other = (ConstDoubleSource)o;
+    return  this.constant == other.constant;
+  }"
+57,1378,tomcat,BC_UNCONFIRMED_CAST,C,last,,STYLE,org.apache.tomcat.util.net.jsse,org.apache.tomcat.util.net.jsse.JSSEImplementation,,getSSLSupport,net,JSSESupport,"JSSESupport,s",52,52,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/tomcat/util/net/jsse/JSSEImplementation.java#L52,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/tomcat/util/net/jsse/JSSEImplementation.java,,unknown,"@Override
+    public SSLSupport getSSLSupport(Socket s) {
+        return new JSSESupport((SSLSocket) s);
+    }"
+58,1689,tomcat,ICAST_INT_2_LONG_AS_INSTANT,A,last,,CORRECTNESS,org.apache.catalina.manager,org.apache.catalina.manager.HTMLManagerServlet$4,,getComparableObject,,Date,"Date,session,getMaxInactiveInterval",1111,1111,close,https://github.com/apache/tomcat/tree/3787242a83ee5555c79fd2e4c6b6952e9195ed8b//java/org/apache/catalina/manager/HTMLManagerServlet.java#L1111,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/manager/HTMLManagerServlet.java,,close,"@Override
+                public Comparable<Date> getComparableObject(Session session) {
+                    return new Date(session.getCreationTime());
+                }"

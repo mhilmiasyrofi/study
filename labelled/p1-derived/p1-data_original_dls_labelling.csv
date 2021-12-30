@@ -1,0 +1,1757 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,23,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.iapi.services.context,org.apache.derby.iapi.services.context.ContextService,,resetCurrentContextManager,,Object oldCM = stack.pop();,,350,350,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/iapi/services/context/ContextService.java#L350,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/services/context/ContextService.java,,close,"public void resetCurrentContextManager(ContextManager cm) {
+		ThreadLocal tcl = threadContextList;
+
+		if (tcl == null) {
+			// The context service is already stopped.
+			return;
+		}
+
+		if (SanityManager.DEBUG) {
+
+			if (Thread.currentThread() != cm.activeThread) {
+				SanityManager.THROWASSERT(""resetCurrentContextManager - mismatch threads - current"" + Thread.currentThread() + "" - cm's "" + cm.activeThread);
+			}
+
+			if (getCurrentContextManager() != cm) {
+				SanityManager.THROWASSERT(""resetCurrentContextManager - mismatch contexts - "" + Thread.currentThread());
+			}
+
+			if (cm.activeCount < -1) {
+				SanityManager.THROWASSERT(""resetCurrentContextManager - invalid count - current"" + Thread.currentThread() + "" - count "" + cm.activeCount);
+			}
+
+			if (cm.activeCount == 0) {
+				SanityManager.THROWASSERT(""resetCurrentContextManager - invalid count - current"" + Thread.currentThread() + "" - count "" + cm.activeCount);
+			}
+
+			if (cm.activeCount > 0) {
+				if (tcl.get() != cm)
+					SanityManager.THROWASSERT(""resetCurrentContextManager - invalid thread local "" + Thread.currentThread() + "" - object "" + tcl.get());
+
+			}
+		}
+
+		if (cm.activeCount != -1) {
+			if (--cm.activeCount == 0) {
+				cm.activeThread = null;
+                
+                // If the ContextManager is empty
+                // then don't keep a reference to it
+                // when it is not in use. The ContextManager
+                // has been closed (most likely) and this
+                // is now unwanted. Keeping the reference
+                // would hold onto memory and increase the
+                // chance of holding onto a another reference
+                // will could cause issues for future operations.
+                if (cm.isEmpty())
+                    tcl.set(null);
+                    
+            }
+			return;
+		}
+
+		java.util.Stack stack = (java.util.Stack) tcl.get();
+
+		Object oldCM = stack.pop();
+
+		ContextManager nextCM = (ContextManager) stack.peek();
+
+		boolean seenMultipleCM = false;
+		boolean seenCM = false;
+		for (int i = 0; i < stack.size(); i++) {
+
+			Object stackCM = stack.elementAt(i);
+			if (stackCM != nextCM)
+				seenMultipleCM = true;
+
+			if (stackCM == cm)
+				seenCM = true;
+		}
+
+		if (!seenCM) {
+			cm.activeThread = null;
+			cm.activeCount = 0;
+		}
+
+		if (!seenMultipleCM)
+		{
+			// all the context managers on the stack
+			// are the same so reduce to a simple count.
+			nextCM.activeCount = stack.size();
+			tcl.set(nextCM);
+		}
+	}"
+1,43,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.conn,org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext,,initDefaultSchemaDescriptor,,String authorizationId = getSessionUserId();,,424,424,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/conn/GenericLanguageConnectionContext.java#L424,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/conn/GenericLanguageConnectionContext.java,,close,"protected SchemaDescriptor initDefaultSchemaDescriptor()
+        throws StandardException {
+        /*
+        ** - If the database supports schemas and a schema with the
+        ** same name as the user's name exists (has been created using
+        ** create schema already) the database will set the users
+        ** default schema to the the schema with the same name as the
+        ** user.
+        ** - Else Set the default schema to APP.
+        */
+        if (cachedInitialDefaultSchemaDescr == null) {
+            DataDictionary dd = getDataDictionary();
+            String authorizationId = getSessionUserId();
+            SchemaDescriptor sd =
+                dd.getSchemaDescriptor(
+                    getSessionUserId(), getTransactionCompile(), false);
+
+            if (sd == null) {
+                sd = new SchemaDescriptor(
+                    dd,
+                    getSessionUserId(),
+                    getSessionUserId(),
+                    (UUID) null,
+                    false);
+            }
+
+            cachedInitialDefaultSchemaDescr = sd;
+        }
+        return cachedInitialDefaultSchemaDescr;
+    }"
+2,54,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.DistinctNode,,optimizeIt,,CostEstimate childCost =,,151,151,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/DistinctNode.java#L151,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/DistinctNode.java,,close,"public CostEstimate optimizeIt(Optimizer optimizer,
+									OptimizablePredicateList predList,
+									CostEstimate outerCost,
+									RowOrdering rowOrdering)
+			throws StandardException
+	{
+		CostEstimate childCost =
+			((Optimizable) childResult).optimizeIt(optimizer,
+									predList,
+									outerCost,
+									rowOrdering);
+
+		return super.optimizeIt(optimizer, predList, outerCost, rowOrdering);
+	}"
+3,114,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.LockTableNode,,bindStatement,,getDataDictionary,getDataDictionary,99,99,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/LockTableNode.java#L99,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/LockTableNode.java,,close,"public void bindStatement() throws StandardException
+	{
+		CompilerContext			cc = getCompilerContext();
+		ConglomerateDescriptor	cd;
+		DataDictionary			dd = getDataDictionary();
+		SchemaDescriptor		sd;
+
+		String schemaName = tableName.getSchemaName();
+		sd = getSchemaDescriptor(schemaName);
+
+		// Users are not allowed to lock system tables
+		if (sd.isSystemSchema())
+		{
+			throw StandardException.newException(SQLState.LANG_NO_USER_DDL_IN_SYSTEM_SCHEMA, 
+							statementToString(), schemaName);
+		}
+
+		lockTableDescriptor = getTableDescriptor(tableName.getTableName(), sd);
+
+		if (lockTableDescriptor == null)
+		{
+			// Check if the reference is for a synonym.
+			TableName synonymTab = resolveTableToSynonym(tableName);
+			if (synonymTab == null)
+				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);
+			tableName = synonymTab;
+			sd = getSchemaDescriptor(tableName.getSchemaName());
+
+			lockTableDescriptor = getTableDescriptor(synonymTab.getTableName(), sd);
+			if (lockTableDescriptor == null)
+				throw StandardException.newException(SQLState.LANG_TABLE_NOT_FOUND, tableName);
+		}
+
+		//throw an exception if user is attempting to lock a temporary table
+		if (lockTableDescriptor.getTableType() == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
+		{
+				throw StandardException.newException(SQLState.LANG_NOT_ALLOWED_FOR_DECLARED_GLOBAL_TEMP_TABLE);
+		}
+
+		conglomerateNumber = lockTableDescriptor.getHeapConglomerateId();
+
+		/* Get the base conglomerate descriptor */
+		cd = lockTableDescriptor.getConglomerateDescriptor(conglomerateNumber);
+
+		/* Statement is dependent on the TableDescriptor and ConglomerateDescriptor */
+		cc.createDependency(lockTableDescriptor);
+		cc.createDependency(cd);
+
+		if (isPrivilegeCollectionRequired())
+		{
+			// need SELECT privilege to perform lock table statement.
+			cc.pushCurrentPrivType(Authorizer.SELECT_PRIV);
+			cc.addRequiredTablePriv(lockTableDescriptor);
+			cc.popCurrentPrivType();
+		}
+	}"
+4,121,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.ResultSetNode,,parseDefault,,CompilerContext 			compilerContext = getCompilerContext();,,1209,1209,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/ResultSetNode.java#L1209,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/ResultSetNode.java,,close,"public	ValueNode	parseDefault
+	(
+		String				defaultText
+    )
+		throws StandardException
+	{
+		Parser						p;
+		ValueNode					defaultTree;
+		LanguageConnectionContext	lcc = getLanguageConnectionContext();
+		CompilerContext 			compilerContext = getCompilerContext();
+
+		/* Get a Statement to pass to the parser */
+
+		/* We're all set up to parse. We have to build a compilable SQL statement
+		 * before we can parse -  So, we goober up a VALUES defaultText.
+		 */
+		String values = ""VALUES "" + defaultText;
+		
+		/*
+		** Get a new compiler context, so the parsing of the select statement
+		** doesn't mess up anything in the current context (it could clobber
+		** the ParameterValueSet, for example).
+		*/
+		CompilerContext newCC = lcc.pushCompilerContext();
+
+		p = newCC.getParser();
+				
+		/* Finally, we can call the parser */
+		// Since this is always nested inside another SQL statement, so topLevel flag
+		// should be false
+		Visitable qt = p.parseStatement(values);
+		if (SanityManager.DEBUG)
+		{
+			if (! (qt instanceof CursorNode))
+			{
+				SanityManager.THROWASSERT(
+					""qt expected to be instanceof CursorNode, not "" +
+					qt.getClass().getName());
+			}
+			CursorNode cn = (CursorNode) qt;
+			if (! (cn.getResultSetNode() instanceof RowResultSetNode))
+			{
+				SanityManager.THROWASSERT(
+					""cn.getResultSetNode() expected to be instanceof RowResultSetNode, not "" +
+					cn.getResultSetNode().getClass().getName());
+			}
+		}
+
+		defaultTree = ((ResultColumn) 
+							((CursorNode) qt).getResultSetNode().getResultColumns().elementAt(0)).
+									getExpression();
+
+		lcc.popCompilerContext(newCC);
+
+		return	defaultTree;
+	}"
+5,154,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.BinaryComparisonOperatorNode,,bindComparisonOperator,,rightOperand,"rightOperand,rightType,getTypeId",201,201,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/BinaryComparisonOperatorNode.java#L201,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/BinaryComparisonOperatorNode.java,,close,"public void bindComparisonOperator()
+			throws StandardException
+	{
+		TypeId	leftType;
+		TypeId	rightType;
+		boolean				nullableResult;
+
+		leftType = leftOperand.getTypeId();
+		rightType = rightOperand.getTypeId();
+
+
+		/*
+		** Can the types be compared to each other?  If not, throw an
+		** exception.
+		*/
+		boolean forEquals = operator.equals(""="") || operator.equals(""<>"");
+
+        boolean cmp = leftOperand.getTypeServices().comparable(
+        		rightOperand.getTypeServices(),
+				forEquals,
+				getClassFactory());
+		// Bypass the comparable check if this is a rewrite from the 
+		// optimizer.  We will assume Mr. Optimizer knows what he is doing.
+          if (!cmp && !forQueryRewrite) {
+			throw StandardException.newException(SQLState.LANG_NOT_COMPARABLE, 
+					leftOperand.getTypeServices().getSQLTypeNameWithCollation() ,
+					rightOperand.getTypeServices().getSQLTypeNameWithCollation());
+				
+		  }
+
+		
+		/*
+		** Set the result type of this comparison operator based on the
+		** operands.  The result type is always SQLBoolean - the only question
+		** is whether it is nullable or not.  If either of the operands is
+		** nullable, the result of the comparison must be nullable, too, so
+		** we can represent the unknown truth value.
+		*/
+		nullableResult = leftOperand.getTypeServices().isNullable() ||
+							rightOperand.getTypeServices().isNullable();
+		setType(new DataTypeDescriptor(TypeId.BOOLEAN_ID, nullableResult));
+
+
+	}"
+6,158,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.OptimizerImpl,,ruleBasedCostOptimizable,,optimizable,"optimizable,getCurrentAccessPath,getLockMode",2027,2027,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/OptimizerImpl.java#L2027,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/OptimizerImpl.java,,close,"private void ruleBasedCostOptimizable(Optimizable optimizable,
+											TableDescriptor td,
+											ConglomerateDescriptor cd,
+											OptimizablePredicateList predList,
+											CostEstimate outerCost)
+				throws StandardException
+	{
+		/* CHOOSE BEST CONGLOMERATE HERE */
+		ConglomerateDescriptor	conglomerateDescriptor = null;
+		ConglomerateDescriptor	bestConglomerateDescriptor = null;
+		AccessPath bestAp = optimizable.getBestAccessPath();
+		int lockMode = optimizable.getCurrentAccessPath().getLockMode();
+
+
+		/*
+		** If the current conglomerate better than the best so far?
+		** The pecking order is:
+		**		o  covering index useful for predicates
+		**			(if there are predicates)
+		**		o  index useful for predicates (if there are predicates)
+		**		o  covering index
+		**		o  table scan
+		*/
+
+		/*
+		** If there is more than one conglomerate descriptor
+		** choose any index that is potentially useful.
+		*/
+		if (predList != null &&
+			predList.useful(optimizable, cd))
+		{
+			/*
+			** Do not let a non-covering matching index scan supplant a
+			** covering matching index scan.
+			*/
+			boolean newCoveringIndex = optimizable.isCoveringIndex(cd);
+			if ( ( ! bestAp.getCoveringIndexScan()) ||
+			    bestAp.getNonMatchingIndexScan() ||
+				newCoveringIndex )
+			{
+				bestAp.setCostEstimate(
+					estimateTotalCost(
+									predList,
+									cd,
+									outerCost,
+									optimizable
+									)
+								);
+				bestAp.setConglomerateDescriptor(cd);
+				bestAp.setNonMatchingIndexScan(false);
+				bestAp.setCoveringIndexScan(newCoveringIndex);
+
+				bestAp.setLockMode(optimizable.getCurrentAccessPath().getLockMode());
+
+				optimizable.rememberJoinStrategyAsBest(bestAp);
+			}
+
+			return;
+		}
+
+		/* Remember the ""last"" covering index.
+		 * NOTE - Since we don't have costing, we just go for the
+		 * last one since that's as good as any
+		 */
+		if (optimizable.isCoveringIndex(cd))
+		{
+			bestAp.setCostEstimate(
+								estimateTotalCost(predList,
+													cd,
+													outerCost,
+													optimizable)
+								);
+			bestAp.setConglomerateDescriptor(cd);
+			bestAp.setNonMatchingIndexScan(true);
+			bestAp.setCoveringIndexScan(true);
+
+			bestAp.setLockMode(optimizable.getCurrentAccessPath().getLockMode());
+
+			optimizable.rememberJoinStrategyAsBest(bestAp);
+			return;
+		}
+
+		/*
+		** If this is the heap, and the best conglomerate so far is a
+		** non-covering, non-matching index scan, pick the heap.
+		*/
+		if ( ( ! bestAp.getCoveringIndexScan()) &&
+			 bestAp.getNonMatchingIndexScan() &&
+			 ( ! cd.isIndex() )
+		   )
+		{
+			bestAp.setCostEstimate(
+									estimateTotalCost(predList,
+														cd,
+														outerCost,
+														optimizable)
+									);
+
+			bestAp.setConglomerateDescriptor(cd);
+
+			bestAp.setLockMode(optimizable.getCurrentAccessPath().getLockMode());
+
+			optimizable.rememberJoinStrategyAsBest(bestAp);
+
+			/*
+			** No need to set non-matching index scan and covering
+			** index scan, as these are already correct.
+			*/
+			return;
+		}
+
+
+		/*
+		** If all else fails, and no conglomerate has been picked yet,
+		** pick this one.
+		*/
+		bestConglomerateDescriptor = bestAp.getConglomerateDescriptor();
+		if (bestConglomerateDescriptor == null)
+		{
+			bestAp.setCostEstimate(
+									estimateTotalCost(predList,
+									 					cd,
+														outerCost,
+														optimizable)
+									);
+
+			bestAp.setConglomerateDescriptor(cd);
+
+			/*
+			** We have determined above that this index is neither covering
+			** nor matching.
+			*/
+			bestAp.setCoveringIndexScan(false);
+			bestAp.setNonMatchingIndexScan(cd.isIndex());
+
+			bestAp.setLockMode(optimizable.getCurrentAccessPath().getLockMode());
+
+			optimizable.rememberJoinStrategyAsBest(bestAp);
+		}
+
+		return;
+	}"
+7,168,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.iapi.tools.i18n,org.apache.derby.iapi.tools.i18n.LocalizedResource,,<clinit>,,"Method getbd = ResultSet.class.getMethod(""getBigDecimal"", new Class[] {int.class});",,61,61,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/tools/org/apache/derby/iapi/tools/i18n/LocalizedResource.java#L61,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/tools/org/apache/derby/iapi/tools/i18n/LocalizedResource.java,,unknown,
+8,180,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.iapi.db,org.apache.derby.iapi.db.OptimizerTrace,,writeOptimizerTraceOutputHtml,,getOptimizerTraceOutput,getOptimizerTraceOutput,130,130,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/iapi/db/OptimizerTrace.java#L130,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/db/OptimizerTrace.java,,unknown,"public static boolean writeOptimizerTraceOutputHtml(String fileName)
+	{
+		boolean retCode = true;
+
+		try
+		{
+		String output = getOptimizerTraceOutput();
+		//RESOLVEOPTIMIZERTRACE - need to write out the html
+		}
+		catch (Throwable t)
+		{
+			// eat all exceptions, simply return false
+			retCode = false;
+		}
+
+		return retCode;
+	}"
+9,201,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.NetworkServerControlImpl,,checkShutdownPrivileges,,final Permission sp  = new SystemPermission(,,1166,1166,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java#L1166,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/NetworkServerControlImpl.java,,open,"public void checkShutdownPrivileges() throws SQLException {    
+        // get the system's authentication service
+        final AuthenticationService auth
+            = ((AuthenticationService)
+               Monitor.findService(AuthenticationService.MODULE,
+                                   ""authentication""));
+
+        // authenticate user
+        if (auth != null) {
+            final Properties finfo = new Properties();
+            if (userArg != null) {
+                finfo.setProperty(""user"", userArg);
+            }
+            if (passwordArg != null) {
+                finfo.setProperty(""password"", passwordArg);
+            }
+            if (!auth.authenticate((String)null, finfo)) {
+                // not a valid user
+                throw Util.generateCsSQLException(
+                SQLState.NET_CONNECT_AUTH_FAILED,
+                MessageService.getTextMessage(MessageId.AUTH_INVALID));
+            }
+        }
+
+        // approve action if not running under a security manager
+        if (System.getSecurityManager() == null) {
+            return;
+        }
+
+        // the check
+        try {
+            final Permission sp  = new SystemPermission(
+                  SystemPermission.SERVER, SystemPermission.SHUTDOWN);
+            // For porting the network server to J2ME/CDC, consider calling
+            // abstract method InternalDriver.checkShutdownPrivileges(user)
+            // instead of static SecurityUtil.checkUserHasPermission().
+            // SecurityUtil.checkUserHasPermission(userArg, sp);
+        } catch (AccessControlException ace) {
+            throw Util.generateCsSQLException(
+                SQLState.AUTH_SHUTDOWN_MISSING_PERMISSION,
+                userArg, (Object)ace); // overloaded method
+        }
+    }"
+10,264,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.tools.ij,org.apache.derby.impl.tools.ij.ij,,dynamicConnection,,URLCheck aCheck = new URLCheck(sVal);,,1471,1471,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//generated/java/org/apache/derby/impl/tools/ij/ij.java#L1471,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//generated/java/org/apache/derby/impl/tools/ij/ij.java,,unknown,
+11,272,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.ResultColumnList,,populate,,"TableName				tableName = makeTableName( table.getSchemaName(), table.getName() );",,4155,4155,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/ResultColumnList.java#L4155,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/ResultColumnList.java,,close,"public	void	populate
+	(
+		TableDescriptor	table,
+		int[]			columnIDs
+	)
+		throws StandardException
+	{
+		if ( columnIDs == null ) { return; }
+
+		int						count = columnIDs.length;
+		TableName				tableName = makeTableName( table.getSchemaName(), table.getName() );
+		String					columnName;
+		int						columnPosition;
+		ResultColumn			rc;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			columnPosition = columnIDs[ i ];
+			columnName = table.getColumnDescriptor( columnPosition ).getColumnName();
+
+			rc = makeColumnFromName( columnName );
+
+			addResultColumn( rc );
+		}
+
+	}"
+12,273,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.ValueNodeList,,comparable,,leftOperand,"leftOperand,leftType,getTypeId",341,341,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/ValueNodeList.java#L341,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/ValueNodeList.java,,close,"public void comparable(ValueNode leftOperand) throws StandardException
+	{
+		int			 size = size();
+		TypeId	leftType;
+		ValueNode		valueNode;
+
+		leftType = leftOperand.getTypeId();
+
+		for (int index = 0; index < size; index++)
+		{
+			valueNode = (ValueNode) elementAt(index);
+
+			/*
+			** Can the types be compared to each other?  If not, throw an
+			** exception.
+			*/
+			if (! leftOperand.getTypeServices().comparable(valueNode.getTypeServices(),
+									false,
+									getClassFactory()))
+			{
+				throw StandardException.newException(SQLState.LANG_NOT_COMPARABLE, 
+						leftOperand.getTypeServices().getSQLTypeNameWithCollation(),
+						valueNode.getTypeServices().getSQLTypeNameWithCollation()
+						);
+			}
+		}
+	}"
+13,303,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.BinaryComparisonOperatorNode,,bindExpression,,rightOperand,"rightOperand,getTypeCompiler",134,134,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/BinaryComparisonOperatorNode.java#L134,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/BinaryComparisonOperatorNode.java,,close,"public ValueNode bindExpression(
+		FromList fromList, SubqueryList subqueryList,
+		Vector	aggregateVector)
+			throws StandardException
+	{
+		super.bindExpression(fromList, subqueryList, aggregateVector);
+
+		TypeCompiler leftTC = leftOperand.getTypeCompiler();
+		TypeCompiler rightTC = rightOperand.getTypeCompiler();
+		TypeId leftTypeId = leftOperand.getTypeId();
+		TypeId rightTypeId = rightOperand.getTypeId();
+
+		/*
+		 * If we are comparing a non-string with a string type, then we
+		 * must prevent the non-string value from being used to probe into
+		 * an index on a string column. This is because the string types
+		 * are all of low precedence, so the comparison rules of the non-string
+		 * value are used, so it may not find values in a string index because
+		 * it will be in the wrong order. So, cast the string value to its
+		 * own type. This is easier than casting it to the non-string type,
+		 * because we would have to figure out the right length to cast it to.
+		 */
+		if (! leftTypeId.isStringTypeId() && rightTypeId.isStringTypeId())
+		{
+			DataTypeDescriptor rightTypeServices = rightOperand.getTypeServices();
+
+			rightOperand =  (ValueNode)
+				getNodeFactory().getNode(
+					C_NodeTypes.CAST_NODE,
+					rightOperand, 
+					new DataTypeDescriptor(
+							rightTypeId,
+							true, 
+							rightTypeServices.getMaximumWidth()),
+					getContextManager());
+			((CastNode) rightOperand).bindCastNodeOnly();
+		}
+		else if (! rightTypeId.isStringTypeId() && leftTypeId.isStringTypeId())
+		{
+			DataTypeDescriptor leftTypeServices = leftOperand.getTypeServices();
+
+			leftOperand =  (ValueNode)
+				getNodeFactory().getNode(
+					C_NodeTypes.CAST_NODE,
+					leftOperand, 
+					new DataTypeDescriptor(
+							leftTypeId,
+							true, 
+							leftTypeServices.getMaximumWidth()),
+					getContextManager());
+			((CastNode) leftOperand).bindCastNodeOnly();
+		}
+
+		/* Test type compatability and set type info for this node */
+		bindComparisonOperator();
+
+		return this;
+	}"
+14,312,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.LikeEscapeOperatorNode,,bindExpression,,receiver,"receiver,getTypeCompiler",266,266,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/LikeEscapeOperatorNode.java#L266,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/LikeEscapeOperatorNode.java,,close,"public ValueNode bindExpression(
+    FromList        fromList, 
+    SubqueryList    subqueryList,
+    Vector          aggregateVector) 
+        throws StandardException
+    {
+        super.bindExpression(fromList, subqueryList, aggregateVector);
+
+        String pattern = null;
+
+        // pattern must be a string or a parameter
+
+        if (!(leftOperand.requiresTypeFromContext()) && 
+             !(leftOperand.getTypeId().isStringTypeId()))
+        {
+            throw StandardException.newException(
+                SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE, ""LIKE"", ""FUNCTION"");
+        }
+
+        // escape must be a string or a parameter
+        if ((rightOperand != null) && 
+            !(rightOperand.requiresTypeFromContext()) && 
+            !(rightOperand.getTypeId().isStringTypeId()))
+        {
+            throw StandardException.newException(
+                SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE, ""LIKE"", ""FUNCTION"");
+        }
+
+        // deal with operand parameters
+
+        /* 
+        *  Is there a ? parameter on the left? ie. ""? like 'Derby'""
+        *
+        *  Do left first because its length is always maximum;
+        *  a parameter on the right copies its length from
+        *  the left, since it won't match if it is any longer than it.
+        */
+        if (receiver.requiresTypeFromContext())
+        {
+            receiver.setType(
+                new DataTypeDescriptor(
+                    TypeId.getBuiltInTypeId(Types.VARCHAR), true));
+            //check if this parameter can pick up it's collation from pattern
+            //or escape clauses in that order. If not, then it will take it's
+            //collation from the compilation schema.
+            if (!leftOperand.requiresTypeFromContext()) {
+                receiver.setCollationInfo(leftOperand.getTypeServices());
+
+            } else if (rightOperand != null && !rightOperand.requiresTypeFromContext()) {
+                receiver.setCollationInfo(rightOperand.getTypeServices());          	
+            } else {
+    			receiver.setCollationUsingCompilationSchema();            	
+            }
+        }
+
+        /* 
+         *  Is there a ? parameter for the PATTERN of LIKE? ie. ""column like ?""
+         *  
+         *  Copy from the receiver -- legal if both are parameters,
+         *  both will be max length.
+         *  REMIND: should nullability be copied, or set to true?
+         */
+        if (leftOperand.requiresTypeFromContext())
+        {
+            /*
+            * Set the pattern to the type of the left parameter, if
+            * the left is a string, otherwise set it to be VARCHAR. 
+            */
+            if (receiver.getTypeId().isStringTypeId())
+            {
+                leftOperand.setType(receiver.getTypeServices());
+            }
+            else
+            {
+                leftOperand.setType(
+                    new DataTypeDescriptor(
+                        TypeId.getBuiltInTypeId(Types.VARCHAR), true));
+            }
+			//collation of ? operand should be picked up from the context.
+            //By the time we come here, receiver will have correct collation
+            //set on it and hence we can rely on it to get correct collation
+            //for the other ? in LIKE clause
+            leftOperand.setCollationInfo(receiver.getTypeServices());          	
+        }
+
+        /* 
+         *  Is there a ? parameter for the ESCAPE of LIKE?
+         *  Copy from the receiver -- legal if both are parameters,
+         *  both will be max length.  nullability is set to true.
+         */
+
+        if (rightOperand != null && rightOperand.requiresTypeFromContext())
+        {
+            /*
+             * Set the pattern to the type of the left parameter, if
+             * the left is a string, otherwise set it to be VARCHAR. 
+             */
+            if (receiver.getTypeId().isStringTypeId())
+            {
+                rightOperand.setType(receiver.getTypeServices());
+            }
+            else
+            {
+                rightOperand.setType(
+                    new DataTypeDescriptor(
+                        TypeId.getBuiltInTypeId(Types.VARCHAR), true));
+            }
+			//collation of ? operand should be picked up from the context.
+            //By the time we come here, receiver will have correct collation
+            //set on it and hence we can rely on it to get correct collation
+            //for the other ? in LIKE clause
+            rightOperand.setCollationInfo(receiver.getTypeServices());    	
+        }
+
+        bindToBuiltIn();
+
+        TypeCompiler receiverTC = receiver.getTypeCompiler();
+        TypeCompiler leftTC     = leftOperand.getTypeCompiler();
+
+        /* The receiver must be a string type
+        */
+        if (! receiver.getTypeId().isStringTypeId())
+        {
+            throw StandardException.newException(
+                SQLState.LANG_DB2_FUNCTION_INCOMPATIBLE, ""LIKE"", ""FUNCTION"");
+        }
+
+        /* If either the left or right operands are non-string types,
+         * then we generate an implicit cast to VARCHAR.
+         */
+        if (!leftOperand.getTypeId().isStringTypeId())
+        {
+            leftOperand = castArgToString(leftOperand);
+            leftTC      = leftOperand.getTypeCompiler();
+        }
+
+        if (rightOperand != null)
+        {
+            rightOperand = castArgToString(rightOperand);
+        }
+
+        /* 
+         * Remember whether or not the right side (the like pattern) is a string 
+         * constant.  We need to remember here so that we can transform LIKE 
+         * 'constant' into = 'constant' for non unicode based collation columns.
+         */
+        boolean leftConstant = (leftOperand instanceof CharConstantNode);
+        if (leftConstant)
+        {
+            pattern = ((CharConstantNode) leftOperand).getString();
+        }
+
+        boolean rightConstant = (rightOperand instanceof CharConstantNode);
+
+        if (rightConstant)
+        {
+            escape = ((CharConstantNode) rightOperand).getString();
+            if (escape.length() != 1)
+            {
+                throw StandardException.newException(
+                    SQLState.LANG_INVALID_ESCAPE_CHARACTER, escape);
+            }
+        }
+        else if (rightOperand == null)
+        {
+            // No Escape clause: Let optimization continue for the = case below
+            rightConstant = true;
+        }
+
+        /* If we are comparing a UCS_BASIC char with a terriotry based char 
+         * then we generate a cast above the receiver to force preprocess to
+         * not attempt any of the > <= optimizations since there is no
+         * way to determine the 'next' character for the <= operand.
+         *
+         * TODO-COLLATE - probably need to do something about different 
+         *                collation types here.
+         */
+
+        // The left and the pattern of the LIKE must be same collation type
+        // and derivation.
+        if (!receiver.getTypeServices().compareCollationInfo(
+        		leftOperand.getTypeServices()))
+        {
+            // throw error.
+            throw StandardException.newException(
+                        SQLState.LANG_LIKE_COLLATION_MISMATCH, 
+                        receiver.getTypeServices().getSQLstring(),
+                        receiver.getTypeServices().getCollationName(),
+                        leftOperand.getTypeServices().getSQLstring(),
+                        leftOperand.getTypeServices().getCollationName());
+        }
+
+        /* If the left side of LIKE is a ColumnReference and right side is a 
+         * string constant without a wildcard (eg. column LIKE 'Derby') then we 
+         * transform the LIKE into the equivalent LIKE AND =.  
+         * If we have an escape clause it also must be a constant 
+         * (eg. column LIKE 'Derby' ESCAPE '%').
+         *
+         * These types of transformations are normally done at preprocess time, 
+         * but we make an exception and do this one at bind time because we 
+         * transform a NOT LIKE 'a' into (a LIKE 'a') = false prior to 
+         * preprocessing.  
+         *
+         * The transformed tree will become:
+         *
+         *        AND
+         *       /   \
+         *     LIKE   =
+         */
+
+        if ((receiver instanceof ColumnReference) && 
+            leftConstant                          && 
+            rightConstant)
+        {
+            if (Like.isOptimizable(pattern))
+            {
+                String newPattern = null;
+
+                /*
+                 * If our pattern has no pattern chars (after stripping them out
+                 * for the ESCAPE case), we are good to apply = to this match
+                 */
+
+                if (escape != null)
+                {
+                    /* we return a new pattern stripped of ESCAPE chars */
+                    newPattern =
+                        Like.stripEscapesNoPatternChars(
+                            pattern, escape.charAt(0));
+                }
+                else if (pattern.indexOf('_') == -1 && 
+                         pattern.indexOf('%') == -1)
+                {
+                    // no pattern characters.
+                    newPattern = pattern;
+                }
+
+                if (newPattern != null)
+                {
+                    // met all conditions, transform LIKE into a ""LIKE and =""
+
+                    ValueNode leftClone = receiver.getClone();
+
+                    // Remember that we did xform, see preprocess()
+                    addedEquals = true;
+
+                    // create equals node of the form (eg. column like 'Derby' :
+                    //       =
+                    //     /   \
+                    //  column  'Derby'
+                    BinaryComparisonOperatorNode equals = 
+                        (BinaryComparisonOperatorNode) getNodeFactory().getNode(
+                            C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE,
+                            leftClone, 
+                            (ValueNode) getNodeFactory().getNode(
+                                C_NodeTypes.CHAR_CONSTANT_NODE,
+                                newPattern,
+                                getContextManager()),
+                            getContextManager());
+
+                    // Set forQueryRewrite to bypass comparability checks
+                    equals.setForQueryRewrite(true);
+
+                    equals = (BinaryComparisonOperatorNode) 
+                        equals.bindExpression(
+                            fromList, subqueryList, aggregateVector);
+
+                    // create new and node and hook in ""equals"" the new ""=' node
+                    //
+                    //        AND
+                    //       /   \
+                    //     LIKE   = 
+                    //           / \
+                    //       column 'Derby'
+
+                    AndNode newAnd = 
+                        (AndNode) getNodeFactory().getNode(
+                                    C_NodeTypes.AND_NODE,
+                                    this,
+                                    equals,
+                                    getContextManager());
+
+                    finishBindExpr();
+                    newAnd.postBindFixup();
+
+                    return newAnd;
+                }
+            }
+        }
+
+        finishBindExpr();
+
+        return this;
+    }"
+15,313,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.store.access.btree,org.apache.derby.impl.store.access.btree.OpenBTree,,checkConsistency,,,"null,root,this,true,checkConsistency",281,281,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/store/access/btree/OpenBTree.java#L281,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/store/access/btree/OpenBTree.java,,open,"public void checkConsistency()
+		throws StandardException
+    {
+		ControlRow root = null;
+
+        try
+        {
+            if (this.container == null)
+            {
+                throw(StandardException.newException(
+                        SQLState.BTREE_IS_CLOSED, new Long(err_containerid)));
+            }
+
+            if (SanityManager.DEBUG)
+                SanityManager.ASSERT(this.init_conglomerate.format_ids != null);
+
+            root = ControlRow.get(this, BTree.ROOTPAGEID);
+
+            int actualpages = root.checkConsistency(this, null, true);
+
+            // RESOLVE (mikem) - anything useful to assert about number of pages
+            // in the tree?
+        }
+        finally
+        {
+            if (root != null)
+                root.release();
+        }
+    }"
+16,326,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.HalfOuterJoinNode,,LOJ_reorderable,,leftResultSet,leftResultSet,496,496,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/HalfOuterJoinNode.java#L496,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/HalfOuterJoinNode.java,,open,"public boolean LOJ_reorderable(int numTables)
+		throws StandardException
+	{
+		boolean anyChange = false;
+
+		ResultSetNode logicalLeftResultSet;  // row-preserving side
+		ResultSetNode logicalRightResultSet; // null-producing side
+
+		// Figure out which is the row-preserving side and which is
+		// null-producing side.
+		if (rightOuterJoin)
+		{ // right outer join
+			logicalLeftResultSet  = rightResultSet;
+			logicalRightResultSet = leftResultSet;
+		}
+		else 
+		{
+			logicalLeftResultSet  = leftResultSet;
+			logicalRightResultSet = rightResultSet;
+		}
+		
+		// Redundantly normalize the ON predicate (it will also be called in preprocess()).
+		super.normExpressions();
+
+        // This is a very simple OJ of base tables. Do nothing.
+		if (logicalLeftResultSet instanceof FromBaseTable &&
+			logicalRightResultSet instanceof FromBaseTable)
+			return anyChange;
+
+        // Recursively check if we can reordering OJ, and build the table
+		// references. Note that joins may have been reordered and therefore the
+		// table references need to be recomputed.
+		if (logicalLeftResultSet instanceof HalfOuterJoinNode)
+		{
+			anyChange =	((HalfOuterJoinNode)logicalLeftResultSet).LOJ_reorderable(numTables) || anyChange;
+		}
+		else if (!(logicalLeftResultSet instanceof FromBaseTable))
+        {// left operand must be either a base table or another OJ
+			// In principle, we don't care about the left operand.  However, we
+			// need to re-bind the resultColumns.  If the left operand is a
+			// view, we may have to re-bind the where clause etc...
+			// We ran into difficulty for the following query:
+			//  create view v8 (cv, bv, av) as (select c, b, a from t union select f, e, d from s);
+			//  select * from v8 left outer join (s left outer join r on (f = i)) on (e=v8.bv);
+			return anyChange;
+		}
+
+		if (logicalRightResultSet instanceof HalfOuterJoinNode)
+		{
+			anyChange = ((HalfOuterJoinNode)logicalRightResultSet).LOJ_reorderable(numTables) || anyChange;
+		}
+		else if (!(logicalRightResultSet instanceof FromBaseTable))
+        {// right operand must be either a base table or another OJ
+			return anyChange;
+		}
+
+        // It is much easier to do OJ reordering if there is no ROJ.
+		// However, we ran into some problem downstream when we transform an ROJ
+		// into LOJ -- transformOuterJoin() didn't expect ROJ to be transformed
+		// into LOJ alread.  So, we skip optimizing ROJ at the moment.
+		if (rightOuterJoin || (logicalRightResultSet instanceof HalfOuterJoinNode && 
+							   ((HalfOuterJoinNode)logicalRightResultSet).rightOuterJoin))
+		{
+			return LOJ_bindResultColumns(anyChange);
+		}
+
+        // Build the data structure for testing/doing OJ reordering.  Fill in
+        // the table references on row-preserving and null-producing sides.  It
+        // may be possible that either operand is a complex view.
+
+        JBitSet RPReferencedTableMap; // Row-preserving
+        JBitSet NPReferencedTableMap; // Null-producing
+
+		RPReferencedTableMap = logicalLeftResultSet.LOJgetReferencedTables(numTables);
+		NPReferencedTableMap = logicalRightResultSet.LOJgetReferencedTables(numTables);
+
+		if ((RPReferencedTableMap == null || NPReferencedTableMap == null) &&
+			anyChange)
+		{
+			return LOJ_bindResultColumns(anyChange);
+		}
+
+
+        // Check if logical right operand is another OJ... so we may be able
+        // to push the join.
+        if (logicalRightResultSet instanceof HalfOuterJoinNode)
+		{
+            // Get the row-preserving map of the  child OJ
+            JBitSet  nestedChildOJRPRefTableMap =
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                LOJgetRPReferencedTables(numTables);
+
+            // Checks that top has p(t1,t2)
+            if ( ! isNullRejecting(
+                         joinClause,
+                         RPReferencedTableMap,
+                         nestedChildOJRPRefTableMap)) {
+                // No, give up.
+                return LOJ_bindResultColumns(anyChange);
+            }
+
+            // Get the null-producing map of the child OJ
+            JBitSet  nestedChildOJNPRefTableMap =
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                LOJgetNPReferencedTables(numTables);
+
+            // Checks that right child has p(t2,t3)
+            if ( isNullRejecting(
+                         ((HalfOuterJoinNode)logicalRightResultSet).joinClause,
+                         nestedChildOJRPRefTableMap,
+                         nestedChildOJNPRefTableMap)) {
+                // Push the current OJ into the next level For safety, check
+                // the JoinNode data members: they should null or empty list
+                // before we proceed.
+                if (super.subqueryList.size() != 0 ||
+                    ((JoinNode)logicalRightResultSet).
+                        subqueryList.size() != 0 ||
+                    super.joinPredicates.size() != 0 ||
+                    ((JoinNode)logicalRightResultSet).
+                        joinPredicates.size() != 0 ||
+                    super.usingClause != null ||
+                    ((JoinNode)logicalRightResultSet).
+                        usingClause != null) {
+
+                    return LOJ_bindResultColumns(anyChange); //  get out of here
+                }
+                anyChange = true; // we are reordering the OJs.
+
+                ResultSetNode tmp = logicalLeftResultSet;
+                ResultSetNode LChild, RChild;
+
+                //            this OJ
+                //            /      \
+                //  logicalLeftRS   LogicalRightRS
+                //                   /     \
+                //                LChild  RChild
+                // becomes
+                //
+                //               this OJ
+                //               /      \
+                //     LogicalRightRS   RChild
+                //           /     \
+                // logicalLeftRS LChild <<< we need to be careful about this
+                //                          order as the ""LogicalRightRS
+                //                          may be a ROJ
+                //
+
+                // handle the lower level OJ node
+                LChild = ((HalfOuterJoinNode)logicalRightResultSet).
+                    leftResultSet;
+                RChild = ((HalfOuterJoinNode)logicalRightResultSet).
+                    rightResultSet;
+
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                    rightResultSet = LChild;
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                    leftResultSet  = tmp;
+
+                // switch the ON clause
+                {
+                    ValueNode vn = joinClause;
+                    joinClause =
+                        ((HalfOuterJoinNode)logicalRightResultSet).joinClause;
+                    ((HalfOuterJoinNode)logicalRightResultSet).joinClause = vn;
+                }
+
+                // No need to switch HalfOuterJoinNode data members for now
+                // because we are handling only OJ.
+                // boolean local_rightOuterJoin = rightOuterJoin;
+                // boolean local_transformed    = transformed;
+                // rightOuterJoin = ((HalfOuterJoinNode)logicalRightResultSet).
+                //     rightOuterJoin;
+                // transformed = ((HalfOuterJoinNode)logicalRightResultSet).
+                //     transformed;
+                // ((HalfOuterJoinNode)logicalRightResultSet).rightOuterJoin =
+                //     local_rightOuterJoin;
+                // ((HalfOuterJoinNode)logicalRightResultSet).transformed =
+                //     local_transformed;
+
+                FromList localFromList = (FromList) getNodeFactory().getNode(
+                    C_NodeTypes.FROM_LIST,
+                    getNodeFactory().doJoinOrderOptimization(),
+                    getContextManager());
+
+                // switch OJ nodes: by handling the current OJ node
+                leftResultSet  = logicalRightResultSet;
+                rightResultSet = RChild;
+
+                // rebuild the result columns and re-bind column references
+                ((HalfOuterJoinNode)leftResultSet).resultColumns = null;
+                 // localFromList is empty:
+                ((JoinNode)leftResultSet).bindResultColumns(localFromList);
+
+                // left operand must be another OJ, so recurse.
+                boolean localChange = ((HalfOuterJoinNode)leftResultSet).
+                    LOJ_reorderable(numTables);
+            }
+        }
+
+        return LOJ_bindResultColumns(anyChange);
+    }"
+17,329,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.SYSTRIGGERSRowFactory,,buildDescriptor,,dd,"dd,getDataDescriptorGenerator",302,302,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/catalog/SYSTRIGGERSRowFactory.java#L302,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/SYSTRIGGERSRowFactory.java,,close,"public TupleDescriptor buildDescriptor
+	(
+		ExecRow					row,
+		TupleDescriptor			parentTupleDescriptor,
+		DataDictionary 			dd 
+	) throws StandardException
+	{
+		DataValueDescriptor		col;
+		String					name;
+		char					theChar;
+		String					uuidStr;
+		String					triggerDefinition;
+		String					oldReferencingName;
+		String					newReferencingName;
+		UUID					uuid;	
+		UUID					suuid;					// schema	
+		UUID					tuuid;					// referenced table	
+		UUID					actionSPSID = null;		// action sps uuid string
+		UUID					whenSPSID = null;		// when clause sps uuid string
+		Timestamp				createTime;
+		int						eventMask = 0;
+		boolean					isBefore;
+		boolean					isRow;
+		boolean					isEnabled;
+		boolean					referencingOld;
+		boolean					referencingNew;
+		ReferencedColumns rcd;
+		TriggerDescriptor		descriptor;
+		DataDescriptorGenerator	ddg = dd.getDataDescriptorGenerator();
+
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(row.nColumns() == SYSTRIGGERS_COLUMN_COUNT, 
+								 ""Wrong number of columns for a SYSTRIGGERS row"");
+		}
+
+		// 1st column is TRIGGERID (UUID - char(36))
+		col = row.getColumn(1);
+		uuidStr = col.getString();
+		uuid = getUUIDFactory().recreateUUID(uuidStr);
+
+		// 2nd column is TRIGGERNAME (varchar(128))
+		col = row.getColumn(2);
+		name = col.getString();
+
+		// 3rd column is SCHEMAID (UUID - char(36))
+		col = row.getColumn(3);
+		uuidStr = col.getString();
+		suuid = getUUIDFactory().recreateUUID(uuidStr);
+
+		// 4th column is CREATIONTIMESTAMP (TIMESTAMP)
+		col = row.getColumn(4);
+		createTime = (Timestamp) col.getObject();
+
+		// 5th column is EVENT (char(1))
+		col = row.getColumn(5);
+		theChar = col.getString().charAt(0);
+		switch (theChar)
+		{
+			case 'U': 
+						eventMask = TriggerDescriptor.TRIGGER_EVENT_UPDATE;
+						break;
+
+			case 'I': 
+						eventMask = TriggerDescriptor.TRIGGER_EVENT_INSERT;
+						break;
+
+			case 'D': 
+						eventMask = TriggerDescriptor.TRIGGER_EVENT_DELETE;
+						break;
+
+			default:
+					if (SanityManager.DEBUG)	
+					{
+						SanityManager.THROWASSERT(""bad event mask: ""+theChar);
+					}
+		}
+		
+		// 6th column is FIRINGTIME (char(1))
+		isBefore = getCharBoolean(row.getColumn(6), 'B', 'A');
+
+		// 7th column is TYPE (char(1))
+		isRow = getCharBoolean(row.getColumn(7), 'R', 'S');
+
+		// 8th column is STATE (char(1))
+		isEnabled = getCharBoolean(row.getColumn(8), 'E', 'D');
+
+		// 9th column is TABLEID (UUID - char(36))
+		col = row.getColumn(9);
+		uuidStr = col.getString();
+		tuuid = getUUIDFactory().recreateUUID(uuidStr);
+
+		// 10th column is WHENSTMTID (UUID - char(36))
+		col = row.getColumn(10);
+		uuidStr = col.getString();
+		if (uuidStr != null)
+			whenSPSID = getUUIDFactory().recreateUUID(uuidStr);
+
+		// 11th column is ACTIONSTMTID (UUID - char(36))
+		col = row.getColumn(11);
+		uuidStr = col.getString();
+		if (uuidStr != null)
+			actionSPSID = getUUIDFactory().recreateUUID(uuidStr);
+
+		// 12th column is REFERENCEDCOLUMNS user type org.apache.derby.catalog.ReferencedColumns
+		col = row.getColumn(12);
+		rcd = (ReferencedColumns) col.getObject();
+		
+		// 13th column is TRIGGERDEFINITION (longvarhar)
+		col = row.getColumn(13);
+		triggerDefinition = col.getString();
+
+		// 14th column is REFERENCINGOLD (boolean)
+		col = row.getColumn(14);
+		referencingOld = col.getBoolean();
+
+		// 15th column is REFERENCINGNEW (boolean)
+		col = row.getColumn(15);
+		referencingNew = col.getBoolean();
+
+		// 16th column is REFERENCINGNAME (varchar(128))
+		col = row.getColumn(16);
+		oldReferencingName = col.getString();
+
+		// 17th column is REFERENCINGNAME (varchar(128))
+		col = row.getColumn(17);
+		newReferencingName = col.getString();
+
+		descriptor = new TriggerDescriptor(
+									dd,
+									dd.getSchemaDescriptor(suuid, null),
+									uuid, 
+									name, 
+									eventMask,
+									isBefore, 
+									isRow,
+									isEnabled,
+									dd.getTableDescriptor(tuuid),
+									whenSPSID,
+									actionSPSID,
+									createTime,
+									(rcd == null) ? (int[])null : rcd.getReferencedColumnPositions(),
+									(rcd == null) ? (int[])null : rcd.getTriggerActionReferencedColumnPositions(),
+									triggerDefinition,
+									referencingOld,
+									referencingNew,
+									oldReferencingName,
+									newReferencingName
+									);
+
+		return descriptor;
+	}"
+18,360,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.FromBaseTable,,isOneRowResultSet,,DataDictionary dd = getDataDictionary();,,4576,4576,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/FromBaseTable.java#L4576,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/FromBaseTable.java,,close,"public boolean isOneRowResultSet()	throws StandardException
+	{
+		// EXISTS FBT will only return a single row
+		if (existsBaseTable)
+		{
+			return true;
+		}
+
+		/* For hash join, we need to consider both the qualification
+		 * and hash join predicates and we consider them against all
+		 * conglomerates since we are looking for any uniqueness
+		 * condition that holds on the columns in the hash table, 
+		 * otherwise we just consider the predicates in the 
+		 * restriction list and the conglomerate being scanned.
+
+		 */
+		AccessPath ap = getTrulyTheBestAccessPath();
+		JoinStrategy trulyTheBestJoinStrategy = ap.getJoinStrategy();
+		PredicateList pl;
+
+		if (trulyTheBestJoinStrategy.isHashJoin())
+		{
+			pl = (PredicateList) getNodeFactory().getNode(
+											C_NodeTypes.PREDICATE_LIST,
+											getContextManager());
+			if (storeRestrictionList != null)
+			{
+				pl.nondestructiveAppend(storeRestrictionList);
+			}
+			if (nonStoreRestrictionList != null)
+			{
+				pl.nondestructiveAppend(nonStoreRestrictionList);
+			}
+			return isOneRowResultSet(pl);
+		}
+		else
+		{
+			return isOneRowResultSet(getTrulyTheBestAccessPath().
+										getConglomerateDescriptor(),
+									 restrictionList);
+		}
+	}"
+19,371,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.ResultColumnList,,setUnionResultExpression,,ContextManager cm = getContextManager();,,2351,2351,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/ResultColumnList.java#L2351,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/ResultColumnList.java,,close,"public void	setUnionResultExpression(ResultColumnList otherRCL,
+                                         int tableNumber,
+                                         int level,
+                                         String operatorName)
+		throws StandardException
+	{
+		TableName		dummyTN;
+
+		if (SanityManager.DEBUG)
+		{
+			if (visibleSize() != otherRCL.visibleSize())
+			{
+				SanityManager.THROWASSERT(
+							""visibleSize() = ("" +
+							visibleSize() +
+							"") is expected to equal otherRCL.visibleSize ("" +
+							otherRCL.visibleSize() +
+							"")"");
+			}
+
+            // Generated grouping columns and unselected ORDER BY columns
+            // should have been removed for the RCL of a SetOperatorNode, so
+            // that size and visible size are equal (DERBY-3764).
+            SanityManager.ASSERT(size() == visibleSize(),
+                                 ""size() and visibleSize() should be equal"");
+		}
+
+		/* Make a dummy TableName to be shared by all new CRs */
+		dummyTN = (TableName) getNodeFactory().getNode(
+										C_NodeTypes.TABLE_NAME,
+										null,
+										null,
+										getContextManager());
+
+		ContextManager cm = getContextManager();
+
+		int size = visibleSize();
+		for (int index = 0; index < size; index++)
+		{
+			boolean		 nullableResult;
+			ColumnReference newCR;
+			ResultColumn thisRC = (ResultColumn) elementAt(index);
+			ResultColumn otherRC = (ResultColumn) otherRCL.elementAt(index);
+			ValueNode	 thisExpr = thisRC.getExpression();
+			ValueNode	 otherExpr = otherRC.getExpression();
+
+			// If there is one row that is not 'autoincrement', the Union should
+			// not be 'autoincrement'.
+			if (!otherRC.isAutoincrementGenerated() && thisRC.isAutoincrementGenerated())
+			{
+				thisRC.resetAutoincrementGenerated();
+			}
+			/*
+			** If there are ? parameters in the ResultColumnList of a row
+			** in a table constructor, their types will not be set.  Just skip
+			** these - their types will be set later.  Each ? parameter will
+			** get the type of the first non-? in its column, so it can't
+			** affect the final dominant type.  It's possible that all the
+			** rows for a particular column will have ? parameters - this is
+			** an error condition that will be caught later.
+			*/
+			TypeId thisTypeId = thisExpr.getTypeId();
+			if (thisTypeId == null)
+				continue;
+
+			TypeId otherTypeId = otherExpr.getTypeId();
+			if (otherTypeId == null)
+				continue;
+
+			/* 
+			** Check type compatability.
+			*/
+			ClassFactory cf = getClassFactory();
+			if ( !unionCompatible( thisExpr, otherExpr ) )
+			{
+				throw StandardException.newException(SQLState.LANG_NOT_UNION_COMPATIBLE, 
+                                                     thisTypeId.getSQLTypeName(),
+                                                     otherTypeId.getSQLTypeName(),
+                                                     operatorName);
+			}
+
+			DataTypeDescriptor resultType = thisExpr.getTypeServices().getDominantType(
+												otherExpr.getTypeServices(),
+												cf);
+
+			newCR = (ColumnReference) getNodeFactory().getNode(
+										C_NodeTypes.COLUMN_REFERENCE,
+										thisRC.getName(),
+										dummyTN,
+										getContextManager());
+			newCR.setType(resultType);
+			/* Set the tableNumber and nesting levels in newCR.
+			 * If thisExpr is not a CR, then newCR cannot be
+			 * correlated, hence source and nesting levels are
+			 * the same.
+			 */
+			if (thisExpr instanceof ColumnReference)
+			{
+				newCR.copyFields((ColumnReference) thisExpr);
+			}
+			else
+			{
+				newCR.setNestingLevel(level);
+				newCR.setSourceLevel(level);
+			}
+			newCR.setTableNumber(tableNumber);
+			thisRC.setExpression(newCR);
+			thisRC.setType(
+				thisRC.getTypeServices().getDominantType(
+					otherRC.getTypeServices(), cf));
+
+			/* DB2 requires both sides of union to have same name for the result to
+			 * have that name. Otherwise, leave it or set it to a generated name */
+			if (thisRC.getName() != null && !thisRC.isNameGenerated() &&
+				otherRC.getName() != null)
+			{
+				/* Result name needs to be changed */
+				if (otherRC.isNameGenerated())
+				{
+					thisRC.setName(otherRC.getName());
+					thisRC.setNameGenerated(true);
+				}
+ 				else if (!thisRC.getName().equals(otherRC.getName()))
+				{
+					/* Both sides have user specified names that don't match */
+					thisRC.setName(null);
+					thisRC.guaranteeColumnName();
+					thisRC.setNameGenerated(true);
+				}
+			}
+		}
+	}"
+20,388,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.SetRoleNode,,activationKind,,getCompilerContext,"getCompilerContext,getParameterList",154,154,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/SetRoleNode.java#L154,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/SetRoleNode.java,,close,"int activationKind()
+    {
+        Vector parameterList = getCompilerContext().getParameterList();
+        /*
+        ** We need parameters only for those that have parameters.
+        */
+        if (type == StatementType.SET_ROLE_DYNAMIC) {
+            return StatementNode.NEED_PARAM_ACTIVATION;
+        } else {
+            return StatementNode.NEED_NOTHING_ACTIVATION;
+        }
+    }"
+21,423,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.execute,org.apache.derby.impl.sql.execute.DDLConstantAction,,findRoleUsage,,dd,"dd,rootGrant,getRoleGrantDescriptor",537,537,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/execute/DDLConstantAction.java#L537,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/execute/DDLConstantAction.java,,close,"private static PermissionsDescriptor findRoleUsage
+		(Activation activation,
+		 StatementPermission statPerm) throws StandardException {
+
+		LanguageConnectionContext lcc =
+			activation.getLanguageConnectionContext();
+		DataDictionary dd = lcc.getDataDictionary();
+		RoleGrantDescriptor rootGrant = null;
+		String role = lcc.getCurrentRoleId(activation);
+		String dbo = dd.getAuthorizationDatabaseOwner();
+        String currentUser = lcc.getCurrentUserId(activation);
+		PermissionsDescriptor permDesc = null;
+
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(
+				role != null,
+				""Unexpected: current role is not set"");
+		}
+
+		// determine how we got to be able use this role
+		rootGrant =
+            dd.getRoleGrantDescriptor(role, currentUser, dbo);
+
+		if (rootGrant == null) {
+			rootGrant = dd.getRoleGrantDescriptor(
+				role,
+				Authorizer.PUBLIC_AUTHORIZATION_ID,
+				dbo);
+		}
+
+		// If not found in current role, get transitive
+		// closure of roles granted to current role and
+		// iterate over it to see if permission has
+		// been granted to any of the roles the current
+		// role inherits.
+		RoleClosureIterator rci =
+			dd.createRoleClosureIterator
+			(activation.getTransactionController(),
+			 role, true /* inverse relation*/);
+
+		String graphGrant;
+		while (permDesc == null &&
+			   (graphGrant = rci.next()) != null) {
+			permDesc =
+				statPerm.getPermissionDescriptor
+				(graphGrant, dd);
+		}
+
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(
+				permDesc != null,
+				""Unexpected: Permission needs to be found via role"");
+		}
+
+		return permDesc;
+	}"
+22,451,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.client.am,org.apache.derby.client.am.ResultSet,,getArray,,java.sql.Array result = isNull(column) ? null : cursor_.getArray(column);,,1351,1351,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/am/ResultSet.java#L1351,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/am/ResultSet.java,,unknown,"public java.sql.Array getArray(int column) throws SQLException {
+        try
+        {
+            closeOpenStreams();
+
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, ""getArray"", column);
+            }
+            checkGetterPreconditions(column, ""getArray"");
+            java.sql.Array result = isNull(column) ? null : cursor_.getArray(column);
+            if (true) {
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.JDBC_METHOD_NOT_IMPLEMENTED));
+            }
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceExit(this, ""getArray"", result);
+            }
+            setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            return result;
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }"
+23,455,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.OrderByList,,isInOrderPrefix,,sourceRCL,"sourceRCL,size",211,211,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/OrderByList.java#L211,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/OrderByList.java,,close,"boolean isInOrderPrefix(ResultColumnList sourceRCL)
+	{
+		boolean inOrderPrefix = true;
+		int rclSize = sourceRCL.size();
+
+		if (SanityManager.DEBUG)
+		{
+			if (size() > sourceRCL.size())
+			{
+				SanityManager.THROWASSERT(
+					""size() ("" + size() + 
+					"") expected to be <= sourceRCL.size() ("" +
+					sourceRCL.size() + "")"");
+			}
+		}
+
+		int size = size();
+		for (int index = 0; index < size; index++)
+		{
+			if (((OrderByColumn) elementAt(index)).getResultColumn() !=
+				(ResultColumn) sourceRCL.elementAt(index))
+			{
+				return false;
+			}
+		}
+		return true;
+	}"
+24,484,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.execute,org.apache.derby.impl.sql.execute.AlterTableConstantAction,,modifyColumnDefault,,dd,"dd,getDataDescriptorGenerator",2069,2069,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/execute/AlterTableConstantAction.java#L2069,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/execute/AlterTableConstantAction.java,,close,"private void modifyColumnDefault(int ix)
+			throws StandardException						 
+	{
+		ColumnDescriptor columnDescriptor = 
+			td.getColumnDescriptor(columnInfo[ix].name);
+		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+		int columnPosition = columnDescriptor.getPosition();
+
+		// Clean up after the old default, if non-null
+		if (columnDescriptor.hasNonNullDefault())
+		{
+			// Invalidate off of the old default
+			DefaultDescriptor defaultDescriptor = new DefaultDescriptor(dd, columnInfo[ix].oldDefaultUUID, 
+										 td.getUUID(), columnPosition);
+
+		
+			dm.invalidateFor(defaultDescriptor, DependencyManager.MODIFY_COLUMN_DEFAULT, lcc);
+		
+			// Drop any dependencies
+			dm.clearDependencies(lcc, defaultDescriptor);
+		}
+
+		UUID defaultUUID = columnInfo[ix].newDefaultUUID;
+
+		/* Generate a UUID for the default, if one exists
+		 * and there is no default id yet.
+		 */
+		if (columnInfo[ix].defaultInfo != null &&
+			defaultUUID == null)
+		{	
+			defaultUUID = dd.getUUIDFactory().createUUID();
+		}
+
+		/* Get a ColumnDescriptor reflecting the new default */
+		columnDescriptor = new ColumnDescriptor(
+												   columnInfo[ix].name,
+												   columnPosition,
+												   columnInfo[ix].dataType,
+												   columnInfo[ix].defaultValue,
+												   columnInfo[ix].defaultInfo,
+												   td,
+												   defaultUUID,
+												   columnInfo[ix].autoincStart,
+												   columnInfo[ix].autoincInc,
+												   columnInfo[ix].autoinc_create_or_modify_Start_Increment
+												   );
+
+		// Update the ColumnDescriptor with new default info
+		dd.dropColumnDescriptor(td.getUUID(), columnInfo[ix].name, tc);
+		dd.addDescriptor(columnDescriptor, td,
+						 DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);
+	
+		if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_INCREMENT)
+		{
+			// adding an autoincrement default-- calculate the maximum value 
+			// of the autoincrement column.
+            long maxValue = getColumnMax(td, columnInfo[ix].name,
+                                         columnInfo[ix].autoincInc);
+			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
+									 maxValue, true);
+		} else if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART)
+		{
+			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
+					 columnInfo[ix].autoincStart, false);
+		} 
+		// else we are simply changing the default value
+	}"
+25,490,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.catalog,org.apache.derby.impl.sql.catalog.DataDictionaryImpl,,isSchemaReferenced,,CatalogRowFactory		rf = ti.getCatalogRowFactory();,,2515,2515,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java#L2515,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/catalog/DataDictionaryImpl.java,,close,"protected boolean isSchemaReferenced(TransactionController	tc, 
+						TabInfoImpl					ti, 
+						int						indexId, 
+						int						indexCol, 
+						DataValueDescriptor		schemaIdOrderable )
+		throws StandardException
+	{
+		ConglomerateController	heapCC = null;
+		ScanController			scanController = null;
+		boolean					foundRow;
+		FormatableBitSet					colToCheck = new FormatableBitSet(indexCol);
+		CatalogRowFactory		rf = ti.getCatalogRowFactory();	
+
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(indexId >= 0, ""code needs to be enhanced""+
+				"" to support a table scan to find the index id"");
+		}
+
+		colToCheck.set(indexCol - 1);
+
+		ScanQualifier[][] qualifier = exFactory.getScanQualifier(1);
+		qualifier[0][0].setQualifier
+				(indexCol - 1,
+				 schemaIdOrderable,
+				 Orderable.ORDER_OP_EQUALS,
+				 false,
+				 false,
+				 false);
+
+		try
+		{
+			heapCC = 
+	            tc.openConglomerate(
+	                ti.getHeapConglomerate(), false, 0, 
+                    TransactionController.MODE_RECORD,
+                    TransactionController.ISOLATION_REPEATABLE_READ);
+	
+			scanController = tc.openScan(
+					ti.getIndexConglomerate(indexId),	// conglomerate to open
+					false, 								// don't hold open across commit
+					0,                                  // for read
+	                TransactionController.MODE_RECORD,	// row locking
+                    TransactionController.ISOLATION_REPEATABLE_READ,
+					colToCheck, 						// don't get any rows
+					null,   							// start position - first row
+					ScanController.GE,      			// startSearchOperation
+					qualifier, 							// scanQualifier,
+					null,   							// stop position - through last row
+					ScanController.GT);     			// stopSearchOperation
+	
+			foundRow = (scanController.next());
+		}
+		finally
+		{
+			if (scanController != null)	
+			{
+				scanController.close();
+			}
+			if (heapCC != null)
+			{
+				heapCC.close();
+			}
+		}
+		
+		return foundRow;
+	}"
+26,505,derby,DLS_DEAD_LOCAL_STORE,B,last,,STYLE,org.apache.derby.impl.sql.compile,org.apache.derby.impl.sql.compile.DMLModStatementNode,,bindRowScopedExpression,,expression,"expression,expression,bindExpression",745,745,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/impl/sql/compile/DMLModStatementNode.java#L745,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/impl/sql/compile/DMLModStatementNode.java,,close,"static void	bindRowScopedExpression
+	(
+		NodeFactory			nodeFactory,
+        ContextManager    contextManager,
+		TableDescriptor		targetTableDescriptor,
+		ResultColumnList	sourceRCL,
+		ValueNode			expression
+    )
+		throws StandardException
+	{
+
+		TableName	targetTableName = makeTableName
+            (nodeFactory, contextManager, targetTableDescriptor.getSchemaName(), targetTableDescriptor.getName());
+
+		/* We now have the expression as a query tree.  Now, we prepare
+		 * to bind that query tree to the source's RCL.  That way, the
+		 * generated code for the expression will be evaluated against the
+		 * source row to be inserted into the target table or
+		 * against the after portion of the source row for the update
+		 * into the target table.
+		 *		o  Goober up a new FromList which has a single table,
+		 *		   a goobered up FromBaseTable for the target table
+		 *		   which has the source's RCL as it RCL.
+		 *		   (This allows the ColumnReferences in the expression
+		 *		   tree to be bound to the right RCs.)
+		 *
+	 	 * Note that in some circumstances we may not actually verify
+		 * the expression against the source RCL but against a temp
+		 * row source used for deferred processing because of a trigger.
+		 * In this case, the caller of bindConstraints (UpdateNode)
+		 * has chosen to pass in the correct RCL to bind against.
+		 */
+		FromList fakeFromList =
+			(FromList) nodeFactory.getNode(
+							C_NodeTypes.FROM_LIST,
+							nodeFactory.doJoinOrderOptimization(),
+							contextManager);
+		FromBaseTable table = (FromBaseTable)
+			nodeFactory.getNode(
+				C_NodeTypes.FROM_BASE_TABLE,
+				targetTableName,
+				null,
+				sourceRCL,
+				null,
+				contextManager);
+		table.setTableNumber(0);
+		fakeFromList.addFromTable(table);
+
+		// Now we can do the bind.
+		expression = expression.bindExpression(
+										fakeFromList,
+										(SubqueryList) null,
+										(Vector) null);
+	}"

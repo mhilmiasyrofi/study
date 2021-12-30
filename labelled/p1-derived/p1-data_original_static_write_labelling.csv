@@ -1,0 +1,601 @@
+,warning id,project,bug_pattern,commit,last_commit_checked,?,bug pattern category,package,class,field,method,type,expr,idents,start_line,end_line,label (automatically determined),commit url,"commit url (of the version compared to, if closed)",code (if open),label,method_content
+0,293,derby,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,B,last,,STYLE,org.apache.derby.iapi.types,org.apache.derby.iapi.types.DataValueFactoryImpl,ZERO_DECIMAL,boot,,NumberDataType,"NumberDataType,decimalImplementation,ZERO_DECIMAL",111,111,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/iapi/types/DataValueFactoryImpl.java#L111,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/types/DataValueFactoryImpl.java,,unknown,"public void boot(boolean create, Properties properties) throws StandardException {
+    		
+    		DataValueDescriptor decimalImplementation = getNullDecimal(null);
+    		
+    		TypeId.decimalImplementation = decimalImplementation;
+    		RegisteredFormatIds.TwoByte[StoredFormatIds.SQL_DECIMAL_ID]
+    									= decimalImplementation.getClass().getName();
+    		    		
+    		// Generate a DECIMAL value represetentation of 0
+    		decimalImplementation = decimalImplementation.getNewNull();
+    		decimalImplementation.setValue(0L);
+    		NumberDataType.ZERO_DECIMAL = decimalImplementation;    		
+
+    		ModuleFactory monitor = Monitor.getMonitor();
+    		//The Locale on monitor has already been set by the boot code in
+    		//BasicDatabase so we can simply do a get here.
+    		//This Locale will be either the Locale obtained from the territory
+    		//attribute supplied by the user on the JDBC url at database create
+    		//time or if user didn't provide the territory attribute at database
+    		//create time, then it will be set to the default JVM locale. The
+    		//Locale object will be used to construct the Collator object which
+    		//will be used if user has requested territory based collation.
+    		databaseLocale = monitor.getLocale(this);
+
+    		//If we are here for database create time, verify that there is 
+    		//Collator support for the database's locale. If not, then we 
+    		//will throw an exception. 
+    		//Notice that this Collator support check is happening only during 
+    		//database creation time. This is because, during database create
+    		//time, DVF has access to collation property of the database and
+    		//hence it can do the Collator support check
+    		//(collation property is available through JDBC url at the database
+    		//create time, if user has asked for a particular collation) eg
+    		//connect 'jdbc:derby:db;create=true;territory=no;collation=TERRITORY_BASED';
+    		//Once the database is created, the collation property gets
+    		//saved in the database and during susbsequent boots of the
+    		//database, collation attribute of the database is only available
+    		//once store has finished reading it. So, during subsequent 
+    		//database boot up time, the collation attribute of the database 
+    		//will be checked the first time a collation operation is done.
+    		//And if the Collator support is not found at that point, user will 
+    		//get an exception for Collator unavailability. This first 
+    		//collation operation can happen if the database needs to be 
+    		//recovered during boot time or otherwise it will happen when the
+    		//user has executed a SQL which requires collation operation.
+	    	if (create) {
+	    		//Get the collation property from the JDBC url(this will be 
+	    		//available only during database create time). It can only have 
+	    		//one of the 2 possible values - UCS_BASIC or TERRITORY_BASED.
+	    		//This property can only be specified at database create time.
+	    		//If the user has requested for territory based database, then 
+	    		//verify that JVM has Collator support for the database locale.
+	    		String userDefinedCollation = 
+	    			properties.getProperty(Attribute.COLLATION);
+	    		if (userDefinedCollation != null) {//Invalid value handling
+					int collationType = DataTypeDescriptor.getCollationType(userDefinedCollation);
+					if (collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC) {
+						if (collationType >= StringDataValue.COLLATION_TYPE_TERRITORY_BASED
+								&& collationType <  StringDataValue.COLLATION_TYPE_TERRITORY_BASED_IDENTICAL) {
+							int strength = collationType - StringDataValue.COLLATION_TYPE_TERRITORY_BASED_PRIMARY;
+							collatorForCharacterTypes = verifyCollatorSupport(strength);
+						} else
+							throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
+					}
+	    		}    		
+	    	}
+    	}"
+1,353,derby,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,B,last,,STYLE,org.apache.derby.iapi.types,org.apache.derby.iapi.types.DataValueFactoryImpl,decimalImplementation,boot,,TypeId,"TypeId,decimalImplementation,decimalImplementation",104,104,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/engine/org/apache/derby/iapi/types/DataValueFactoryImpl.java#L104,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/engine/org/apache/derby/iapi/types/DataValueFactoryImpl.java,,unknown,"public void boot(boolean create, Properties properties) throws StandardException {
+    		
+    		DataValueDescriptor decimalImplementation = getNullDecimal(null);
+    		
+    		TypeId.decimalImplementation = decimalImplementation;
+    		RegisteredFormatIds.TwoByte[StoredFormatIds.SQL_DECIMAL_ID]
+    									= decimalImplementation.getClass().getName();
+    		    		
+    		// Generate a DECIMAL value represetentation of 0
+    		decimalImplementation = decimalImplementation.getNewNull();
+    		decimalImplementation.setValue(0L);
+    		NumberDataType.ZERO_DECIMAL = decimalImplementation;    		
+
+    		ModuleFactory monitor = Monitor.getMonitor();
+    		//The Locale on monitor has already been set by the boot code in
+    		//BasicDatabase so we can simply do a get here.
+    		//This Locale will be either the Locale obtained from the territory
+    		//attribute supplied by the user on the JDBC url at database create
+    		//time or if user didn't provide the territory attribute at database
+    		//create time, then it will be set to the default JVM locale. The
+    		//Locale object will be used to construct the Collator object which
+    		//will be used if user has requested territory based collation.
+    		databaseLocale = monitor.getLocale(this);
+
+    		//If we are here for database create time, verify that there is 
+    		//Collator support for the database's locale. If not, then we 
+    		//will throw an exception. 
+    		//Notice that this Collator support check is happening only during 
+    		//database creation time. This is because, during database create
+    		//time, DVF has access to collation property of the database and
+    		//hence it can do the Collator support check
+    		//(collation property is available through JDBC url at the database
+    		//create time, if user has asked for a particular collation) eg
+    		//connect 'jdbc:derby:db;create=true;territory=no;collation=TERRITORY_BASED';
+    		//Once the database is created, the collation property gets
+    		//saved in the database and during susbsequent boots of the
+    		//database, collation attribute of the database is only available
+    		//once store has finished reading it. So, during subsequent 
+    		//database boot up time, the collation attribute of the database 
+    		//will be checked the first time a collation operation is done.
+    		//And if the Collator support is not found at that point, user will 
+    		//get an exception for Collator unavailability. This first 
+    		//collation operation can happen if the database needs to be 
+    		//recovered during boot time or otherwise it will happen when the
+    		//user has executed a SQL which requires collation operation.
+	    	if (create) {
+	    		//Get the collation property from the JDBC url(this will be 
+	    		//available only during database create time). It can only have 
+	    		//one of the 2 possible values - UCS_BASIC or TERRITORY_BASED.
+	    		//This property can only be specified at database create time.
+	    		//If the user has requested for territory based database, then 
+	    		//verify that JVM has Collator support for the database locale.
+	    		String userDefinedCollation = 
+	    			properties.getProperty(Attribute.COLLATION);
+	    		if (userDefinedCollation != null) {//Invalid value handling
+					int collationType = DataTypeDescriptor.getCollationType(userDefinedCollation);
+					if (collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC) {
+						if (collationType >= StringDataValue.COLLATION_TYPE_TERRITORY_BASED
+								&& collationType <  StringDataValue.COLLATION_TYPE_TERRITORY_BASED_IDENTICAL) {
+							int strength = collationType - StringDataValue.COLLATION_TYPE_TERRITORY_BASED_PRIMARY;
+							collatorForCharacterTypes = verifyCollatorSupport(strength);
+						} else
+							throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
+					}
+	    		}    		
+	    	}
+    	}"
+2,502,derby,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.derby.impl.drda,org.apache.derby.impl.drda.DDMReader,internalTrace,<init>,,internalTrace = false;,,188,188,close,https://github.com/apache/derby/tree/9495437c8b640d689c8a67563097b86cb0cd6fca//java/drda/org/apache/derby/impl/drda/DDMReader.java#L188,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/drda/org/apache/derby/impl/drda/DDMReader.java,,close,
+3,1850,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.util,org.apache.lucene.util.LuceneTestCase,state,tearDown,,state = State.TEARDOWN; // set the state for subsequent tests,,603,603,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test-framework/java/org/apache/lucene/util/LuceneTestCase.java#L603,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test-framework/java/org/apache/lucene/util/LuceneTestCase.java,,unknown,"@After
+  public void tearDown() throws Exception {
+    State oldState = state; // capture test execution state
+    state = State.TEARDOWN; // set the state for subsequent tests
+    
+    // NOTE: with junit 4.7, we don't get a reproduceWith because our Watchman
+    // does not know if something fails in tearDown. so we ensure this happens ourselves for now.
+    // we can remove this if we upgrade to 4.8
+    Throwable problem = null;
+    
+    try {
+      if (!testsFailed) {
+        // Note: we allow a test to go straight from SETUP -> TEARDOWN (without ever entering the RANTEST state)
+        // because if you assume() inside setUp(), it skips the test and the TestWatchman has no way to know...
+        assertTrue(""ensure your setUp() calls super.setUp()!!!"", oldState == State.RANTEST || oldState == State.SETUP);
+      }
+    } catch (Throwable t) {
+      if (problem == null) problem = t;
+    }
+
+    BooleanQuery.setMaxClauseCount(savedBoolMaxClauseCount);
+
+    // this won't throw any exceptions or fail the test
+    // if we change this, then change this logic
+    checkRogueThreadsAfter();
+    // restore the default uncaught exception handler
+    Thread.setDefaultUncaughtExceptionHandler(savedUncaughtExceptionHandler);
+    
+    try {
+      checkUncaughtExceptionsAfter();
+    } catch (Throwable t) {
+      if (problem == null) problem = t;
+    }
+    
+    try {
+      // calling assertSaneFieldCaches here isn't as useful as having test
+      // classes call it directly from the scope where the index readers
+      // are used, because they could be gc'ed just before this tearDown
+      // method is called.
+      //
+      // But it's better then nothing.
+      //
+      // If you are testing functionality that you know for a fact
+      // ""violates"" FieldCache sanity, then you should either explicitly
+      // call purgeFieldCache at the end of your test method, or refactor
+      // your Test class so that the inconsistant FieldCache usages are
+      // isolated in distinct test methods
+      assertSaneFieldCaches(getTestLabel());
+    } catch (Throwable t) {
+      if (problem == null) problem = t;
+    }
+    
+    purgeFieldCache(FieldCache.DEFAULT);
+    
+    if (problem != null) {
+      testsFailed = true;
+      reportAdditionalFailureInfo();
+      throw new RuntimeException(problem);
+    }
+  }"
+4,1887,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.util,org.apache.lucene.util.LuceneTestCase$4,testsFailed,uncaughtException,,testsFailed = true;,,547,547,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test-framework/java/org/apache/lucene/util/LuceneTestCase.java#L547,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test-framework/java/org/apache/lucene/util/LuceneTestCase.java,,unknown,"public void uncaughtException(Thread t, Throwable e) {
+        testsFailed = true;
+        uncaughtExceptions.add(new UncaughtExceptionEntry(t, e));
+        if (savedUncaughtExceptionHandler != null)
+          savedUncaughtExceptionHandler.uncaughtException(t, e);
+        }"
+5,1942,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestStressIndexing2,seed,testMultiConfig,,seed++;,,108,108,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestStressIndexing2.java#L108,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestStressIndexing2.java,,unknown,"public void testMultiConfig() throws Throwable {
+    // test lots of smaller different params together
+
+    int num = atLeast(3);
+    for (int i = 0; i < num; i++) { // increase iterations for better testing
+      if (VERBOSE) {
+        System.out.println(""\n\nTEST: top iter="" + i);
+      }
+      sameFieldOrder=random.nextBoolean();
+      mergeFactor=random.nextInt(3)+2;
+      maxBufferedDocs=random.nextInt(3)+2;
+      int maxThreadStates = 1+random.nextInt(10);
+      boolean doReaderPooling = random.nextBoolean();
+      seed++;
+
+      int nThreads=random.nextInt(5)+1;
+      int iter=random.nextInt(5)+1;
+      int range=random.nextInt(20)+1;
+      Directory dir1 = newDirectory();
+      Directory dir2 = newDirectory();
+      if (VERBOSE) {
+        System.out.println(""  nThreads="" + nThreads + "" iter="" + iter + "" range="" + range + "" doPooling="" + doReaderPooling + "" maxThreadStates="" + maxThreadStates + "" sameFieldOrder="" + sameFieldOrder + "" mergeFactor="" + mergeFactor);
+      }
+      Map<String,Document> docs = indexRandom(nThreads, iter, range, dir1, maxThreadStates, doReaderPooling);
+      if (VERBOSE) {
+        System.out.println(""TEST: index serial"");
+      }
+      indexSerial(random, docs, dir2);
+      if (VERBOSE) {
+        System.out.println(""TEST: verify"");
+      }
+      verifyEquals(dir1, dir2, ""id"");
+      dir1.close();
+      dir2.close();
+    }
+  }"
+6,2088,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestOmitTf$CountingHitCollector,count,<init>,,count,"count,sum",412,412,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestOmitTf.java#L412,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestOmitTf.java,,unknown,
+7,2107,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestOmitTf$CountingHitCollector,count,collect,,count,count,417,417,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestOmitTf.java#L417,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestOmitTf.java,,unknown,"@Override
+                      public final void collect(int doc) throws IOException {
+                        //System.out.println(""Q1: Doc="" + doc + "" score="" + score);
+                        float score = scorer.score();
+                        assertTrue(score==1.0f);
+                        super.collect(doc);
+                      }"
+8,2154,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.solr.handler.admin,org.apache.solr.handler.admin.ShowFileRequestHandler,instance,<init>,,instance,"instance,this",89,89,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//solr/core/src/java/org/apache/solr/handler/admin/ShowFileRequestHandler.java#L89,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/handler/admin/ShowFileRequestHandler.java,,close,
+9,2166,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestStressIndexing2,sameFieldOrder,testMultiConfig,,sameFieldOrder=random.nextBoolean();,,103,103,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestStressIndexing2.java#L103,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestStressIndexing2.java,,unknown,"public void testMultiConfig() throws Throwable {
+    // test lots of smaller different params together
+
+    int num = atLeast(3);
+    for (int i = 0; i < num; i++) { // increase iterations for better testing
+      if (VERBOSE) {
+        System.out.println(""\n\nTEST: top iter="" + i);
+      }
+      sameFieldOrder=random.nextBoolean();
+      mergeFactor=random.nextInt(3)+2;
+      maxBufferedDocs=random.nextInt(3)+2;
+      int maxThreadStates = 1+random.nextInt(10);
+      boolean doReaderPooling = random.nextBoolean();
+      seed++;
+
+      int nThreads=random.nextInt(5)+1;
+      int iter=random.nextInt(5)+1;
+      int range=random.nextInt(20)+1;
+      Directory dir1 = newDirectory();
+      Directory dir2 = newDirectory();
+      if (VERBOSE) {
+        System.out.println(""  nThreads="" + nThreads + "" iter="" + iter + "" range="" + range + "" doPooling="" + doReaderPooling + "" maxThreadStates="" + maxThreadStates + "" sameFieldOrder="" + sameFieldOrder + "" mergeFactor="" + mergeFactor);
+      }
+      Map<String,Document> docs = indexRandom(nThreads, iter, range, dir1, maxThreadStates, doReaderPooling);
+      if (VERBOSE) {
+        System.out.println(""TEST: index serial"");
+      }
+      indexSerial(random, docs, dir2);
+      if (VERBOSE) {
+        System.out.println(""TEST: verify"");
+      }
+      verifyEquals(dir1, dir2, ""id"");
+      dir1.close();
+      dir2.close();
+    }
+  }"
+10,2390,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestOmitTf$CountingHitCollector,sum,<init>,,count,"count,sum",412,412,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestOmitTf.java#L412,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestOmitTf.java,,unknown,
+11,2502,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestFieldsReader,doFail,testExceptions,,FaultyIndexInput,"FaultyIndexInput,true,doFail",211,211,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestFieldsReader.java#L211,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestFieldsReader.java,,unknown,"public void testExceptions() throws Throwable {
+    File indexDir = _TestUtil.getTempDir(""testfieldswriterexceptions"");
+
+    try {
+      Directory dir = new FaultyFSDirectory(indexDir);
+      IndexWriter writer = new IndexWriter(dir, newIndexWriterConfig( 
+          TEST_VERSION_CURRENT, new MockAnalyzer(random)).setOpenMode(OpenMode.CREATE));
+      for(int i=0;i<2;i++)
+        writer.addDocument(testDoc);
+      writer.forceMerge(1);
+      writer.close();
+
+      IndexReader reader = IndexReader.open(dir);
+
+      FaultyIndexInput.doFail = true;
+
+      boolean exc = false;
+
+      for(int i=0;i<2;i++) {
+        try {
+          reader.document(i);
+        } catch (IOException ioe) {
+          // expected
+          exc = true;
+        }
+        try {
+          reader.document(i);
+        } catch (IOException ioe) {
+          // expected
+          exc = true;
+        }
+      }
+      assertTrue(exc);
+      reader.close();
+      dir.close();
+    } finally {
+      _TestUtil.rmDir(indexDir);
+    }
+
+  }"
+12,2957,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.lucene.index,org.apache.lucene.index.TestStressIndexing2,maxBufferedDocs,testMultiConfig,,maxBufferedDocs=random.nextInt(3)+2;,,105,105,close,https://github.com/apache/lucene-solr/tree/c0600cc6dc84d20ab47cc321cd0e893a11c0f303//lucene/src/test/org/apache/lucene/index/TestStressIndexing2.java#L105,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//lucene/src/test/org/apache/lucene/index/TestStressIndexing2.java,,unknown,"public void testMultiConfig() throws Throwable {
+    // test lots of smaller different params together
+
+    int num = atLeast(3);
+    for (int i = 0; i < num; i++) { // increase iterations for better testing
+      if (VERBOSE) {
+        System.out.println(""\n\nTEST: top iter="" + i);
+      }
+      sameFieldOrder=random.nextBoolean();
+      mergeFactor=random.nextInt(3)+2;
+      maxBufferedDocs=random.nextInt(3)+2;
+      int maxThreadStates = 1+random.nextInt(10);
+      boolean doReaderPooling = random.nextBoolean();
+      seed++;
+
+      int nThreads=random.nextInt(5)+1;
+      int iter=random.nextInt(5)+1;
+      int range=random.nextInt(20)+1;
+      Directory dir1 = newDirectory();
+      Directory dir2 = newDirectory();
+      if (VERBOSE) {
+        System.out.println(""  nThreads="" + nThreads + "" iter="" + iter + "" range="" + range + "" doPooling="" + doReaderPooling + "" maxThreadStates="" + maxThreadStates + "" sameFieldOrder="" + sameFieldOrder + "" mergeFactor="" + mergeFactor);
+      }
+      Map<String,Document> docs = indexRandom(nThreads, iter, range, dir1, maxThreadStates, doReaderPooling);
+      if (VERBOSE) {
+        System.out.println(""TEST: index serial"");
+      }
+      indexSerial(random, docs, dir2);
+      if (VERBOSE) {
+        System.out.println(""TEST: verify"");
+      }
+      verifyEquals(dir1, dir2, ""id"");
+      dir1.close();
+      dir2.close();
+    }
+  }"
+13,2188,lucene-solr,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,C,last,,STYLE,org.apache.solr,org.apache.solr.SolrJettyTestBase,server,getSolrServer,,createNewSolrServer,"createNewSolrServer,server",147,147,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/test-framework/src/java/org/apache/solr/SolrJettyTestBase.java#L147,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/test-framework/src/java/org/apache/solr/SolrJettyTestBase.java,,unknown,"public SolrServer getSolrServer() {
+    {
+      if (server == null) {
+        server = createNewSolrServer();
+      }
+      return server;
+    }
+  }"
+14,1004,tomcat,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,C,last,,STYLE,org.apache.catalina.authenticator,org.apache.catalina.authenticator.DigestAuthenticator,md5Helper,<init>,,"md5Helper = MessageDigest.getInstance(""MD5"");",,69,69,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/authenticator/DigestAuthenticator.java#L69,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/authenticator/DigestAuthenticator.java,,close,
+15,1565,tomcat,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,C,last,,STYLE,org.apache.catalina.servlets,org.apache.catalina.servlets.WebdavServlet,md5Helper,init,,MessageDigest,"MessageDigest,md5Helper,getInstance",279,279,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/catalina/servlets/WebdavServlet.java#L279,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/catalina/servlets/WebdavServlet.java,,close,"@Override
+    public void init()
+        throws ServletException {
+
+        super.init();
+
+        if (getServletConfig().getInitParameter(""secret"") != null)
+            secret = getServletConfig().getInitParameter(""secret"");
+
+        if (getServletConfig().getInitParameter(""maxDepth"") != null)
+            maxDepth = Integer.parseInt(
+                    getServletConfig().getInitParameter(""maxDepth""));
+
+        if (getServletConfig().getInitParameter(""allowSpecialPaths"") != null)
+            allowSpecialPaths = Boolean.parseBoolean(
+                    getServletConfig().getInitParameter(""allowSpecialPaths""));
+
+        // Load the MD5 helper used to calculate signatures.
+        try {
+            md5Helper = MessageDigest.getInstance(""MD5"");
+        } catch (NoSuchAlgorithmException e) {
+            throw new UnavailableException(""No MD5"");
+        }
+
+    }"
+16,1665,tomcat,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,C,last,,STYLE,org.apache.tomcat.util.modeler.modules,org.apache.tomcat.util.modeler.modules.MbeansDescriptorsDigesterSource,digester,execute,,digester = createDigester();,,160,160,close,https://github.com/apache/tomcat/tree/411e4cc9b12bb4fd5aadfbb585db9b40afc90d3d//java/org/apache/tomcat/util/modeler/modules/MbeansDescriptorsDigesterSource.java#L160,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/tomcat/util/modeler/modules/MbeansDescriptorsDigesterSource.java,,close,"public void execute() throws Exception {
+        if (registry == null) {
+            registry = Registry.getRegistry(null, null);
+        }
+
+        InputStream stream = (InputStream) source;
+
+        if (digester == null) {
+            digester = createDigester();
+        }
+        ArrayList<ManagedBean> loadedMbeans = new ArrayList<>();
+
+        synchronized (digester) {
+
+            // Process the input file to configure our registry
+            try {
+                // Push our registry object onto the stack
+                digester.push(loadedMbeans);
+                digester.parse(stream);
+            } catch (Exception e) {
+                log.error(""Error digesting Registry data"", e);
+                throw e;
+            } finally {
+                digester.reset();
+            }
+
+        }
+        Iterator<ManagedBean> iter = loadedMbeans.iterator();
+        while (iter.hasNext()) {
+            registry.addManagedBean(iter.next());
+        }
+    }"
+17,1412,tomcat,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,B,last,,STYLE,org.apache.jasper,org.apache.jasper.JspC,validating,setValidateXml,,b,"b,org,ParserUtils,apache,jasper,validating,xmlparser",845,845,close,https://github.com/apache/tomcat/tree/ad9a49cb08bf004af97cad465bba45d21d112325//java/org/apache/jasper/JspC.java#L845,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/JspC.java,,close,"public void setValidateXml( boolean b ) {
+        org.apache.jasper.xmlparser.ParserUtils.validating=b;
+    }"
+18,1676,tomcat,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,B,last,,STYLE,org.apache.jasper,org.apache.jasper.EmbeddedServletOptions,validating,<init>,,ParserUtils,"ParserUtils,false,validating,equals,validating",462,462,close,https://github.com/apache/tomcat/tree/ad9a49cb08bf004af97cad465bba45d21d112325//java/org/apache/jasper/EmbeddedServletOptions.java#L462,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//java/org/apache/jasper/EmbeddedServletOptions.java,,close,
+19,9538,jmeter,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,C,last,,STYLE,org.apache.jmeter.gui.action,org.apache.jmeter.gui.action.Help,helpWindow,doAction,,EscapeDialog,"EscapeDialog,Frame,helpWindow",74,74,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/gui/action/Help.java#L74,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/gui/action/Help.java,,close,"@Override
+    public void doAction(ActionEvent e) {
+        if (helpWindow == null) {
+            helpWindow = new EscapeDialog(new Frame(),// independent frame to
+                                                    // allow it to be overlaid
+                                                    // by the main frame
+                    JMeterUtils.getResString(""help""),//$NON-NLS-1$
+                    false);
+            helpWindow.getContentPane().setLayout(new GridLayout(1, 1));
+            helpWindow.getContentPane().removeAll();
+            helpWindow.getContentPane().add(scroller);
+            ComponentUtil.centerComponentInWindow(helpWindow, 60);
+        }
+        helpWindow.setVisible(true); // set the window visible immediately
+        /*
+         * This means that a new page will be shown before rendering is complete,
+         * however the correct location will be displayed.
+         * Attempts to use a ""page"" PropertyChangeListener to detect when the page
+         * has been loaded failed to work any better. 
+         */
+        StringBuilder url=new StringBuilder();
+        if (e.getSource() instanceof String[]) {
+            String[] source = (String[]) e.getSource();
+            url.append(source[0]).append('#').append(source[1]);
+        } else {
+            url.append(HELP_PAGE).append('#').append(GuiPackage.getInstance().getTreeListener().getCurrentNode().getDocAnchor());
+        }
+        try {
+            helpDoc.setPage(url.toString()); // N.B. this only reloads if necessary (ignores the reference)
+        } catch (IOException ioe) {
+            log.error(ioe.toString());
+            JMeterUtils.reportErrorToUser(""Problem loading a help page - see log for details"");
+        }
+    }"
+20,9567,jmeter,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,C,last,,STYLE,org.apache.jmeter.engine,org.apache.jmeter.engine.StandardJMeterEngine,engine,<init>,,engine,"engine,this",161,161,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/engine/StandardJMeterEngine.java#L161,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/engine/StandardJMeterEngine.java,,close,
+21,9576,jmeter,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,C,last,,STYLE,org.apache.jmeter.testelement,org.apache.jmeter.testelement.TestPlan,functionalMode,setFunctionalMode,,funcMode,"funcMode,functionalMode",134,134,close,https://github.com/apache/jmeter/tree/032cc396b962c0b5ac6a31f0b756d624be34efd0//src/core/org/apache/jmeter/testelement/TestPlan.java#L134,https://github.com/apache/jmeter/tree/b3f452902a78827bd885e6dbf30b14d11fb4df93//src/core/org/apache/jmeter/testelement/TestPlan.java,,close,"public void setFunctionalMode(boolean funcMode) {
+        setProperty(new BooleanProperty(FUNCTIONAL_MODE, funcMode));
+        functionalMode = funcMode;
+    }"
+22,3110,cassandra,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.cassandra.db,org.apache.cassandra.db.Memtable$3,activelyMeasuring,run,,Memtable,"Memtable,activelyMeasuring,this",154,154,close,https://github.com/apache/cassandra/tree/7efab48e72247734ae38eabfc61a9ff0a5aa87ec//src/java/org/apache/cassandra/db/Memtable.java#L154,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/db/Memtable.java,,unknown,"public void run()
+            {
+                activelyMeasuring = Memtable.this;
+
+                long start = System.currentTimeMillis();
+                // ConcurrentSkipListMap has cycles, so measureDeep will have to track a reference to EACH object it visits.
+                // So to reduce the memory overhead of doing a measurement, we break it up to row-at-a-time.
+                long deepSize = meter.measure(columnFamilies);
+                int objects = 0;
+                for (Map.Entry<DecoratedKey, ColumnFamily> entry : columnFamilies.entrySet())
+                {
+                    deepSize += meter.measureDeep(entry.getKey()) + meter.measureDeep(entry.getValue());
+                    objects += entry.getValue().getColumnCount();
+                }
+                double newRatio = (double) deepSize / currentThroughput.get();
+
+                if (newRatio < MIN_SANE_LIVE_RATIO)
+                {
+                    logger.warn(""setting live ratio to minimum of 1.0 instead of {}"", newRatio);
+                    newRatio = MIN_SANE_LIVE_RATIO;
+                }
+                if (newRatio > MAX_SANE_LIVE_RATIO)
+                {
+                    logger.warn(""setting live ratio to maximum of 64 instead of {}"", newRatio);
+                    newRatio = MAX_SANE_LIVE_RATIO;
+                }
+                cfs.liveRatio = Math.max(cfs.liveRatio, newRatio);
+
+                logger.info(""{} liveRatio is {} (just-counted was {}).  calculation took {}ms for {} columns"",
+                            new Object[]{ cfs, cfs.liveRatio, newRatio, System.currentTimeMillis() - start, objects });
+                activelyMeasuring = null;
+            }"
+23,3136,cassandra,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.cassandra.db.compaction,org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy,minSSTableSize,<init>,,DEFAULT_MIN_SSTABLE_SIZE,"DEFAULT_MIN_SSTABLE_SIZE,Long,minSSTableSize,null,optionValue,optionValue,parseLong",46,46,close,https://github.com/apache/cassandra/tree/7efab48e72247734ae38eabfc61a9ff0a5aa87ec//src/java/org/apache/cassandra/db/compaction/SizeTieredCompactionStrategy.java#L46,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/db/compaction/SizeTieredCompactionStrategy.java,,close,
+24,3934,cassandra,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.cassandra.gms,org.apache.cassandra.gms.FailureDetector,phiConvictThreshold_,setPhiConvictThreshold,,phi,"phi,phiConvictThreshold_",132,132,close,https://github.com/apache/cassandra/tree/7efab48e72247734ae38eabfc61a9ff0a5aa87ec//src/java/org/apache/cassandra/gms/FailureDetector.java#L132,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/gms/FailureDetector.java,,close,"public void setPhiConvictThreshold(int phi)
+    {
+        phiConvictThreshold_ = phi;
+    }"
+25,7026,cassandra,ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD,A,last,,STYLE,org.apache.cassandra.service,org.apache.cassandra.service.StorageProxy,maxHintWindow,setMaxHintWindow,,maxHintWindow,"maxHintWindow,ms",1137,1137,close,https://github.com/apache/cassandra/tree/7efab48e72247734ae38eabfc61a9ff0a5aa87ec//src/java/org/apache/cassandra/service/StorageProxy.java#L1137,https://github.com/apache/cassandra/tree/f3e38cb638113c2a23855a104d6082da5bc10ddb//src/java/org/apache/cassandra/service/StorageProxy.java,,close,"public void setMaxHintWindow(int ms)
+    {
+        maxHintWindow = ms;
+    }"
+26,827,derby,LI_LAZY_INIT_STATIC,B,last,,MT_CORRECTNESS,org.apache.derby.client.net,org.apache.derby.client.net.NetLogWriter,codePointNameTable__,<init>,,if (codePointNameTable__ == null) {,,128,129,close,https://github.com/apache/derby/tree/eea0d50c8d732cad9ba563ddfa786b7028eb092f//java/client/org/apache/derby/client/net/NetLogWriter.java#L128,https://github.com/apache/derby/tree/33427bdb982a7dd5b9e629ccec9c40f2b96412b4//java/client/org/apache/derby/client/net/NetLogWriter.java,,close,
+27,1981,lucene-solr,LI_LAZY_INIT_STATIC,C,last,,MT_CORRECTNESS,org.apache.solr.core,org.apache.solr.core.HdfsDirectoryFactory,metrics,create,,if (metrics == null) {,,100,101,close,https://github.com/apache/lucene-solr/tree/43535fecb8455b3f9364f447e129ae05f79697e2//solr/core/src/java/org/apache/solr/core/HdfsDirectoryFactory.java#L100,https://github.com/apache/lucene-solr/tree/3291ef884d26e3f8cb43707f2acdf674f3e51c01//solr/core/src/java/org/apache/solr/core/HdfsDirectoryFactory.java,,open,"@Override
+  protected Directory create(String path, DirContext dirContext)
+      throws IOException {
+    LOG.info(""creating directory factory for path {}"", path);
+    Configuration conf = getConf();
+    
+    if (metrics == null) {
+      metrics = new Metrics(conf);
+    }
+    
+    boolean blockCacheEnabled = params.getBool(BLOCKCACHE_ENABLED, true);
+    boolean blockCacheReadEnabled = params.getBool(BLOCKCACHE_READ_ENABLED,
+        true);
+    boolean blockCacheWriteEnabled = params.getBool(BLOCKCACHE_WRITE_ENABLED, true);
+    Directory dir = null;
+    
+    if (blockCacheEnabled && dirContext != DirContext.META_DATA) {
+      int numberOfBlocksPerBank = params.getInt(NUMBEROFBLOCKSPERBANK, 16384);
+      
+      int blockSize = BlockDirectory.BLOCK_SIZE;
+      
+      int bankCount = params.getInt(BLOCKCACHE_SLAB_COUNT, 1);
+      
+      boolean directAllocation = params.getBool(
+          BLOCKCACHE_DIRECT_MEMORY_ALLOCATION, true);
+      
+      BlockCache blockCache;
+      
+      int slabSize = numberOfBlocksPerBank * blockSize;
+      LOG.info(
+          ""Number of slabs of block cache [{}] with direct memory allocation set to [{}]"",
+          bankCount, directAllocation);
+      LOG.info(
+          ""Block cache target memory usage, slab size of [{}] will allocate [{}] slabs and use ~[{}] bytes"",
+          new Object[] {slabSize, bankCount,
+              ((long) bankCount * (long) slabSize)});
+      
+      int _1024Size = params.getInt(""solr.hdfs.blockcache.bufferstore.1024"",
+          8192);
+      int _8192Size = params.getInt(""solr.hdfs.blockcache.bufferstore.8192"",
+          8192);
+      
+      BufferStore.init(_1024Size, _8192Size, metrics);
+      long totalMemory = (long) bankCount * (long) numberOfBlocksPerBank
+          * (long) blockSize;
+      try {
+        blockCache = new BlockCache(metrics, directAllocation, totalMemory,
+            slabSize, blockSize);
+      } catch (OutOfMemoryError e) {
+        throw new RuntimeException(
+            ""The max direct memory is likely too low.  Either increase it (by adding -XX:MaxDirectMemorySize=<size>g -XX:+UseLargePages to your containers startup args)""
+                + "" or disable direct allocation using solr.hdfs.blockcache.direct.memory.allocation=false in solrconfig.xml. If you are putting the block cache on the heap,""
+                + "" your java heap size might not be large enough.""
+                + "" Failed allocating ~"" + totalMemory / 1000000.0 + "" MB."", e);
+      }
+      Cache cache = new BlockDirectoryCache(blockCache, metrics);
+      HdfsDirectory hdfsDirectory = new HdfsDirectory(new Path(path), conf);
+      dir = new BlockDirectory(""solrcore"", hdfsDirectory, cache, null,
+          blockCacheReadEnabled, blockCacheWriteEnabled);
+    } else {
+      dir = new HdfsDirectory(new Path(path), conf);
+    }
+    
+    boolean nrtCachingDirectory = params.getBool(NRTCACHINGDIRECTORY_ENABLE, true);
+    if (nrtCachingDirectory) {
+      double nrtCacheMaxMergeSizeMB = params.getInt(
+          NRTCACHINGDIRECTORY_MAXMERGESIZEMB, 16);
+      double nrtCacheMaxCacheMB = params.getInt(NRTCACHINGDIRECTORY_MAXCACHEMB,
+          192);
+      
+      return new NRTCachingDirectory(dir, nrtCacheMaxMergeSizeMB,
+          nrtCacheMaxCacheMB);
+    }
+    return dir;
+  }"
+28,1588,tomcat,LI_LAZY_INIT_STATIC,B,last,,MT_CORRECTNESS,org.apache.tomcat.jdbc.pool.interceptor,org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReportJmx,SLOW_QUERY_TYPE,getCompositeType,,SLOW_QUERY_TYPE,"SLOW_QUERY_TYPE,null",110,112,close,https://github.com/apache/tomcat/tree/ad9a49cb08bf004af97cad465bba45d21d112325//modules/jdbc-pool/src/main/java/org/apache/tomcat/jdbc/pool/interceptor/SlowQueryReportJmx.java#L110,https://github.com/apache/tomcat/tree/2b5ab0627098a0b6654afebb914d7c25fd98638d//modules/jdbc-pool/src/main/java/org/apache/tomcat/jdbc/pool/interceptor/SlowQueryReportJmx.java,,close,"protected static CompositeType getCompositeType() {
+        if (SLOW_QUERY_TYPE==null) {
+            try {
+                SLOW_QUERY_TYPE = new CompositeType(
+                        SlowQueryReportJmx.class.getName(),
+                        ""Composite data type for query statistics"",
+                        QueryStats.getFieldNames(),
+                        QueryStats.getFieldDescriptions(),
+                        QueryStats.getFieldTypes());
+            }catch (OpenDataException x) {
+                log.warn(""Unable to initialize composite data type for JMX stats and notifications."",x);
+            }
+        }
+        return SLOW_QUERY_TYPE;
+    }"
