@@ -88,22 +88,25 @@ def retrieve_method_content(github_url:str, target_method_name:str) -> str:
 
 if __name__ == "__main__" :
 
-    dir_to_csv_files = "/Users/mhilmiasyrofi/Documents/AI4SAWI/study/labelled/p1"
+    dir_to_csv_files = "/Users/mhilmiasyrofi/Documents/AI4SAWI/study/data"
 
     output_dir = dir_to_csv_files + "-derived"
 
     os.makedirs(output_dir,exist_ok=True)
     
 
-    for file_path in glob.iglob(dir_to_csv_files + '**/*.csv', recursive=True):
+    for file_path in glob.iglob(dir_to_csv_files + '/**/*.csv', recursive=True):
+        print(f"Processing {file_path}")
         df = pd.read_csv(file_path)
 
         df["method_content"] = df.apply(
-            lambda x: retrieve_method_content(x["commit url"], x["method"]), axis=1)
+            lambda x:  retrieve_method_content(x["url"], x["method_name"]) if (x["url"] != "url" and x["method_name"] != None) else "", axis=1)
 
+        df = df[df["method_content"] != ""]
+        
         output_file = file_path.replace(dir_to_csv_files, output_dir)
 
-        df.to_csv(output_file)
+        df.to_csv(output_file, index=False)
 
 
 
