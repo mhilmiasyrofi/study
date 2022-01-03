@@ -1,18 +1,18 @@
 ## Source
 ## - https://huggingface.co/microsoft/codebert-base
 ## - https://github.com/microsoft/CodeBERT
+## - https://rsilveira79.github.io/fermenting_gradients/machine_learning/nlp/pytorch/text_classification_roberta/
 ## - https://www.thepythoncode.com/article/finetuning-bert-using-huggingface-transformers-python
 
 import pandas as pd
+import sklearn
 from sklearn.metrics import accuracy_score
 import torch
 from transformers.file_utils import is_tf_available, is_torch_available, is_torch_tpu_available
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, RobertaForSequenceClassification
 from transformers import Trainer, TrainingArguments
 import numpy as np
 import random
-from sklearn.datasets import fetch_20newsgroups
-from sklearn.model_selection import train_test_split
 
 
 def set_seed(seed: int):
@@ -36,10 +36,10 @@ def read_actionable_warning_dataset():
     df_train = pd.read_csv("../data-derived/train.csv")
     df_test = pd.read_csv("../data-derived/test.csv")
 
-    df_train["label"] = df_train["category"].apply(lambda x: 0 if "open" else 1)
-    df_test["label"] = df_test["category"].apply(lambda x: 0 if "open" else 1)
+    df_train["labels"] = df_train["category"].apply(lambda x: 0 if x == "open" else 1)
+    df_test["labels"] = df_test["category"].apply(lambda x: 0 if x == "open" else 1)
 
-    return (list(df_train["method_content"]), list(df_test["method_content"]), list(df_train["label"]),  list(df_test["label"])), target_names
+    return (list(df_train["method_content"]), list(df_test["method_content"]), list(df_train["labels"]),  list(df_test["labels"])), target_names
     
 
 
@@ -50,7 +50,7 @@ class ActionableWarningDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         item = {k: torch.tensor(v[idx]) for k, v in self.encodings.items()}
-        item["label"] = torch.tensor([self.labels[idx]])
+        item["labels"] = torch.tensor([self.labels[idx]])
         return item
 
     def __len__(self):
@@ -61,9 +61,15 @@ def compute_metrics(pred):
     labels = pred.label_ids
     preds = pred.predictions.argmax(-1)
     # calculate accuracy using sklearn's function
-    acc = accuracy_score(labels, preds)
+    acc = sklearn.metrics.accuracy_score(labels, preds)
+    precision = sklearn.metrics.precision_score(labels, preds)
+    recall = sklearn.metrics.recall_score(labels, preds)
+    f1 = sklearn.metrics.f1_score(labels, preds)
     return {
-        'accuracy': acc,
+        'accuracy': acc, 
+        'precision': precision,
+        'recall': recall,
+        'f1' :f1
     }
 
 
@@ -95,22 +101,22 @@ if __name__ == "__main__":
     valid_dataset = ActionableWarningDataset(valid_encodings, valid_labels)
 
     # load the model and pass to CUDA
-    model = AutoModel.from_pretrained(
+    model = RobertaForSequenceClassification.from_pretrained(
         model_name, num_labels=len(target_names)).to("cuda")
 
     training_args = TrainingArguments(
-        output_dir='./results',          # output directory
+        output_dir='./../codebert-checkpoint',          # output directory
         num_train_epochs=3,              # total number of training epochs
-        per_device_train_batch_size=4,  # batch size per device during training
-        per_device_eval_batch_size=4,   # batch size for evaluation
-        warmup_steps=500,                # number of warmup steps for learning rate scheduler
+        per_device_train_batch_size=1,  # batch size per device during training
+        per_device_eval_batch_size=1,   # batch size for evaluation
+        warmup_steps=100,                # number of warmup steps for learning rate scheduler
         weight_decay=0.01,               # strength of weight decay
         logging_dir='./logs',            # directory for storing logs
         # load the best model when finished training (default metric is loss)
         load_best_model_at_end=True,
         # but you can specify `metric_for_best_model` argument to change to accuracy or other metric
-        logging_steps=400,               # log & save weights each logging_steps
-        save_steps=400,
+        logging_steps=327,               # log & save weights each logging_steps
+        save_steps=327,
         evaluation_strategy="steps",     # evaluate each `logging_steps`
     )
 
@@ -130,6 +136,6 @@ if __name__ == "__main__":
     trainer.evaluate()
 
     # saving the fine tuned model & tokenizer
-    model_path = "codebert-AI4SE"
+    model_path = './../codebert-checkpoint/best-model'
     model.save_pretrained(model_path)
     tokenizer.save_pretrained(model_path)
