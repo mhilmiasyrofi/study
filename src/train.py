@@ -4,6 +4,8 @@
 ## - https://rsilveira79.github.io/fermenting_gradients/machine_learning/nlp/pytorch/text_classification_roberta/
 ## - https://www.thepythoncode.com/article/finetuning-bert-using-huggingface-transformers-python
 
+import numpy as np
+import random
 import pandas as pd
 import sklearn
 from sklearn.metrics import accuracy_score
@@ -11,8 +13,8 @@ import torch
 from transformers.file_utils import is_tf_available, is_torch_available, is_torch_tpu_available
 from transformers import AutoTokenizer, RobertaForSequenceClassification
 from transformers import Trainer, TrainingArguments
-import numpy as np
-import random
+from transformers.optimization import Adafactor, AdafactorSchedule
+
 
 
 def set_seed(seed: int):
@@ -32,7 +34,7 @@ def set_seed(seed: int):
 
 
 def read_actionable_warning_dataset():
-    target_names = ["open", "closed"]
+    target_names = ["open", "close"]
     df_train = pd.read_csv("../data-derived/train.csv")
     df_test = pd.read_csv("../data-derived/test.csv")
 
@@ -60,7 +62,7 @@ class ActionableWarningDataset(torch.utils.data.Dataset):
 def compute_metrics(pred):
     labels = pred.label_ids
     preds = pred.predictions.argmax(-1)
-    # calculate accuracy using sklearn's function
+    # calculate metric using sklearn's function
     acc = sklearn.metrics.accuracy_score(labels, preds)
     precision = sklearn.metrics.precision_score(labels, preds)
     recall = sklearn.metrics.recall_score(labels, preds)
@@ -106,9 +108,10 @@ if __name__ == "__main__":
 
     training_args = TrainingArguments(
         output_dir='./../codebert-checkpoint',          # output directory
-        num_train_epochs=3,              # total number of training epochs
+        num_train_epochs=20,              # total number of training epochs
         per_device_train_batch_size=1,  # batch size per device during training
         per_device_eval_batch_size=1,   # batch size for evaluation
+        learning_rate=1e-6,
         warmup_steps=100,                # number of warmup steps for learning rate scheduler
         weight_decay=0.01,               # strength of weight decay
         logging_dir='./logs',            # directory for storing logs
@@ -120,14 +123,28 @@ if __name__ == "__main__":
         evaluation_strategy="steps",     # evaluate each `logging_steps`
     )
 
+    optimizer = Adafactor(model.parameters(), scale_parameter=True,
+                          relative_step=True, warmup_init=True, lr=None)
+    lr_scheduler = AdafactorSchedule(optimizer)
+
     trainer = Trainer(
         model=model,                         # the instantiated Transformers model to be trained
         args=training_args,                  # training arguments, defined above
         train_dataset=train_dataset,         # training dataset
         eval_dataset=valid_dataset,          # evaluation dataset
+        optimizers=(optimizer, lr_scheduler),
         # the callback that computes metrics of interest
         compute_metrics=compute_metrics,
     )
+
+    # trainer = Trainer(
+    #     model=model,                         # the instantiated Transformers model to be trained
+    #     args=training_args,                  # training arguments, defined above
+    #     train_dataset=train_dataset,         # training dataset
+    #     eval_dataset=valid_dataset,          # evaluation dataset
+    #     # the callback that computes metrics of interest
+    #     compute_metrics=compute_metrics,
+    # )
 
     # train the model
     trainer.train()
