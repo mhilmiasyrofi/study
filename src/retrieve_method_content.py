@@ -45,6 +45,8 @@ def retrieve_method_content(github_url:str, target_method_name:str) -> str:
         - otherwise return an empty string
     """
 
+    print(github_url)
+    print(target_method_name)
     raw_github_url = convert_github_url_into_raw_url(github_url)
 
     response = requests.get(raw_github_url)
@@ -71,6 +73,8 @@ def retrieve_method_content(github_url:str, target_method_name:str) -> str:
 
     captures = query.captures(tree.root_node)
 
+    res = ""
+
     for capture in captures:
         node, node_type = capture
         name_node = node.child_by_field_name('name')
@@ -81,14 +85,18 @@ def retrieve_method_content(github_url:str, target_method_name:str) -> str:
             node_text = code_bytes[node.start_byte:node.end_byte].decode(
                 'utf8')
             # print(method_name, node_text)
-            return node_text
+            res = node_text
+            break
 
-    return ""
+    return res
+
+# def test_retrieve_method_content():
+
 
 
 if __name__ == "__main__" :
 
-    dir_to_csv_files = "/Users/mhilmiasyrofi/Documents/AI4SAWI/study/data"
+    dir_to_csv_files = "/Users/mhilmiasyrofi/Documents/AI4SAWI/study/data/test"
 
     output_dir = dir_to_csv_files + "-derived"
 
